@@ -1,28 +1,39 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 export const useHeartScore = (userId?: string) => {
   const queryClient = useQueryClient();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userId) {
+      setCurrentUserId(userId);
+    } else {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setCurrentUserId(user?.id || null);
+      });
+    }
+  }, [userId]);
 
   // Fetch today's heart score
   const { data: todayScore, isLoading } = useQuery({
-    queryKey: ["heartScore", "today", userId],
+    queryKey: ["heartScore", "today", currentUserId],
     queryFn: async () => {
       const today = new Date().toISOString().split("T")[0];
-      const { data: { user } } = await supabase.auth.getUser();
       
       const { data, error } = await supabase
         .from("heart_scores")
         .select("*")
-        .eq("user_id", userId || user?.id)
+        .eq("user_id", currentUserId!)
         .eq("score_date", today)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
-    enabled: !!userId || true,
+    enabled: !!currentUserId,
   });
 
   // Calculate heart score mutation
@@ -50,23 +61,22 @@ export const useHeartScore = (userId?: string) => {
 
   // Fetch heart score history (last 30 days)
   const { data: history } = useQuery({
-    queryKey: ["heartScore", "history", userId],
+    queryKey: ["heartScore", "history", currentUserId],
     queryFn: async () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { data: { user } } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from("heart_scores")
         .select("*")
-        .eq("user_id", userId || user?.id)
+        .eq("user_id", currentUserId!)
         .gte("score_date", thirtyDaysAgo.toISOString().split("T")[0])
         .order("score_date", { ascending: false });
 
       if (error) throw error;
       return data;
     },
-    enabled: !!userId || true,
+    enabled: !!currentUserId,
   });
 
   return {
