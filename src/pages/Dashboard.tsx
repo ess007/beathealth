@@ -21,7 +21,10 @@ const Dashboard = () => {
   const { mainStreakCount, isLoading: streaksLoading, updateStreak } = useStreaks();
   const { achievements, checkAndAwardBadges } = useAchievements();
   const [showCelebration, setShowCelebration] = useState(false);
-  const [previousRitualStatus, setPreviousRitualStatus] = useState<{morning: boolean, evening: boolean}>({ morning: false, evening: false });
+  const [hasShownCelebrationToday, setHasShownCelebrationToday] = useState(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return localStorage.getItem("lastCelebrationDate") === today;
+  });
 
   const navigateTo = (path: string) => {
     window.location.href = path;
@@ -86,26 +89,23 @@ const Dashboard = () => {
     staleTime: 60 * 1000, // 1 minute
   });
 
-  // Check for both rituals completed and trigger celebration
+  // Check for both rituals completed and trigger celebration (only once per day)
   useEffect(() => {
-    if (ritualData?.morning.completed && ritualData?.evening.completed) {
-      // Check if this is a new completion (both weren't completed before)
-      if (!previousRitualStatus.morning || !previousRitualStatus.evening) {
-        // Update streak
-        updateStreak({ type: "daily_checkin" });
-        // Check for new achievements
-        checkAndAwardBadges();
-        // Show celebration
-        setShowCelebration(true);
-      }
-      setPreviousRitualStatus({ morning: true, evening: true });
-    } else {
-      setPreviousRitualStatus({
-        morning: ritualData?.morning.completed || false,
-        evening: ritualData?.evening.completed || false,
-      });
+    if (ritualData?.morning.completed && ritualData?.evening.completed && !hasShownCelebrationToday) {
+      const today = new Date().toISOString().split("T")[0];
+      
+      // Update streak
+      updateStreak({ type: "daily_checkin" });
+      // Check for new achievements
+      checkAndAwardBadges();
+      // Show celebration
+      setShowCelebration(true);
+      
+      // Mark celebration as shown for today
+      localStorage.setItem("lastCelebrationDate", today);
+      setHasShownCelebrationToday(true);
     }
-  }, [ritualData?.morning.completed, ritualData?.evening.completed]);
+  }, [ritualData?.morning.completed, ritualData?.evening.completed, hasShownCelebrationToday, updateStreak, checkAndAwardBadges]);
 
   // Refetch rituals when page gains focus
   useEffect(() => {
