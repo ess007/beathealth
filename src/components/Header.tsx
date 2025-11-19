@@ -143,7 +143,7 @@ export const Header = () => {
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-0">
+            <DropdownMenuContent align="end" className="w-80 max-h-[85vh] overflow-y-auto p-0">
               {/* Profile Header Section */}
               <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-b">
                 <div className="flex items-start gap-3">
@@ -231,17 +231,17 @@ export const Header = () => {
               {/* Quick Actions */}
               <div className="p-2">
                 <DropdownMenuLabel className="text-xs text-muted-foreground px-2 pb-1">
-                  {t("profile.quickActions") || "Quick Actions"}
+                  Quick Actions
                 </DropdownMenuLabel>
                 <DialogTrigger asChild>
                   <DropdownMenuItem className="cursor-pointer py-2.5">
                     <Activity className="w-4 h-4 mr-3 text-primary" />
-                    <span>{t("profile.connectDevices") || "Connect Devices"}</span>
+                    <span>Connect Devices</span>
                   </DropdownMenuItem>
                 </DialogTrigger>
                 <DropdownMenuItem onClick={() => window.location.href = "/app/profile"} className="py-2.5">
                   <Settings className="w-4 h-4 mr-3 text-primary" />
-                  <span>{t("profile.settings") || "Settings"}</span>
+                  <span>Settings</span>
                 </DropdownMenuItem>
               </div>
               
