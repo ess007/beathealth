@@ -18,12 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, UserPlus, Heart, AlertCircle } from "lucide-react";
+import { Users, UserPlus, AlertCircle } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFamilyLinks } from "@/hooks/useFamilyLinks";
 import FamilyMemberCard from "@/components/FamilyMemberCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Logo } from "@/components/Logo";
 
 const Family = () => {
   const { t } = useLanguage();
@@ -54,7 +55,7 @@ const Family = () => {
         <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <Heart className="w-8 h-8 animate-pulse text-primary" />
+            <Logo size="md" showText={false} className="animate-pulse" />
           </div>
         </main>
       </div>

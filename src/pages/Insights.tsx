@@ -7,9 +7,10 @@ import { useHeartScore } from "@/hooks/useHeartScore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Heart, Activity, Droplet, TrendingUp, Brain, Sparkles } from "lucide-react";
+import { Activity, Droplet, TrendingUp, Brain, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
+import { Logo } from "@/components/Logo";
 
 const Insights = () => {
   const { history } = useHeartScore();
@@ -144,7 +145,7 @@ const Insights = () => {
             
             <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5">
               <div className="flex items-center gap-2 mb-2">
-                <Heart className="w-4 h-4 text-accent" />
+                <Logo size="sm" showText={false} className="w-4 h-4" />
                 <span className="text-xs font-medium text-muted-foreground uppercase">HeartScore</span>
               </div>
               <p className="text-2xl font-bold">{aiInsights.summary.avgHeartScore}/100</p>
@@ -166,7 +167,7 @@ const Insights = () => {
         <Tabs defaultValue="heartscore" className="space-y-6 mb-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="heartscore">
-              <Heart className="w-4 h-4 mr-2" />
+              <Logo size="sm" showText={false} className="w-4 h-4 mr-2" />
               HeartScore
             </TabsTrigger>
             <TabsTrigger value="bp">

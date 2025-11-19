@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Heart } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const Onboarding = () => {
   const { t, language, setLanguage } = useLanguage();
@@ -66,7 +66,7 @@ const Onboarding = () => {
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <Heart className="w-16 h-16 mx-auto text-primary" />
+              <Logo size="lg" showText={false} className="mx-auto" />
               <h2 className="text-2xl font-bold">{t("onboarding.welcome")}</h2>
               <p className="text-muted-foreground">{t("onboarding.subtitle")}</p>
             </div>

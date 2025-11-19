@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Activity, Droplet, Check, X, Bell } from "lucide-react";
+import { Activity, Droplet, Check, X, Bell } from "lucide-react";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Logo } from "@/components/Logo";
 
 interface FamilyMemberCardProps {
   memberId: string;
@@ -140,7 +141,9 @@ const FamilyMemberCard = ({
 
       {/* HeartScore */}
       <div className="flex items-center gap-4 mb-4 p-4 bg-muted/50 rounded-lg">
-        <Heart className={`w-10 h-10 ${getScoreColor(score)}`} fill="currentColor" />
+        <div className={getScoreColor(score)}>
+          <Logo size="md" showText={false} />
+        </div>
         <div>
           <div className="text-sm text-muted-foreground">HeartScore</div>
           <div className={`text-3xl font-bold ${getScoreColor(score)}`}>{score}/100</div>

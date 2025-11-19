@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
-import { Heart, Info, RefreshCw } from "lucide-react";
+import { Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Logo } from "@/components/Logo";
 
 const HeartScoreCard = () => {
   const { todayScore, isLoading, calculateScore, isCalculating } = useHeartScore();
@@ -80,7 +81,9 @@ const HeartScoreCard = () => {
             </span>
             <span className="text-3xl text-muted-foreground">/100</span>
           </div>
-          <Heart className={`w-16 h-16 ${getScoreColor(score)}`} fill="currentColor" />
+          <div className={getScoreColor(score)}>
+            <Logo size="lg" showText={false} />
+          </div>
         </div>
 
         {/* Score Bar */}
