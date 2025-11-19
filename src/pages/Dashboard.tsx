@@ -54,39 +54,39 @@ const Dashboard = () => {
   const greeting = hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-6">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+      <main className="container mx-auto px-4 py-4 md:py-8 max-w-5xl">
+        <div className="mb-6 md:mb-8 flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
               {greeting}{user && ", " + (user.email?.split("@")[0] || "Friend")}! 👋
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base md:text-lg">
               {t("dashboard.tagline")}
             </p>
           </div>
           
           {!streaksLoading && (
-            <Card className="p-4 flex items-center gap-3 shadow-card">
-              <Flame className="w-8 h-8 text-primary" />
+            <Card className="p-3 md:p-4 flex items-center gap-2 md:gap-3 shadow-card shrink-0">
+              <Flame className="w-6 h-6 md:w-8 md:h-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold">{mainStreakCount}</p>
-                <p className="text-xs text-muted-foreground">{t("dashboard.daysStrong")}</p>
+                <p className="text-xl md:text-2xl font-bold">{mainStreakCount}</p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">{t("dashboard.daysStrong")}</p>
               </div>
             </Card>
           )}
         </div>
 
         {/* HeartScore Card */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <HeartScoreCard />
         </div>
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">{t("dashboard.todaysRituals")}</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-4">{t("dashboard.todaysRituals")}</h2>
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <RitualProgress
               title={t("ritual.morning")}
               subtitle={t("ritual.morningSubtitle")}

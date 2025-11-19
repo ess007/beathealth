@@ -104,13 +104,13 @@ const AICoach = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-6 max-w-4xl flex flex-col">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">{t("coach.title")}</h1>
-          <p className="text-muted-foreground">{t("coach.subtitle")}</p>
+      <main className="flex-1 container mx-auto px-4 py-4 md:py-6 max-w-4xl flex flex-col">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t("coach.title")}</h1>
+          <p className="text-muted-foreground text-sm md:text-base">{t("coach.subtitle")}</p>
         </div>
 
         {/* Messages */}

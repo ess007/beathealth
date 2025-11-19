@@ -25,10 +25,10 @@ export const Header = () => {
 
   return (
     <header className="border-b bg-card shadow-sm sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Heart className="w-8 h-8 text-primary" />
-          <span className="text-2xl font-bold">Beat</span>
+          <Heart className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+          <span className="text-xl md:text-2xl font-bold">Beat</span>
         </div>
         <div className="flex items-center gap-2">
           {/* Language Dropdown */}
