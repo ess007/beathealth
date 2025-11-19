@@ -113,18 +113,28 @@ const Dashboard = () => {
     if (ritualData?.morning.completed && ritualData?.evening.completed && !hasShownCelebrationToday) {
       const today = new Date().toISOString().split("T")[0];
       
-      // Update streak
-      updateStreak({ type: "daily_checkin" });
-      // Check for new achievements
-      checkAndAwardBadges();
-      // Show celebration
-      setShowCelebration(true);
-      
-      // Mark celebration as shown for today
-      localStorage.setItem("lastCelebrationDate", today);
-      setHasShownCelebrationToday(true);
+      // Update streak via RPC
+      (async () => {
+        try {
+          await supabase.rpc('update_or_create_streak', {
+            p_user_id: user?.id,
+            p_type: 'daily_checkin'
+          });
+          
+          // Check for new achievements
+          checkAndAwardBadges();
+          // Show celebration
+          setShowCelebration(true);
+          
+          // Mark celebration as shown for today
+          localStorage.setItem("lastCelebrationDate", today);
+          setHasShownCelebrationToday(true);
+        } catch (err) {
+          console.error("Error updating daily streak:", err);
+        }
+      })();
     }
-  }, [ritualData?.morning.completed, ritualData?.evening.completed, hasShownCelebrationToday, updateStreak, checkAndAwardBadges]);
+  }, [ritualData?.morning.completed, ritualData?.evening.completed, hasShownCelebrationToday, user?.id, checkAndAwardBadges]);
 
   // Refetch rituals when page gains focus
   useEffect(() => {
