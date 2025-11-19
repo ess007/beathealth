@@ -14,16 +14,343 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      behavior_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          log_date: string
+          meds_taken: boolean | null
+          notes: string | null
+          ritual_type: string
+          sleep_hours: number | null
+          sleep_quality: Database["public"]["Enums"]["sleep_quality"] | null
+          steps_count: number | null
+          stress_level: Database["public"]["Enums"]["stress_level"] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          log_date: string
+          meds_taken?: boolean | null
+          notes?: string | null
+          ritual_type: string
+          sleep_hours?: number | null
+          sleep_quality?: Database["public"]["Enums"]["sleep_quality"] | null
+          steps_count?: number | null
+          stress_level?: Database["public"]["Enums"]["stress_level"] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          log_date?: string
+          meds_taken?: boolean | null
+          notes?: string | null
+          ritual_type?: string
+          sleep_hours?: number | null
+          sleep_quality?: Database["public"]["Enums"]["sleep_quality"] | null
+          steps_count?: number | null
+          stress_level?: Database["public"]["Enums"]["stress_level"] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bp_logs: {
+        Row: {
+          created_at: string | null
+          diastolic: number
+          heart_rate: number | null
+          id: string
+          measured_at: string
+          metadata: Json | null
+          notes: string | null
+          ritual_type: string | null
+          source_type: string | null
+          systolic: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          diastolic: number
+          heart_rate?: number | null
+          id?: string
+          measured_at: string
+          metadata?: Json | null
+          notes?: string | null
+          ritual_type?: string | null
+          source_type?: string | null
+          systolic: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          diastolic?: number
+          heart_rate?: number | null
+          id?: string
+          measured_at?: string
+          metadata?: Json | null
+          notes?: string | null
+          ritual_type?: string | null
+          source_type?: string | null
+          systolic?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          language: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_links: {
+        Row: {
+          can_nudge: boolean | null
+          can_view: boolean | null
+          caregiver_id: string
+          created_at: string | null
+          id: string
+          member_id: string
+          relationship: string | null
+        }
+        Insert: {
+          can_nudge?: boolean | null
+          can_view?: boolean | null
+          caregiver_id: string
+          created_at?: string | null
+          id?: string
+          member_id: string
+          relationship?: string | null
+        }
+        Update: {
+          can_nudge?: boolean | null
+          can_view?: boolean | null
+          caregiver_id?: string
+          created_at?: string | null
+          id?: string
+          member_id?: string
+          relationship?: string | null
+        }
+        Relationships: []
+      }
+      heart_scores: {
+        Row: {
+          ai_explanation: string | null
+          bp_score: number | null
+          consistency_score: number | null
+          created_at: string | null
+          heart_score: number
+          id: string
+          score_date: string
+          sugar_score: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_explanation?: string | null
+          bp_score?: number | null
+          consistency_score?: number | null
+          created_at?: string | null
+          heart_score: number
+          id?: string
+          score_date: string
+          sugar_score?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_explanation?: string | null
+          bp_score?: number | null
+          consistency_score?: number | null
+          created_at?: string | null
+          heart_score?: number
+          id?: string
+          score_date?: string
+          sugar_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          evening_ritual_time: string | null
+          full_name: string | null
+          gender: string | null
+          has_diabetes: boolean | null
+          has_heart_disease: boolean | null
+          has_hypertension: boolean | null
+          height_cm: number | null
+          id: string
+          morning_ritual_time: string | null
+          phone: string | null
+          updated_at: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          evening_ritual_time?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_diabetes?: boolean | null
+          has_heart_disease?: boolean | null
+          has_hypertension?: boolean | null
+          height_cm?: number | null
+          id: string
+          morning_ritual_time?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          evening_ritual_time?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_diabetes?: boolean | null
+          has_heart_disease?: boolean | null
+          has_hypertension?: boolean | null
+          height_cm?: number | null
+          id?: string
+          morning_ritual_time?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      sugar_logs: {
+        Row: {
+          created_at: string | null
+          glucose_mg_dl: number
+          id: string
+          measured_at: string
+          measurement_type: string
+          metadata: Json | null
+          notes: string | null
+          ritual_type: string | null
+          source_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          glucose_mg_dl: number
+          id?: string
+          measured_at: string
+          measurement_type: string
+          metadata?: Json | null
+          notes?: string | null
+          ritual_type?: string | null
+          source_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          glucose_mg_dl?: number
+          id?: string
+          measured_at?: string
+          measurement_type?: string
+          metadata?: Json | null
+          notes?: string | null
+          ritual_type?: string | null
+          source_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "member" | "family" | "doctor" | "admin"
+      sleep_quality: "excellent" | "good" | "fair" | "poor" | "very_poor"
+      stress_level: "low" | "moderate" | "high" | "very_high"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +477,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["member", "family", "doctor", "admin"],
+      sleep_quality: ["excellent", "good", "fair", "poor", "very_poor"],
+      stress_level: ["low", "moderate", "high", "very_high"],
+    },
   },
 } as const
