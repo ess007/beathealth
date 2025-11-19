@@ -12,7 +12,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart } from "lucide-react";
 
 const Onboarding = () => {
-  const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -55,7 +54,7 @@ const Onboarding = () => {
       });
 
       toast.success(t("onboarding.success"));
-      navigate("/app/home");
+      window.location.href = "/app/home";
     } catch (error) {
       console.error("Onboarding error:", error);
       toast.error(t("onboarding.error"));

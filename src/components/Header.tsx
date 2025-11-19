@@ -9,18 +9,16 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/components/ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.success(t("header.signOut"));
-    navigate("/");
+    window.location.href = "/";
   };
 
   return (
