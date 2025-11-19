@@ -4,9 +4,9 @@
   "description": "Keep Your Beat Strong. Daily health tracking for Indian adults.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#FAFAFA",
   "theme_color": "#FF6B6B",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,11 +19,19 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": ["health", "medical", "lifestyle"],
   "lang": "en-IN",
   "dir": "ltr",
   "scope": "/",
+  "prefer_related_applications": false,
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "screenshots": []
 }

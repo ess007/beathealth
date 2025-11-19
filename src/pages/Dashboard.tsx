@@ -47,7 +47,10 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-primary">{t("common.loading")}</div>
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">{t("common.loading")}</p>
+        </div>
       </div>
     );
   }
@@ -56,7 +59,7 @@ const Dashboard = () => {
   const greeting = hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-6">
+    <div className="min-h-screen bg-background pb-20 md:pb-6 animate-fade-in">
       <Header />
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-5xl">
