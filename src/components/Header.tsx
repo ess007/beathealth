@@ -199,8 +199,10 @@ export const Header = () => {
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-semibold">{profile?.full_name || "User"}</span>
-                  <span className="text-xs text-muted-foreground">{t("header.viewProfile") || "View Profile"}</span>
+                  <span className="text-sm font-semibold">
+                    {profile?.full_name || profile?.email?.split('@')[0] || "User"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">View Profile</span>
                 </span>
               </Button>
             </DropdownMenuTrigger>
@@ -236,7 +238,9 @@ export const Header = () => {
                     {!isEditingProfile ? (
                       <>
                         <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-base truncate">{profile?.full_name || "User"}</h3>
+                          <h3 className="font-semibold text-base truncate">
+                            {profile?.full_name || profile?.email?.split('@')[0] || "User"}
+                          </h3>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -246,7 +250,7 @@ export const Header = () => {
                             <Edit className="w-3.5 h-3.5" />
                           </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
+                        <p className="text-xs text-muted-foreground">Complete your profile</p>
                         {profile?.weight_kg && (
                           <div className="flex gap-3 mt-2 text-xs">
                             <span className="bg-background/50 px-2 py-1 rounded">
@@ -319,9 +323,18 @@ export const Header = () => {
                     <span>Connect Devices</span>
                   </DropdownMenuItem>
                 </DialogTrigger>
-                <DropdownMenuItem onClick={() => window.location.href = "/app/profile"} className="py-2.5">
+                <DropdownMenuItem onClick={async () => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    await supabase.from("profiles").update({ 
+                      tutorial_completed: false,
+                      tutorial_step: 0
+                    }).eq("id", user.id);
+                    window.location.reload();
+                  }
+                }} className="py-2.5">
                   <Settings className="w-4 h-4 mr-3 text-primary" />
-                  <span>Settings</span>
+                  <span>Restart Tutorial</span>
                 </DropdownMenuItem>
               </div>
               

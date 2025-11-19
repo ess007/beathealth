@@ -465,6 +465,8 @@ export type Database = {
           onboarding_completed: boolean | null
           phone: string | null
           text_size_preference: string | null
+          tutorial_completed: boolean | null
+          tutorial_step: number | null
           updated_at: string | null
           weight_kg: number | null
         }
@@ -488,6 +490,8 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone?: string | null
           text_size_preference?: string | null
+          tutorial_completed?: boolean | null
+          tutorial_step?: number | null
           updated_at?: string | null
           weight_kg?: number | null
         }
@@ -511,6 +515,8 @@ export type Database = {
           onboarding_completed?: boolean | null
           phone?: string | null
           text_size_preference?: string | null
+          tutorial_completed?: boolean | null
+          tutorial_step?: number | null
           updated_at?: string | null
           weight_kg?: number | null
         }
