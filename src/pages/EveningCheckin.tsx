@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeartScore } from "@/hooks/useHeartScore";
 
 const EveningCheckin = () => {
-  const navigate = useNavigate();
   const { t } = useLanguage();
   const { calculateScore } = useHeartScore();
   const [step, setStep] = useState(1);
@@ -34,7 +33,7 @@ const EveningCheckin = () => {
     if (step > 1) {
       setStep(step - 1);
     } else {
-      navigate("/app/home");
+      window.location.href = "/app/home";
     }
   };
 
@@ -81,7 +80,7 @@ const EveningCheckin = () => {
       calculateScore(undefined);
 
       toast.success(t("checkin.completedSuccess"));
-      navigate("/app/home");
+      window.location.href = "/app/home";
     } catch (error) {
       console.error("Error saving evening ritual:", error);
       toast.error("Failed to save data. Please try again.");

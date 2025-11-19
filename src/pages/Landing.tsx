@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Heart, Users, TrendingUp, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
-  const navigate = useNavigate();
 
   // Structured Data for SEO
   const structuredData = {
@@ -51,7 +49,9 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 className="gradient-primary text-white shadow-elevated h-14 px-8 text-lg"
-                onClick={() => navigate("/auth")}
+                onClick={() => {
+                  window.location.href = "/auth";
+                }}
                 aria-label="Start using Beat for free today"
               >
                 Start Free Today
@@ -60,7 +60,9 @@ const Landing = () => {
                 size="lg" 
                 variant="outline" 
                 className="h-14 px-8 text-lg border-2"
-                onClick={() => navigate("/app/home")}
+                onClick={() => {
+                  window.location.href = "/app/home";
+                }}
                 aria-label="View a demo of the Beat app"
               >
                 View Demo
@@ -116,7 +118,9 @@ const Landing = () => {
             size="lg" 
             variant="secondary"
             className="h-14 px-8 text-lg shadow-elevated"
-            onClick={() => navigate("/auth")}
+            onClick={() => {
+              window.location.href = "/auth";
+            }}
             aria-label="Get started with Beat for free"
           >
             Get Started Free

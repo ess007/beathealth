@@ -12,17 +12,20 @@ import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
 
+  const navigateTo = (path: string) => {
+    window.location.href = path;
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!session) {
-          navigate("/auth");
+          navigateTo("/auth");
         } else {
           setUser(session.user);
         }
@@ -32,7 +35,7 @@ const Dashboard = () => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        navigate("/auth");
+        navigateTo("/auth");
       } else {
         setUser(session.user);
       }
@@ -40,7 +43,7 @@ const Dashboard = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   if (loading) {
     return (
@@ -98,7 +101,7 @@ const Dashboard = () => {
                 { label: t("ritual.sleepQuality"), done: false },
                 { label: t("ritual.medsTaken"), done: false },
               ]}
-              onStart={() => navigate("/app/checkin/morning")}
+              onStart={() => navigateTo("/app/checkin/morning")}
             />
             <RitualProgress
               title={t("ritual.evening")}
@@ -120,7 +123,7 @@ const Dashboard = () => {
           <Button
             variant="outline"
             className="h-20 flex flex-col items-center justify-center border-2 hover:border-primary transition-smooth"
-            onClick={() => navigate("/app/insights")}
+            onClick={() => navigateTo("/app/insights")}
           >
             <Activity className="w-6 h-6 mb-2 text-primary" />
             <span>{t("dashboard.viewTrends")}</span>
@@ -128,7 +131,7 @@ const Dashboard = () => {
           <Button
             variant="outline"
             className="h-20 flex flex-col items-center justify-center border-2 hover:border-secondary transition-smooth"
-            onClick={() => navigate("/app/family")}
+            onClick={() => navigateTo("/app/family")}
           >
             <Users className="w-6 h-6 mb-2 text-secondary" />
             <span>{t("dashboard.familyDashboard")}</span>
@@ -136,7 +139,7 @@ const Dashboard = () => {
           <Button
             variant="outline"
             className="h-20 flex flex-col items-center justify-center border-2 hover:border-accent transition-smooth"
-            onClick={() => navigate("/app/coach")}
+            onClick={() => navigateTo("/app/coach")}
           >
             <MessageCircle className="w-6 h-6 mb-2 text-accent" />
             <span>{t("dashboard.aiCopilot")}</span>

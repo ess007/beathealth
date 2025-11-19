@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,6 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +25,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate("/app/home");
+        window.location.href = "/app/home";
       } else {
         const { error } = await supabase.auth.signUp({
           email,
