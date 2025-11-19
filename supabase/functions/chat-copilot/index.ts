@@ -32,27 +32,31 @@ serve(async (req) => {
       );
     }
 
+    // Extract the JWT token from "Bearer <token>"
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Create Supabase client with service role key for admin operations
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       {
         auth: {
           persistSession: false,
         },
-        global: {
-          headers: { Authorization: authHeader },
-        },
       }
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Verify the user's JWT token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      console.error("Authentication failed:", authError);
+      console.error("Authentication failed:", authError?.message || "No user found");
       return new Response(
         JSON.stringify({ error: "Unauthorized - Invalid authentication" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    
+    console.log("Authenticated user:", user.id);
 
     // Validate and parse input
     const body = await req.json();
