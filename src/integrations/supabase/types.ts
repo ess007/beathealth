@@ -286,6 +286,48 @@ export type Database = {
         }
         Relationships: []
       }
+      health_goals: {
+        Row: {
+          created_at: string | null
+          current_value: number | null
+          goal_type: string
+          id: string
+          notes: string | null
+          start_date: string
+          status: string
+          target_date: string | null
+          target_value: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: number | null
+          goal_type: string
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          target_value: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: number | null
+          goal_type?: string
+          id?: string
+          notes?: string | null
+          start_date?: string
+          status?: string
+          target_date?: string | null
+          target_value?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       heart_scores: {
         Row: {
           ai_explanation: string | null

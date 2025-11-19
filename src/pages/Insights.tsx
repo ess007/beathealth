@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Heart, Activity, Droplet, TrendingUp, Brain, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
 
 const Insights = () => {
   const { history } = useHeartScore();
@@ -161,9 +162,178 @@ const Insights = () => {
           </div>
         )}
 
-        {/* AI Insights Card */}
+        {/* Charts Tabs */}
+        <Tabs defaultValue="heartscore" className="space-y-6 mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="heartscore">
+              <Heart className="w-4 h-4 mr-2" />
+              HeartScore
+            </TabsTrigger>
+            <TabsTrigger value="bp">
+              <Activity className="w-4 h-4 mr-2" />
+              Blood Pressure
+            </TabsTrigger>
+            <TabsTrigger value="sugar">
+              <Droplet className="w-4 h-4 mr-2" />
+              Blood Sugar
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="heartscore" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">HeartScore Trend (30 Days)</h3>
+              {heartScoreData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={heartScoreData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[0, 100]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--primary))" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Complete rituals to see your HeartScore trends</p>
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* Sub-scores */}
+            {heartScoreData.length > 0 && (
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Avg BP Score</div>
+                  <div className="text-3xl font-bold text-score-good">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.bp, 0) / heartScoreData.length
+                    )}
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Avg Sugar Score</div>
+                  <div className="text-3xl font-bold text-score-good">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.sugar, 0) / heartScoreData.length
+                    )}
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Ritual Consistency</div>
+                  <div className="text-3xl font-bold text-score-excellent">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.consistency, 0) /
+                        heartScoreData.length
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="bp" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Blood Pressure Trend (30 Days)</h3>
+              {bpData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={bpData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[60, 180]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="systolic"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      name="Systolic"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="diastolic"
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth={2}
+                      name="Diastolic"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Log BP readings to see trends</p>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="sugar" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Sugar Levels Trend (30 Days)</h3>
+              {sugarData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={sugarData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[60, 250]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="glucose"
+                      stroke="hsl(var(--accent))"
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--accent))" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Droplet className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Log sugar levels to see trends</p>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Health Goals Tracker */}
+        <div className="mb-6">
+          <HealthGoalsTracker />
+        </div>
+
+        {/* AI Insights Card - Moved below charts */}
         {aiInsights && (
-          <Card className="p-6 mb-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+          <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
             <div className="flex items-start gap-3 mb-4">
               <Brain className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div className="flex-1">
@@ -335,169 +505,6 @@ const Insights = () => {
             )}
           </Card>
         )}
-
-        <Tabs defaultValue="heartscore" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="heartscore">
-              <Heart className="w-4 h-4 mr-2" />
-              HeartScore
-            </TabsTrigger>
-            <TabsTrigger value="bp">
-              <Activity className="w-4 h-4 mr-2" />
-              Blood Pressure
-            </TabsTrigger>
-            <TabsTrigger value="sugar">
-              <Droplet className="w-4 h-4 mr-2" />
-              Sugar Levels
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="heartscore" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">HeartScore Trend (30 Days)</h3>
-              {heartScoreData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={heartScoreData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[0, 100]} className="text-xs" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={3}
-                      dot={{ fill: "hsl(var(--primary))" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Complete rituals to see your HeartScore trends</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* Sub-scores */}
-            {heartScoreData.length > 0 && (
-              <div className="grid md:grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Avg BP Score</div>
-                  <div className="text-3xl font-bold text-score-good">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.bp, 0) / heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Avg Sugar Score</div>
-                  <div className="text-3xl font-bold text-score-good">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.sugar, 0) / heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Ritual Consistency</div>
-                  <div className="text-3xl font-bold text-score-excellent">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.consistency, 0) /
-                        heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="bp" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Blood Pressure Trend (30 Days)</h3>
-              {bpData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={bpData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[60, 180]} className="text-xs" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="systolic"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      name="Systolic"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="diastolic"
-                      stroke="hsl(var(--secondary))"
-                      strokeWidth={2}
-                      name="Diastolic"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Log BP readings to see trends</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="sugar" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Sugar Levels Trend (30 Days)</h3>
-              {sugarData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={sugarData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[60, 250]} className="text-xs" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="glucose"
-                      stroke="hsl(var(--accent))"
-                      strokeWidth={3}
-                      dot={{ fill: "hsl(var(--accent))" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-64 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <Droplet className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Log sugar levels to see trends</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-          </TabsContent>
-        </Tabs>
       </main>
     </div>
   );
