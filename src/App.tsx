@@ -15,6 +15,7 @@ import { lazy, Suspense } from "react";
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Rituals = lazy(() => import("./pages/Rituals"));
 const MorningCheckin = lazy(() => import("./pages/MorningCheckin"));
 const EveningCheckin = lazy(() => import("./pages/EveningCheckin"));
 const Insights = lazy(() => import("./pages/Insights"));
@@ -59,7 +60,7 @@ const AppContent = () => {
   // App routes for swipe navigation
   const appRoutes = [
     "/app/home",
-    "/app/checkin/morning",
+    "/app/checkin",
     "/app/insights",
     "/app/family",
     "/app/coach",
@@ -91,6 +92,7 @@ const AppContent = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app/home" element={<Dashboard />} />
+            <Route path="/app/checkin" element={<Rituals />} />
             <Route path="/app/checkin/morning" element={<MorningCheckin />} />
             <Route path="/app/checkin/evening" element={<EveningCheckin />} />
             <Route path="/app/insights" element={<Insights />} />
