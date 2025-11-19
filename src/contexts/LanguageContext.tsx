@@ -23,6 +23,11 @@ const translations = {
     "header.dark": "Dark",
     "header.system": "System",
     
+    // Accessibility
+    "accessibility.textSize": "Text Size",
+    "accessibility.normal": "Normal",
+    "accessibility.large": "Large",
+    
     // Dashboard
     "dashboard.goodMorning": "Good Morning",
     "dashboard.goodAfternoon": "Good Afternoon",
@@ -159,6 +164,11 @@ const translations = {
     "header.light": "लाइट",
     "header.dark": "डार्क",
     "header.system": "सिस्टम",
+    
+    // Accessibility
+    "accessibility.textSize": "टेक्स्ट साइज़",
+    "accessibility.normal": "सामान्य",
+    "accessibility.large": "बड़ा",
     
     // Dashboard
     "dashboard.goodMorning": "सुप्रभात",
