@@ -8,6 +8,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { BottomNav } from "@/components/BottomNav";
 import { PageTransition } from "@/components/PageTransition";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useMedicationReminders } from "@/hooks/useMedicationReminders";
 import { lazy, Suspense } from "react";
 
 // Lazy load pages for better performance
@@ -19,6 +20,8 @@ const EveningCheckin = lazy(() => import("./pages/EveningCheckin"));
 const Insights = lazy(() => import("./pages/Insights"));
 const Family = lazy(() => import("./pages/Family"));
 const AICoach = lazy(() => import("./pages/AICoach"));
+const Medications = lazy(() => import("./pages/Medications"));
+const Achievements = lazy(() => import("./pages/Achievements"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -49,6 +52,9 @@ const AppContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const showBottomNav = location.pathname.startsWith("/app/");
+
+  // Enable medication reminders
+  useMedicationReminders();
 
   // App routes for swipe navigation
   const appRoutes = [
@@ -90,6 +96,8 @@ const AppContent = () => {
             <Route path="/app/insights" element={<Insights />} />
             <Route path="/app/family" element={<Family />} />
             <Route path="/app/coach" element={<AICoach />} />
+            <Route path="/app/medications" element={<Medications />} />
+            <Route path="/app/achievements" element={<Achievements />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
