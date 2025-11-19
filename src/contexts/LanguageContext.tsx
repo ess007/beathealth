@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import * as React from "react";
 
 type Language = "en" | "hi";
 
@@ -219,10 +219,10 @@ const translations = {
   },
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>("en");
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
+  const [language, setLanguage] = React.useState<Language>("en");
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations.en] || key;
@@ -236,7 +236,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useLanguage = () => {
-  const context = useContext(LanguageContext);
+  const context = React.useContext(LanguageContext);
   if (!context) {
     throw new Error("useLanguage must be used within LanguageProvider");
   }
