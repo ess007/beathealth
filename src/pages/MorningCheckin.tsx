@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartScore } from "@/hooks/useHeartScore";
+import { Logo } from "@/components/Logo";
 
 const MorningCheckin = () => {
   const { t } = useLanguage();
@@ -92,7 +93,7 @@ const MorningCheckin = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+            <Logo size="sm" showText={false} />
             <span className="font-semibold text-sm md:text-base">{t("ritual.morning")}</span>
           </div>
           <div className="w-10"></div>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useState, useEffect, useRef } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,8 @@ import {
   Settings,
   Edit,
   Save,
-  X
+  X,
+  Camera
 } from "lucide-react";
 import { FitnessTrackerConnection } from "@/components/FitnessTrackerConnection";
 import {
@@ -52,6 +53,8 @@ export const Header = () => {
     weight_kg: "",
     height_cm: "",
   });
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -77,6 +80,63 @@ export const Header = () => {
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // Validate file size (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("File size must be less than 2MB");
+        return;
+      }
+
+      setIsUploadingAvatar(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Delete old avatar if exists
+      if (profile?.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast.success("Profile photo updated");
+      fetchProfile();
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Failed to upload photo");
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -133,6 +193,7 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 h-auto py-2 px-3 hover:bg-accent/50 transition-all">
                 <Avatar className="w-10 h-10 border-2 border-primary ring-2 ring-primary/10">
+                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />}
                   <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-base font-bold">
                     {initials}
                   </AvatarFallback>
@@ -147,11 +208,30 @@ export const Header = () => {
               {/* Profile Header Section */}
               <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-b">
                 <div className="flex items-start gap-3">
-                  <Avatar className="w-16 h-16 border-2 border-primary shadow-lg">
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xl font-bold">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="w-16 h-16 border-2 border-primary shadow-lg">
+                      {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name || "User"} />}
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-xl font-bold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingAvatar}
+                      className="absolute -bottom-1 -right-1 h-7 w-7 p-0 rounded-full shadow-md"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     {!isEditingProfile ? (
                       <>
@@ -250,7 +330,7 @@ export const Header = () => {
               {/* Accessibility */}
               <div className="p-2">
                 <DropdownMenuLabel className="text-xs text-muted-foreground px-2 pb-1">
-                  {t("accessibility.title") || "Accessibility"}
+                  Accessibility
                 </DropdownMenuLabel>
                 <div className="flex gap-1 px-2 pb-2">
                   <Button
@@ -279,7 +359,7 @@ export const Header = () => {
               {/* Theme */}
               <div className="p-2">
                 <DropdownMenuLabel className="text-xs text-muted-foreground px-2 pb-1">
-                  {t("theme.title") || "Theme"}
+                  Theme
                 </DropdownMenuLabel>
                 <div className="flex gap-1 px-2 pb-2">
                   <Button
@@ -317,7 +397,7 @@ export const Header = () => {
               {/* Language */}
               <div className="p-2">
                 <DropdownMenuLabel className="text-xs text-muted-foreground px-2 pb-1">
-                  {t("language.title") || "Language"}
+                  Language
                 </DropdownMenuLabel>
                 <div className="flex gap-1 px-2 pb-2">
                   <Button

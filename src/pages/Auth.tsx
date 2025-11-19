@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -48,7 +48,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
+          <Logo size="lg" showText={false} className="mx-auto mb-4" />
           <h1 className="text-3xl font-bold">Welcome to Beat</h1>
           <p className="text-muted-foreground mt-2">Keep Your Beat Strong</p>
         </div>
