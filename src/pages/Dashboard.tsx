@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { StreakCelebration } from "@/components/StreakCelebration";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementBadge } from "@/components/AchievementBadge";
+import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -29,6 +30,24 @@ const Dashboard = () => {
   const navigateTo = (path: string) => {
     window.location.href = path;
   };
+
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   // Fetch today's ritual completion status
   const { data: ritualData, refetch: refetchRituals } = useQuery({
@@ -157,6 +176,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-6 animate-fade-in">
       <Header />
+      <InteractiveTutorial />
       <StreakCelebration 
         show={showCelebration} 
         streakCount={mainStreakCount} 
@@ -167,7 +187,7 @@ const Dashboard = () => {
         <div className="mb-6 md:mb-8 flex items-start justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
-              {greeting}{user && ", " + (user.email?.split("@")[0] || "Friend")}! 👋
+              {greeting}{profile?.full_name && ", " + profile.full_name}! 👋
             </h1>
             <p className="text-muted-foreground text-base md:text-lg">
               {t("dashboard.tagline")}
@@ -175,7 +195,7 @@ const Dashboard = () => {
           </div>
           
           {!streaksLoading && (
-            <Card className="p-3 md:p-4 flex items-center gap-2 md:gap-3 shadow-card shrink-0">
+            <Card id="streak-counter" className="p-3 md:p-4 flex items-center gap-2 md:gap-3 shadow-card shrink-0">
               <Flame className="w-6 h-6 md:w-8 md:h-8 text-primary" />
               <div>
                 <p className="text-xl md:text-2xl font-bold">{mainStreakCount}</p>
@@ -186,11 +206,11 @@ const Dashboard = () => {
         </div>
 
         {/* HeartScore Card */}
-        <div className="mb-6 md:mb-8">
+        <div id="heartscore-card" className="mb-6 md:mb-8">
           <HeartScoreCard />
         </div>
 
-        <div className="mb-6 md:mb-8">
+        <div id="ritual-section" className="mb-6 md:mb-8">
           <h2 className="text-xl md:text-2xl font-semibold mb-4">{t("dashboard.todaysRituals")}</h2>
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <RitualProgress
@@ -244,7 +264,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div id="quick-actions" className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Button
             variant="outline"
             className="h-20 flex flex-col items-center justify-center border-2 hover:border-primary transition-smooth"
