@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import beatLogo from "@/assets/beat-logo.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -21,7 +21,7 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Heart className={`${sizeClasses[size]} text-primary`} fill="currentColor" />
+      <img src={beatLogo} alt="Beat Logo" className={sizeClasses[size]} />
       {showText && (
         <span className={`${textSizeClasses[size]} font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent`}>
           Beat
