@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame } from "lucide-react";
@@ -114,7 +113,7 @@ const Dashboard = () => {
                 { label: t("ritual.stepsCount"), done: false },
                 { label: t("ritual.stressLevel"), done: false },
               ]}
-              onStart={() => navigate("/app/checkin/evening")}
+              onStart={() => navigateTo("/app/checkin/evening")}
             />
           </div>
         </div>
