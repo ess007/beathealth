@@ -8,10 +8,12 @@ import { Heart, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useHeartScore } from "@/hooks/useHeartScore";
 
 const EveningCheckin = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { calculateScore } = useHeartScore();
   const [step, setStep] = useState(1);
   const [data, setData] = useState({
     bpSystolic: "",
@@ -74,6 +76,9 @@ const EveningCheckin = () => {
         stress_level: ["low", "moderate", "high", "very_high"][parseInt(data.stressLevel)] as any,
         meds_taken: data.medsTaken,
       });
+
+      // Calculate HeartScore
+      calculateScore(undefined);
 
       toast.success(t("checkin.completedSuccess"));
       navigate("/app/home");
