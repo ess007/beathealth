@@ -120,6 +120,47 @@ const Insights = () => {
           </p>
         </div>
 
+        {/* Summary Metrics */}
+        {aiInsights?.summary && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Avg BP</span>
+              </div>
+              <p className="text-2xl font-bold">{aiInsights.summary.avgSystolic}/{aiInsights.summary.avgDiastolic}</p>
+              <p className="text-xs text-muted-foreground">{aiInsights.summary.dataPoints.bp} readings</p>
+            </Card>
+            
+            <Card className="p-4 bg-gradient-to-br from-secondary/10 to-secondary/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Droplet className="w-4 h-4 text-secondary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Avg Sugar</span>
+              </div>
+              <p className="text-2xl font-bold">{aiInsights.summary.avgSugar}</p>
+              <p className="text-xs text-muted-foreground">{aiInsights.summary.dataPoints.sugar} readings</p>
+            </Card>
+            
+            <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-4 h-4 text-accent" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">HeartScore</span>
+              </div>
+              <p className="text-2xl font-bold">{aiInsights.summary.avgHeartScore}/100</p>
+              <p className="text-xs text-muted-foreground">30-day average</p>
+            </Card>
+            
+            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground uppercase">Activity</span>
+              </div>
+              <p className="text-2xl font-bold">{aiInsights.summary.avgSteps}</p>
+              <p className="text-xs text-muted-foreground">steps/day</p>
+            </Card>
+          </div>
+        )}
+
         {/* AI Insights Card */}
         {aiInsights && (
           <Card className="p-6 mb-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
@@ -127,37 +168,124 @@ const Insights = () => {
               <Brain className="w-6 h-6 text-primary shrink-0 mt-1" />
               <div className="flex-1">
                 <h2 className="text-xl font-semibold mb-1 flex items-center gap-2">
-                  AI Health Insights
+                  AI Health Analysis
                   <Sparkles className="w-4 h-4 text-accent" />
                 </h2>
-                <p className="text-sm text-muted-foreground">Personalized analysis of your health patterns</p>
+                <p className="text-sm text-muted-foreground">Personalized insights from your health data</p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  setLoadingInsights(true);
-                  await refetchInsights();
-                  setLoadingInsights(false);
-                  toast.success("Insights refreshed!");
-                }}
-                disabled={loadingInsights}
-              >
-                {loadingInsights ? "Analyzing..." : "Refresh"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      toast.loading("Generating PDF report...");
+                      const { data, error } = await supabase.functions.invoke('generate-pdf-report');
+                      
+                      if (error) throw error;
+                      
+                      // Create blob from base64 PDF data
+                      const byteCharacters = atob(data.pdf);
+                      const byteNumbers = new Array(byteCharacters.length);
+                      for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                      }
+                      const byteArray = new Uint8Array(byteNumbers);
+                      const blob = new Blob([byteArray], { type: 'application/pdf' });
+                      
+                      // Download PDF
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `health-report-${new Date().toISOString().split('T')[0]}.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                      
+                      toast.success("Report downloaded!");
+                    } catch (error) {
+                      console.error('PDF generation error:', error);
+                      toast.error("Failed to generate report");
+                    }
+                  }}
+                >
+                  Download Report
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    setLoadingInsights(true);
+                    await refetchInsights();
+                    setLoadingInsights(false);
+                    toast.success("Insights refreshed!");
+                  }}
+                  disabled={loadingInsights}
+                >
+                  {loadingInsights ? "Analyzing..." : "Refresh"}
+                </Button>
+              </div>
             </div>
             
-            <div className="prose prose-sm max-w-none">
-              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-                {aiInsights.insights}
-              </div>
+            {/* Parse and render insights in structured format */}
+            <div className="space-y-4">
+              {aiInsights.insights.split('\n\n').map((section: string, idx: number) => {
+                if (!section.trim()) return null;
+                
+                // Check if it's a heading (contains ** or starts with #)
+                const isHeading = section.includes('**') || section.startsWith('#');
+                
+                if (isHeading) {
+                  const cleanHeading = section.replace(/[*#]/g, '').trim();
+                  return (
+                    <div key={idx} className="pt-4 first:pt-0">
+                      <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                        {cleanHeading.includes('Correlation') && <TrendingUp className="w-4 h-4 text-primary" />}
+                        {cleanHeading.includes('Trend') && <Activity className="w-4 h-4 text-accent" />}
+                        {cleanHeading.includes('Recommendation') && <Sparkles className="w-4 h-4 text-secondary" />}
+                        {cleanHeading}
+                      </h3>
+                    </div>
+                  );
+                }
+                
+                // Render as bullet points or paragraphs
+                const lines = section.split('\n').filter(l => l.trim());
+                return (
+                  <div key={idx} className="space-y-2">
+                    {lines.map((line, lineIdx) => {
+                      const isBullet = line.trim().startsWith('-') || line.trim().startsWith('•');
+                      const cleanLine = line.replace(/^[-•]\s*/, '').trim();
+                      
+                      if (isBullet) {
+                        return (
+                          <div key={lineIdx} className="flex items-start gap-2 pl-4">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                            <p className="text-sm text-foreground leading-relaxed">{cleanLine}</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <p key={lineIdx} className="text-sm text-foreground leading-relaxed">
+                          {cleanLine}
+                        </p>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Correlations */}
             {aiInsights.correlations && (
               <div className="mt-6 pt-6 border-t border-border/50">
-                <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">Detected Correlations</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <h3 className="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Health Correlations
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {Object.entries(aiInsights.correlations).map(([key, value]: [string, any]) => {
                     const correlation = value as number;
                     const strength = Math.abs(correlation);
@@ -167,14 +295,36 @@ const Insights = () => {
                       .trim();
                     
                     return (
-                      <div key={key} className="flex items-center gap-2 p-3 rounded-lg bg-background/50">
-                        <div className={`w-2 h-2 rounded-full ${
-                          strength > 0.5 ? 'bg-primary' : strength > 0.3 ? 'bg-accent' : 'bg-muted'
-                        }`} />
+                      <div key={key} className="flex items-center gap-3 p-4 rounded-lg bg-background border border-border/50">
+                        <div className="relative w-12 h-12 shrink-0">
+                          <svg className="transform -rotate-90 w-12 h-12">
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              stroke="hsl(var(--muted))"
+                              strokeWidth="4"
+                              fill="none"
+                            />
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="20"
+                              stroke={strength > 0.5 ? 'hsl(var(--primary))' : strength > 0.3 ? 'hsl(var(--accent))' : 'hsl(var(--muted))'}
+                              strokeWidth="4"
+                              fill="none"
+                              strokeDasharray={`${strength * 125.6} 125.6`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-bold">{(strength * 100).toFixed(0)}%</span>
+                          </div>
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium truncate">{label}</p>
+                          <p className="text-sm font-medium truncate">{label}</p>
                           <p className="text-xs text-muted-foreground">
-                            {correlation > 0 ? 'Positive' : 'Negative'} ({(strength * 100).toFixed(0)}%)
+                            {correlation > 0 ? 'Positive' : 'Negative'} correlation
                           </p>
                         </div>
                       </div>
