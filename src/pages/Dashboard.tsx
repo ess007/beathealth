@@ -58,7 +58,7 @@ const Dashboard = () => {
 
         {/* HeartScore Card */}
         <div className="mb-8">
-          <HeartScoreCard score={82} />
+          <HeartScoreCard />
         </div>
 
         <div className="mb-8">
