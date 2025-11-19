@@ -25,7 +25,7 @@ const FamilyMemberCard = ({
 }: FamilyMemberCardProps) => {
   const { todayScore } = useHeartScore(memberId);
 
-  // Fetch today's ritual completion
+  // Fetch today's ritual completion with caching
   const { data: todayRituals } = useQuery({
     queryKey: ["rituals", memberId, "today"],
     queryFn: async () => {
@@ -39,9 +39,11 @@ const FamilyMemberCard = ({
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Fetch latest BP reading
+  // Fetch latest BP reading with caching
   const { data: latestBP } = useQuery({
     queryKey: ["bp", memberId, "latest"],
     queryFn: async () => {
@@ -56,9 +58,11 @@ const FamilyMemberCard = ({
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Fetch latest sugar reading
+  // Fetch latest sugar reading with caching
   const { data: latestSugar } = useQuery({
     queryKey: ["sugar", memberId, "latest"],
     queryFn: async () => {
@@ -73,6 +77,8 @@ const FamilyMemberCard = ({
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const score = todayScore?.heart_score || 0;
@@ -105,15 +111,15 @@ const FamilyMemberCard = ({
   };
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-smooth">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-xl font-semibold mb-1">
+    <Card className="p-4 md:p-6 hover:shadow-lg transition-smooth">
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-4 gap-3">
+        <div className="flex-1">
+          <h3 className="text-lg md:text-xl font-semibold mb-1">
             {memberName || memberEmail.split("@")[0]}
           </h3>
-          <p className="text-sm text-muted-foreground capitalize">{relationship}</p>
+          <p className="text-xs md:text-sm text-muted-foreground capitalize">{relationship}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {canNudge && (
             <Button variant="ghost" size="icon" className="rounded-full">
               <Bell className="w-4 h-4" />

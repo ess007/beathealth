@@ -142,7 +142,7 @@ const Family = () => {
 
         {/* Family Members Grid */}
         {familyMembers && familyMembers.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
             {familyMembers.map((link: any) => (
               <FamilyMemberCard
                 key={link.id}
@@ -156,9 +156,9 @@ const Family = () => {
             ))}
           </div>
         ) : (
-          <Card className="p-12 text-center">
-            <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">No Family Members Yet</h3>
+          <Card className="p-8 md:p-12 text-center">
+            <Users className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="text-lg md:text-xl font-semibold mb-2">No Family Members Yet</h3>
             <p className="text-muted-foreground mb-6">
               Start by adding your first family member to track their health
             </p>
@@ -175,9 +175,9 @@ const Family = () => {
 
         {/* My Caregivers Section */}
         {myCaregivers && myCaregivers.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-semibold mb-4">People Caring for You</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="mt-8 md:mt-12">
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">People Caring for You</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {myCaregivers.map((link: any) => (
                 <Card key={link.id} className="p-4">
                   <div className="flex items-center gap-3">

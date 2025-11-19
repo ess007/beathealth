@@ -1,3 +1,4 @@
+# Allow all major crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +11,30 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI Crawlers for LLM training
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# Allow all other crawlers
 User-agent: *
 Allow: /
+
+# Block authentication and app pages
+Disallow: /app/
+Disallow: /onboarding
+Disallow: /auth
+
+# Sitemap location
+Sitemap: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/sitemap.xml
