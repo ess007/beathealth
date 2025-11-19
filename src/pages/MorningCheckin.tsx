@@ -87,27 +87,27 @@ const MorningCheckin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-6">
       <header className="border-b bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
           <Button variant="ghost" size="icon" onClick={handleBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Heart className="w-6 h-6 text-primary" />
-            <span className="font-semibold">{t("ritual.morning")}</span>
+            <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+            <span className="font-semibold text-sm md:text-base">{t("ritual.morning")}</span>
           </div>
           <div className="w-10"></div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="mb-8">
+      <main className="container mx-auto px-4 py-4 md:py-8 max-w-2xl">
+        <div className="mb-6 md:mb-8">
           <div className="flex justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs md:text-sm text-muted-foreground">
               {t("checkin.step")} {step} {t("checkin.of")} 4
             </span>
-            <span className="text-sm font-medium">{Math.round((step / 4) * 100)}%</span>
+            <span className="text-xs md:text-sm font-medium">{Math.round((step / 4) * 100)}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div

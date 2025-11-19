@@ -93,13 +93,13 @@ const Insights = () => {
   }, []) || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-6">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Health Insights</h1>
-          <p className="text-muted-foreground text-lg">
+      <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">Health Insights</h1>
+          <p className="text-muted-foreground text-base md:text-lg">
             Track your health trends over time
           </p>
         </div>
