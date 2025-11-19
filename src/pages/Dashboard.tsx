@@ -10,12 +10,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { StreakCelebration } from "@/components/StreakCelebration";
 
 const Dashboard = () => {
   const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
+  const { mainStreakCount, isLoading: streaksLoading, updateStreak } = useStreaks();
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [previousRitualStatus, setPreviousRitualStatus] = useState<{morning: boolean, evening: boolean}>({ morning: false, evening: false });
 
   const navigateTo = (path: string) => {
     window.location.href = path;
@@ -80,6 +83,25 @@ const Dashboard = () => {
     staleTime: 60 * 1000, // 1 minute
   });
 
+  // Check for both rituals completed and trigger celebration
+  useEffect(() => {
+    if (ritualData?.morning.completed && ritualData?.evening.completed) {
+      // Check if this is a new completion (both weren't completed before)
+      if (!previousRitualStatus.morning || !previousRitualStatus.evening) {
+        // Update streak
+        updateStreak({ type: "daily_checkin" });
+        // Show celebration
+        setShowCelebration(true);
+      }
+      setPreviousRitualStatus({ morning: true, evening: true });
+    } else {
+      setPreviousRitualStatus({
+        morning: ritualData?.morning.completed || false,
+        evening: ritualData?.evening.completed || false,
+      });
+    }
+  }, [ritualData?.morning.completed, ritualData?.evening.completed]);
+
   // Refetch rituals when page gains focus
   useEffect(() => {
     const handleFocus = () => {
@@ -130,6 +152,11 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-6 animate-fade-in">
       <Header />
+      <StreakCelebration 
+        show={showCelebration} 
+        streakCount={mainStreakCount} 
+        onClose={() => setShowCelebration(false)} 
+      />
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-5xl">
         <div className="mb-6 md:mb-8 flex items-start justify-between gap-4">

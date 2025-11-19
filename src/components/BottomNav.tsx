@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 const navItems = [
   { icon: Home, label: "Home", path: "/app/home" },
   { icon: Activity, label: "Check-in", path: "/app/checkin/morning" },
+  { icon: MessageCircle, label: "Pulse", path: "/app/coach" },
   { icon: TrendingUp, label: "Insights", path: "/app/insights" },
   { icon: Users, label: "Family", path: "/app/family" },
-  { icon: MessageCircle, label: "Coach", path: "/app/coach" },
 ];
 
 export const BottomNav = () => {

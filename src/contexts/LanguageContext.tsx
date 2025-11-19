@@ -37,7 +37,7 @@ const translations = {
     "dashboard.quickActions": "Quick Actions",
     "dashboard.viewTrends": "View Trends",
     "dashboard.familyDashboard": "Family Dashboard",
-    "dashboard.aiCopilot": "AI Copilot",
+    "dashboard.aiCopilot": "Pulse",
     
     // Rituals
     "ritual.morning": "Morning Ritual",
@@ -102,8 +102,8 @@ const translations = {
     "checkin.completedSuccess": "Ritual completed! 🎉",
     
     // AI Coach
-    "coach.title": "Beat Copilot",
-    "coach.subtitle": "Your AI health assistant",
+    "coach.title": "Pulse",
+    "coach.subtitle": "Your medical-grade AI health coach",
     "coach.placeholder": "Ask me anything about your health...",
     "coach.send": "Send",
     "coach.thinking": "Thinking...",
@@ -179,7 +179,7 @@ const translations = {
     "dashboard.quickActions": "त्वरित कार्य",
     "dashboard.viewTrends": "रुझान देखें",
     "dashboard.familyDashboard": "परिवार डैशबोर्ड",
-    "dashboard.aiCopilot": "AI सहायक",
+    "dashboard.aiCopilot": "पल्स",
     
     // Rituals
     "ritual.morning": "सुबह की दिनचर्या",
@@ -244,8 +244,8 @@ const translations = {
     "checkin.completedSuccess": "दिनचर्या पूरी हुई! 🎉",
     
     // AI Coach
-    "coach.title": "बीट सहायक",
-    "coach.subtitle": "आपका AI स्वास्थ्य सहायक",
+    "coach.title": "पल्स",
+    "coach.subtitle": "आपका चिकित्सा-ग्रेड AI स्वास्थ्य कोच",
     "coach.placeholder": "अपने स्वास्थ्य के बारे में कुछ भी पूछें...",
     "coach.send": "भेजें",
     "coach.thinking": "सोच रहे हैं...",
