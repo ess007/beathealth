@@ -1,7 +1,7 @@
 project_id = "neaeizjlvforwzxtfzus"
 
 [functions.chat-copilot]
-verify_jwt = false
+verify_jwt = true
 
 [functions.calculate-heart-score]
 verify_jwt = true

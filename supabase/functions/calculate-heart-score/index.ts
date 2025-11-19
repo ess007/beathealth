@@ -1,10 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.83.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const scoreSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
+});
 
 interface BPLog {
   systolic: number;
@@ -51,7 +57,10 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    const { date } = await req.json();
+    // Validate and parse input
+    const body = await req.json();
+    const validated = scoreSchema.parse(body);
+    const { date } = validated;
     const targetDate = date || new Date().toISOString().split("T")[0];
 
     console.log(`Calculating HeartScore for user ${user.id} on ${targetDate}`);
@@ -242,6 +251,22 @@ Write a warm, encouraging 2-3 sentence explanation in simple English about what 
     );
   } catch (error) {
     console.error("Error calculating HeartScore:", error);
+    
+    // Handle validation errors
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid input",
+          details: error.errors
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({
         success: false,
