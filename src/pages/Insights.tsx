@@ -1,184 +1,268 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, ArrowLeft, TrendingUp, Activity } from "lucide-react";
+import { useHeartScore } from "@/hooks/useHeartScore";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Heart, Activity, Droplet, TrendingUp } from "lucide-react";
 
 const Insights = () => {
-  const navigate = useNavigate();
+  const { history } = useHeartScore();
 
-  // Mock data for charts
-  const heartScoreData = [
-    { date: "Mon", score: 78 },
-    { date: "Tue", score: 80 },
-    { date: "Wed", score: 79 },
-    { date: "Thu", score: 82 },
-    { date: "Fri", score: 81 },
-    { date: "Sat", score: 85 },
-    { date: "Sun", score: 82 },
-  ];
+  // Fetch BP logs for last 30 days
+  const { data: bpLogs } = useQuery({
+    queryKey: ["bp", "history"],
+    queryFn: async () => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: { user } } = await supabase.auth.getUser();
 
-  const bpData = [
-    { date: "Mon", systolic: 125, diastolic: 82 },
-    { date: "Tue", systolic: 122, diastolic: 80 },
-    { date: "Wed", systolic: 128, diastolic: 84 },
-    { date: "Thu", systolic: 120, diastolic: 78 },
-    { date: "Fri", systolic: 118, diastolic: 76 },
-    { date: "Sat", systolic: 122, diastolic: 80 },
-    { date: "Sun", systolic: 120, diastolic: 78 },
-  ];
+      const { data, error } = await supabase
+        .from("bp_logs")
+        .select("*")
+        .eq("user_id", user?.id)
+        .gte("measured_at", thirtyDaysAgo.toISOString())
+        .order("measured_at", { ascending: true });
 
-  const sugarData = [
-    { date: "Mon", fasting: 105, random: 140 },
-    { date: "Tue", fasting: 102, random: 135 },
-    { date: "Wed", fasting: 108, random: 145 },
-    { date: "Thu", fasting: 100, random: 130 },
-    { date: "Fri", fasting: 98, random: 128 },
-    { date: "Sat", fasting: 103, random: 138 },
-    { date: "Sun", fasting: 100, random: 132 },
-  ];
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch sugar logs for last 30 days
+  const { data: sugarLogs } = useQuery({
+    queryKey: ["sugar", "history"],
+    queryFn: async () => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const { data, error } = await supabase
+        .from("sugar_logs")
+        .select("*")
+        .eq("user_id", user?.id)
+        .gte("measured_at", thirtyDaysAgo.toISOString())
+        .order("measured_at", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Transform HeartScore data for chart
+  const heartScoreData = history?.map((score) => ({
+    date: new Date(score.score_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    score: score.heart_score,
+    bp: score.bp_score,
+    sugar: score.sugar_score,
+    consistency: score.consistency_score,
+  })) || [];
+
+  // Transform BP data for chart (group by day)
+  const bpData = bpLogs?.reduce((acc: any[], log) => {
+    const date = new Date(log.measured_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const existing = acc.find((item) => item.date === date);
+    if (existing) {
+      existing.systolic = (existing.systolic + log.systolic) / 2;
+      existing.diastolic = (existing.diastolic + log.diastolic) / 2;
+    } else {
+      acc.push({
+        date,
+        systolic: log.systolic,
+        diastolic: log.diastolic,
+      });
+    }
+    return acc;
+  }, []) || [];
+
+  // Transform sugar data for chart (group by day)
+  const sugarData = sugarLogs?.reduce((acc: any[], log) => {
+    const date = new Date(log.measured_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const existing = acc.find((item) => item.date === date);
+    if (existing) {
+      existing.glucose = (existing.glucose + log.glucose_mg_dl) / 2;
+    } else {
+      acc.push({
+        date,
+        glucose: log.glucose_mg_dl,
+        type: log.measurement_type,
+      });
+    }
+    return acc;
+  }, []) || [];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/app/home")}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            <span className="font-semibold">Insights & Trends</span>
-          </div>
-          <div className="w-10"></div>
-        </div>
-      </header>
+      <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <Tabs defaultValue="heart" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-14">
-            <TabsTrigger value="heart" className="text-base">
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Health Insights</h1>
+          <p className="text-muted-foreground text-lg">
+            Track your health trends over time
+          </p>
+        </div>
+
+        <Tabs defaultValue="heartscore" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="heartscore">
               <Heart className="w-4 h-4 mr-2" />
               HeartScore
             </TabsTrigger>
-            <TabsTrigger value="bp" className="text-base">
+            <TabsTrigger value="bp">
               <Activity className="w-4 h-4 mr-2" />
               Blood Pressure
             </TabsTrigger>
-            <TabsTrigger value="sugar" className="text-base">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Blood Sugar
+            <TabsTrigger value="sugar">
+              <Droplet className="w-4 h-4 mr-2" />
+              Sugar Levels
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="heart" className="space-y-6">
-            <Card className="p-6 shadow-card">
-              <h3 className="text-xl font-semibold mb-4">7-Day HeartScore Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={heartScoreData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={3}
-                    dot={{ fill: "hsl(var(--primary))", r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+          <TabsContent value="heartscore" className="space-y-6">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">HeartScore Trend (30 Days)</h3>
+              {heartScoreData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={heartScoreData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[0, 100]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="score"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--primary))" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Complete rituals to see your HeartScore trends</p>
+                  </div>
+                </div>
+              )}
             </Card>
 
-            <Card className="p-6 shadow-card">
-              <h3 className="text-lg font-semibold mb-2">Weekly Summary</h3>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Average Score</p>
-                  <p className="text-2xl font-bold text-primary">81</p>
-                </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Best Day</p>
-                  <p className="text-2xl font-bold text-secondary">85</p>
-                </div>
+            {/* Sub-scores */}
+            {heartScoreData.length > 0 && (
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Avg BP Score</div>
+                  <div className="text-3xl font-bold text-score-good">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.bp, 0) / heartScoreData.length
+                    )}
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Avg Sugar Score</div>
+                  <div className="text-3xl font-bold text-score-good">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.sugar, 0) / heartScoreData.length
+                    )}
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Ritual Consistency</div>
+                  <div className="text-3xl font-bold text-score-excellent">
+                    {Math.round(
+                      heartScoreData.reduce((sum, d) => sum + d.consistency, 0) /
+                        heartScoreData.length
+                    )}
+                  </div>
+                </Card>
               </div>
-            </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="bp" className="space-y-6">
-            <Card className="p-6 shadow-card">
-              <h3 className="text-xl font-semibold mb-4">7-Day Blood Pressure Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={bpData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="systolic"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={3}
-                    name="Systolic"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="diastolic"
-                    stroke="hsl(var(--secondary))"
-                    strokeWidth={3}
-                    name="Diastolic"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Blood Pressure Trend (30 Days)</h3>
+              {bpData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={bpData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[60, 180]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="systolic"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      name="Systolic"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="diastolic"
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth={2}
+                      name="Diastolic"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Log BP readings to see trends</p>
+                  </div>
+                </div>
+              )}
             </Card>
           </TabsContent>
 
           <TabsContent value="sugar" className="space-y-6">
-            <Card className="p-6 shadow-card">
-              <h3 className="text-xl font-semibold mb-4">7-Day Blood Sugar Trend</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={sugarData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="fasting"
-                    stroke="hsl(var(--accent))"
-                    strokeWidth={3}
-                    name="Fasting"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="random"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={3}
-                    name="Random"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Sugar Levels Trend (30 Days)</h3>
+              {sugarData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={sugarData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="date" className="text-xs" />
+                    <YAxis domain={[60, 250]} className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="glucose"
+                      stroke="hsl(var(--accent))"
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--accent))" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <Droplet className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>Log sugar levels to see trends</p>
+                  </div>
+                </div>
+              )}
             </Card>
           </TabsContent>
         </Tabs>

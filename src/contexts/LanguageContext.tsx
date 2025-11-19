@@ -105,6 +105,13 @@ const translations = {
     
     // Common
     "common.loading": "Loading...",
+    
+    // Family
+    "family.title": "Family Dashboard",
+    "family.subtitle": "Keep track of your loved ones' health",
+    "family.addMember": "Add Family Member",
+    "family.noMembers": "No Family Members Yet",
+    "family.addFirst": "Add Your First Member",
   },
   hi: {
     // Header
@@ -202,6 +209,13 @@ const translations = {
     
     // Common
     "common.loading": "लोड हो रहा है...",
+    
+    // Family
+    "family.title": "परिवार डैशबोर्ड",
+    "family.subtitle": "अपने प्रियजनों के स्वास्थ्य पर नज़र रखें",
+    "family.addMember": "परिवार का सदस्य जोड़ें",
+    "family.noMembers": "अभी तक कोई परिवार का सदस्य नहीं",
+    "family.addFirst": "अपना पहला सदस्य जोड़ें",
   },
 };
 
