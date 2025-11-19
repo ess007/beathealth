@@ -9,6 +9,7 @@ import RitualProgress from "@/components/RitualProgress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -19,6 +20,74 @@ const Dashboard = () => {
   const navigateTo = (path: string) => {
     window.location.href = path;
   };
+
+  // Fetch today's ritual completion status
+  const { data: ritualData, refetch: refetchRituals } = useQuery({
+    queryKey: ["rituals", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const today = new Date().toISOString().split("T")[0];
+      
+      // Fetch behavior logs for today
+      const { data: behaviorLogs } = await supabase
+        .from("behavior_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("log_date", today);
+
+      // Fetch BP logs for today
+      const { data: bpLogs } = await supabase
+        .from("bp_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("measured_at", `${today}T00:00:00`)
+        .lt("measured_at", `${today}T23:59:59`);
+
+      // Fetch sugar logs for today
+      const { data: sugarLogs } = await supabase
+        .from("sugar_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("measured_at", `${today}T00:00:00`)
+        .lt("measured_at", `${today}T23:59:59`);
+
+      const morningBehavior = behaviorLogs?.find((log) => log.ritual_type === "morning");
+      const eveningBehavior = behaviorLogs?.find((log) => log.ritual_type === "evening");
+      const morningBP = bpLogs?.find((log) => log.ritual_type === "morning");
+      const eveningBP = bpLogs?.find((log) => log.ritual_type === "evening");
+      const fastingSugar = sugarLogs?.find((log) => log.measurement_type === "fasting");
+      const randomSugar = sugarLogs?.find((log) => log.measurement_type !== "fasting");
+
+      return {
+        morning: {
+          completed: !!morningBehavior && !!morningBP,
+          hasBP: !!morningBP,
+          hasSugar: !!fastingSugar,
+          hasSleep: !!morningBehavior?.sleep_quality,
+          hasMeds: morningBehavior?.meds_taken !== null,
+        },
+        evening: {
+          completed: !!eveningBehavior && !!eveningBP,
+          hasBP: !!eveningBP,
+          hasSugar: !!randomSugar,
+          hasSteps: !!eveningBehavior?.steps_count,
+          hasMeds: eveningBehavior?.meds_taken !== null,
+        },
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 60 * 1000, // 1 minute
+  });
+
+  // Refetch rituals when page gains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchRituals();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refetchRituals]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -96,12 +165,12 @@ const Dashboard = () => {
               title={t("ritual.morning")}
               subtitle={t("ritual.morningSubtitle")}
               icon={<Sun className="w-6 h-6 text-accent" />}
-              completed={false}
+              completed={ritualData?.morning.completed || false}
               tasks={[
-                { label: t("ritual.bloodPressure"), done: false },
-                { label: t("ritual.fastingSugar"), done: false },
-                { label: t("ritual.sleepQuality"), done: false },
-                { label: t("ritual.medsTaken"), done: false },
+                { label: t("ritual.bloodPressure"), done: ritualData?.morning.hasBP || false },
+                { label: t("ritual.fastingSugar"), done: ritualData?.morning.hasSugar || false },
+                { label: t("ritual.sleepQuality"), done: ritualData?.morning.hasSleep || false },
+                { label: t("ritual.medsTaken"), done: ritualData?.morning.hasMeds || false },
               ]}
               onStart={() => navigateTo("/app/checkin/morning")}
             />
@@ -109,11 +178,11 @@ const Dashboard = () => {
               title={t("ritual.evening")}
               subtitle={t("ritual.eveningSubtitle")}
               icon={<Moon className="w-6 h-6 text-primary" />}
-              completed={false}
+              completed={ritualData?.evening.completed || false}
               tasks={[
-                { label: t("ritual.bloodPressure"), done: false },
-                { label: t("ritual.randomSugar"), done: false },
-                { label: t("ritual.stepsCount"), done: false },
+                { label: t("ritual.bloodPressure"), done: ritualData?.evening.hasBP || false },
+                { label: t("ritual.randomSugar"), done: ritualData?.evening.hasSugar || false },
+                { label: t("ritual.stepsCount"), done: ritualData?.evening.hasSteps || false },
                 { label: t("ritual.stressLevel"), done: false },
               ]}
               onStart={() => navigateTo("/app/checkin/evening")}
