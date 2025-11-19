@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
 import RitualProgress from "@/components/RitualProgress";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
 
 const Dashboard = () => {
@@ -14,6 +16,7 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -55,13 +58,25 @@ const Dashboard = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {greeting}{user && ", " + (user.email?.split("@")[0] || "Friend")}! 👋
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {t("dashboard.tagline")}
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              {greeting}{user && ", " + (user.email?.split("@")[0] || "Friend")}! 👋
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              {t("dashboard.tagline")}
+            </p>
+          </div>
+          
+          {!streaksLoading && (
+            <Card className="p-4 flex items-center gap-3 shadow-card">
+              <Flame className="w-8 h-8 text-primary" />
+              <div>
+                <p className="text-2xl font-bold">{mainStreakCount}</p>
+                <p className="text-xs text-muted-foreground">{t("dashboard.daysStrong")}</p>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* HeartScore Card */}

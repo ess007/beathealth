@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_nudges: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          delivered_via: string
+          id: string
+          nudge_text: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          delivered_via?: string
+          id?: string
+          nudge_text: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          delivered_via?: string
+          id?: string
+          nudge_text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       behavior_logs: {
         Row: {
           created_at: string | null
@@ -157,6 +184,30 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          created_at: string | null
+          id: string
+          payload_json: Json | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          payload_json?: Json | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          payload_json?: Json | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       family_links: {
         Row: {
           can_nudge: boolean | null
@@ -184,6 +235,27 @@ export type Database = {
           id?: string
           member_id?: string
           relationship?: string | null
+        }
+        Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string | null
+          value_json: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string | null
+          value_json?: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string | null
+          value_json?: Json
         }
         Relationships: []
       }
@@ -231,13 +303,18 @@ export type Database = {
           evening_ritual_time: string | null
           full_name: string | null
           gender: string | null
+          goals: Json | null
           has_diabetes: boolean | null
           has_heart_disease: boolean | null
           has_hypertension: boolean | null
           height_cm: number | null
+          high_contrast_mode: boolean | null
           id: string
+          language: string | null
           morning_ritual_time: string | null
+          onboarding_completed: boolean | null
           phone: string | null
+          text_size_preference: string | null
           updated_at: string | null
           weight_kg: number | null
         }
@@ -248,13 +325,18 @@ export type Database = {
           evening_ritual_time?: string | null
           full_name?: string | null
           gender?: string | null
+          goals?: Json | null
           has_diabetes?: boolean | null
           has_heart_disease?: boolean | null
           has_hypertension?: boolean | null
           height_cm?: number | null
+          high_contrast_mode?: boolean | null
           id: string
+          language?: string | null
           morning_ritual_time?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
+          text_size_preference?: string | null
           updated_at?: string | null
           weight_kg?: number | null
         }
@@ -265,15 +347,47 @@ export type Database = {
           evening_ritual_time?: string | null
           full_name?: string | null
           gender?: string | null
+          goals?: Json | null
           has_diabetes?: boolean | null
           has_heart_disease?: boolean | null
           has_hypertension?: boolean | null
           height_cm?: number | null
+          high_contrast_mode?: boolean | null
           id?: string
+          language?: string | null
           morning_ritual_time?: string | null
+          onboarding_completed?: boolean | null
           phone?: string | null
+          text_size_preference?: string | null
           updated_at?: string | null
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      streaks: {
+        Row: {
+          count: number
+          created_at: string | null
+          id: string
+          last_logged_at: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string | null
+          id?: string
+          last_logged_at?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string | null
+          id?: string
+          last_logged_at?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
