@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Users, TrendingUp, Shield } from "lucide-react";
+import { Users, TrendingUp, Shield } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const Landing = () => {
 
@@ -35,13 +36,13 @@ const Landing = () => {
         <section className="relative overflow-hidden" role="banner">
           <div className="absolute inset-0 gradient-warm opacity-5" aria-hidden="true"></div>
           <div className="container mx-auto px-4 py-20 relative">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              <div className="inline-block" aria-hidden="true">
-                <Heart className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
-              </div>
-              <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Keep Your Beat Strong
-              </h1>
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="flex justify-center mb-6">
+              <Logo size="lg" showText={false} className="animate-pulse" />
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Keep Your Beat Strong
+            </h1>
               <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
                 Your daily heart health score. Track BP, sugar, and habits. Built for Indian families who care.
               </p>
@@ -82,7 +83,7 @@ const Landing = () => {
             </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <FeatureCard
-              icon={<Heart className="w-8 h-8 text-primary" aria-hidden="true" />}
+              icon={<Logo size="md" showText={false} />}
               title="Daily HeartScore"
               description="Your health credit score. Track how you're doing, every single day."
             />

@@ -19,6 +19,76 @@ export interface HealthGoal {
 export const useHealthGoals = (userId?: string) => {
   const queryClient = useQueryClient();
 
+  // Auto-sync goal progress from latest readings
+  const syncGoalProgress = async (goalId: string, goalType: string, targetUserId: string) => {
+    let currentValue = null;
+
+    try {
+      if (goalType === 'bp_control') {
+        // Get latest BP reading
+        const { data } = await supabase
+          .from('bp_logs')
+          .select('systolic, diastolic')
+          .eq('user_id', targetUserId)
+          .order('measured_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (data) {
+          currentValue = data.systolic; // Use systolic as the current value
+        }
+      } else if (goalType === 'sugar_control') {
+        // Get latest sugar reading
+        const { data } = await supabase
+          .from('sugar_logs')
+          .select('glucose_mg_dl')
+          .eq('user_id', targetUserId)
+          .order('measured_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (data) {
+          currentValue = data.glucose_mg_dl;
+        }
+      } else if (goalType === 'weight_loss') {
+        // Get current weight from profile
+        const { data } = await supabase
+          .from('profiles')
+          .select('weight_kg')
+          .eq('id', targetUserId)
+          .single();
+        
+        if (data?.weight_kg) {
+          currentValue = data.weight_kg;
+        }
+      } else if (goalType === 'step_count') {
+        // Get today's step count
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('behavior_logs')
+          .select('steps_count')
+          .eq('user_id', targetUserId)
+          .eq('log_date', today)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (data?.steps_count) {
+          currentValue = data.steps_count;
+        }
+      }
+
+      if (currentValue !== null) {
+        await supabase
+          .from('health_goals')
+          .update({ current_value: currentValue })
+          .eq('id', goalId);
+      }
+    } catch (error) {
+      console.error('Error syncing goal progress:', error);
+    }
+  };
+
   const { data: goals, isLoading } = useQuery({
     queryKey: ["health-goals", userId],
     queryFn: async () => {
@@ -34,9 +104,17 @@ export const useHealthGoals = (userId?: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      
+      // Auto-sync current values for all active goals
+      const activeGoals = (data as HealthGoal[])?.filter(g => g.status === 'active') || [];
+      for (const goal of activeGoals) {
+        syncGoalProgress(goal.id, goal.goal_type, targetUserId);
+      }
+      
       return data as HealthGoal[];
     },
     enabled: !!userId || true,
+    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes to sync progress
   });
 
   const createGoal = useMutation({

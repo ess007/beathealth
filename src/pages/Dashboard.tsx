@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { StreakCelebration } from "@/components/StreakCelebration";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementBadge } from "@/components/AchievementBadge";
+import { ProfileSection } from "@/components/ProfileSection";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -164,6 +165,9 @@ const Dashboard = () => {
       />
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-5xl">
+        {/* Profile Section at Top */}
+        <ProfileSection />
+        
         <div className="mb-6 md:mb-8 flex items-start justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">

@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Send, Bot, User } from "lucide-react";
+import { Send, User } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { VoiceInput } from "@/components/VoiceInput";
+import { Logo } from "@/components/Logo";
 
 interface Message {
   role: "user" | "assistant";
@@ -109,9 +110,12 @@ const AICoach = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-4 md:py-6 max-w-4xl flex flex-col">
-        <div className="mb-4 md:mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t("coach.title")}</h1>
-          <p className="text-muted-foreground text-sm md:text-base">{t("coach.subtitle")}</p>
+        <div className="mb-4 md:mb-6 flex items-center gap-3">
+          <Logo size="md" showText={false} />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Pulse AI Coach</h1>
+            <p className="text-muted-foreground text-sm md:text-base">Your personal health advisor</p>
+          </div>
         </div>
 
         {/* Messages */}
@@ -119,7 +123,7 @@ const AICoach = () => {
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center text-muted-foreground">
               <div>
-                <Bot className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <Logo size="lg" showText={false} className="mx-auto mb-4 opacity-50" />
                 <p>{t("coach.placeholder")}</p>
               </div>
             </div>
@@ -134,7 +138,7 @@ const AICoach = () => {
                 >
                   {msg.role === "assistant" && (
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-primary-foreground" />
+                      <Logo size="sm" showText={false} />
                     </div>
                   )}
                   <div
@@ -156,7 +160,7 @@ const AICoach = () => {
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-primary-foreground" />
+                    <Logo size="sm" showText={false} />
                   </div>
                   <div className="bg-muted rounded-lg p-4">
                     <p className="text-muted-foreground">{t("coach.thinking")}</p>
