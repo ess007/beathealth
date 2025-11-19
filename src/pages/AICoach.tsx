@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { VoiceInput } from "@/components/VoiceInput";
 
 interface Message {
   role: "user" | "assistant";
@@ -175,15 +176,17 @@ const AICoach = () => {
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
             placeholder={t("coach.placeholder")}
             disabled={isLoading}
-            className="h-12 text-base"
+            className="h-12 text-base flex-1"
           />
-          <Button
-            onClick={handleSend}
-            disabled={isLoading || !input.trim()}
-            size="lg"
-            className="px-6"
-          >
-            <Send className="w-5 h-5" />
+          <VoiceInput
+            onTranscript={(text) => {
+              setInput(text);
+              setTimeout(() => handleSend(), 100);
+            }}
+            disabled={isLoading}
+          />
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-12 w-12">
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </main>

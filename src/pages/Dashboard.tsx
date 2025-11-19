@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame } from "lucide-react";
+import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame, Pill, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -11,12 +11,15 @@ import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { StreakCelebration } from "@/components/StreakCelebration";
+import { useAchievements } from "@/hooks/useAchievements";
+import { AchievementBadge } from "@/components/AchievementBadge";
 
 const Dashboard = () => {
   const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { mainStreakCount, isLoading: streaksLoading, updateStreak } = useStreaks();
+  const { achievements, checkAndAwardBadges } = useAchievements();
   const [showCelebration, setShowCelebration] = useState(false);
   const [previousRitualStatus, setPreviousRitualStatus] = useState<{morning: boolean, evening: boolean}>({ morning: false, evening: false });
 
@@ -90,6 +93,8 @@ const Dashboard = () => {
       if (!previousRitualStatus.morning || !previousRitualStatus.evening) {
         // Update streak
         updateStreak({ type: "daily_checkin" });
+        // Check for new achievements
+        checkAndAwardBadges();
         // Show celebration
         setShowCelebration(true);
       }
@@ -217,7 +222,29 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Latest Achievements */}
+        {achievements && achievements.length > 0 && (
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl md:text-2xl font-semibold">Recent Achievements</h2>
+              <Button variant="ghost" onClick={() => navigateTo("/app/achievements")}>
+                View All
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {achievements.slice(0, 3).map((achievement) => (
+                <AchievementBadge
+                  key={achievement.id}
+                  type={achievement.badge_type}
+                  earnedAt={achievement.earned_at}
+                  size="small"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Button
             variant="outline"
             className="h-20 flex flex-col items-center justify-center border-2 hover:border-primary transition-smooth"
@@ -241,6 +268,22 @@ const Dashboard = () => {
           >
             <MessageCircle className="w-6 h-6 mb-2 text-accent" />
             <span>{t("dashboard.aiCopilot")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-20 flex flex-col items-center justify-center border-2 hover:border-primary transition-smooth"
+            onClick={() => navigateTo("/app/medications")}
+          >
+            <Pill className="w-6 h-6 mb-2 text-primary" />
+            <span>Medications</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-20 flex flex-col items-center justify-center border-2 hover:border-accent transition-smooth sm:col-span-2 lg:col-span-4"
+            onClick={() => navigateTo("/app/achievements")}
+          >
+            <Award className="w-6 h-6 mb-2 text-accent" />
+            <span>View Achievements</span>
           </Button>
         </div>
       </main>

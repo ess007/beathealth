@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          badge_type: string
+          earned_at: string | null
+          id: string
+          metadata: Json | null
+          shared: boolean | null
+          user_id: string
+        }
+        Insert: {
+          badge_type: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          shared?: boolean | null
+          user_id: string
+        }
+        Update: {
+          badge_type?: string
+          earned_at?: string | null
+          id?: string
+          metadata?: Json | null
+          shared?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_nudges: {
         Row: {
           category: string | null
@@ -291,6 +318,86 @@ export type Database = {
           id?: string
           score_date?: string
           sugar_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      medication_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          medication_id: string
+          notes: string | null
+          scheduled_at: string
+          skipped: boolean | null
+          taken_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          medication_id: string
+          notes?: string | null
+          scheduled_at: string
+          skipped?: boolean | null
+          taken_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          medication_id?: string
+          notes?: string | null
+          scheduled_at?: string
+          skipped?: boolean | null
+          taken_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_logs_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          custom_times: string[] | null
+          dosage: string | null
+          frequency: string
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          custom_times?: string[] | null
+          dosage?: string | null
+          frequency: string
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          custom_times?: string[] | null
+          dosage?: string | null
+          frequency?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
