@@ -40,7 +40,7 @@ const Landing = () => {
             <div className="flex justify-center mb-6">
               <Logo size="lg" showText={false} className="animate-pulse" />
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent leading-tight pb-2">
               Keep Your Beat Strong
             </h1>
               <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
