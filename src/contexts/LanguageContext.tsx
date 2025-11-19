@@ -112,6 +112,39 @@ const translations = {
     "family.addMember": "Add Family Member",
     "family.noMembers": "No Family Members Yet",
     "family.addFirst": "Add Your First Member",
+    
+    // Onboarding
+    "onboarding.welcome": "Welcome to Beat!",
+    "onboarding.subtitle": "Keep Your Beat Strong",
+    "onboarding.language": "Choose your language",
+    "onboarding.continue": "Continue",
+    "onboarding.basicInfo": "Basic Information",
+    "onboarding.basicInfoDesc": "Tell us about yourself",
+    "onboarding.fullName": "Full Name",
+    "onboarding.namePlaceholder": "Enter your name",
+    "onboarding.dateOfBirth": "Date of Birth",
+    "onboarding.gender": "Gender",
+    "onboarding.genderPlaceholder": "Select gender",
+    "onboarding.male": "Male",
+    "onboarding.female": "Female",
+    "onboarding.other": "Other",
+    "onboarding.height": "Height (cm)",
+    "onboarding.weight": "Weight (kg)",
+    "onboarding.healthGoals": "Health Goals",
+    "onboarding.healthGoalsDesc": "What would you like to track?",
+    "onboarding.hasHypertension": "I have high blood pressure",
+    "onboarding.hasDiabetes": "I have diabetes",
+    "onboarding.hasHeartDisease": "I have heart disease",
+    "onboarding.ritualTimes": "Daily Check-in Times",
+    "onboarding.ritualTimesDesc": "When should we remind you?",
+    "onboarding.morningTime": "Morning Check-in",
+    "onboarding.eveningTime": "Evening Check-in",
+    "onboarding.finish": "Get Started",
+    "onboarding.success": "Welcome to Beat!",
+    "onboarding.error": "Failed to complete onboarding",
+    
+    // Dashboard
+    "dashboard.daysStrong": "Days Strong"
   },
   hi: {
     // Header
@@ -216,7 +249,40 @@ const translations = {
     "family.addMember": "परिवार का सदस्य जोड़ें",
     "family.noMembers": "अभी तक कोई परिवार का सदस्य नहीं",
     "family.addFirst": "अपना पहला सदस्य जोड़ें",
-  },
+    
+    // Onboarding
+    "onboarding.welcome": "बीट में आपका स्वागत है!",
+    "onboarding.subtitle": "अपना बीट मजबूत रखें",
+    "onboarding.language": "अपनी भाषा चुनें",
+    "onboarding.continue": "जारी रखें",
+    "onboarding.basicInfo": "बुनियादी जानकारी",
+    "onboarding.basicInfoDesc": "हमें अपने बारे में बताएं",
+    "onboarding.fullName": "पूरा नाम",
+    "onboarding.namePlaceholder": "अपना नाम दर्ज करें",
+    "onboarding.dateOfBirth": "जन्म तिथि",
+    "onboarding.gender": "लिंग",
+    "onboarding.genderPlaceholder": "लिंग चुनें",
+    "onboarding.male": "पुरुष",
+    "onboarding.female": "महिला",
+    "onboarding.other": "अन्य",
+    "onboarding.height": "ऊंचाई (सेमी)",
+    "onboarding.weight": "वजन (किग्रा)",
+    "onboarding.healthGoals": "स्वास्थ्य लक्ष्य",
+    "onboarding.healthGoalsDesc": "आप क्या ट्रैक करना चाहेंगे?",
+    "onboarding.hasHypertension": "मुझे उच्च रक्तचाप है",
+    "onboarding.hasDiabetes": "मुझे मधुमेह है",
+    "onboarding.hasHeartDisease": "मुझे हृदय रोग है",
+    "onboarding.ritualTimes": "दैनिक चेक-इन समय",
+    "onboarding.ritualTimesDesc": "हमें आपको कब याद दिलाना चाहिए?",
+    "onboarding.morningTime": "सुबह की चेक-इन",
+    "onboarding.eveningTime": "शाम की चेक-इन",
+    "onboarding.finish": "शुरू करें",
+    "onboarding.success": "बीट में आपका स्वागत है!",
+    "onboarding.error": "ऑनबोर्डिंग पूरी करने में विफल",
+    
+    // Dashboard
+    "dashboard.daysStrong": "दिन मजबूत"
+  }
 };
 
 const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined);
