@@ -74,11 +74,52 @@ const MorningCheckin = () => {
         meds_taken: data.medsTaken,
       });
 
+      // Update streak for morning ritual
+      try {
+        await supabase.rpc('update_or_create_streak', {
+          p_user_id: user.id,
+          p_type: 'morning_ritual'
+        });
+        
+        // Check if both rituals are now complete
+        const today = new Date().toISOString().split("T")[0];
+        const { data: eveningLog } = await supabase
+          .from("behavior_logs")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("log_date", today)
+          .eq("ritual_type", "evening")
+          .single();
+        
+        // If both complete, update daily checkin streak
+        if (eveningLog) {
+          await supabase.rpc('update_or_create_streak', {
+            p_user_id: user.id,
+            p_type: 'daily_checkin'
+          });
+        }
+      } catch (streakError) {
+        console.error("Error updating streak:", streakError);
+      }
+
       // Calculate HeartScore
       calculateScore(undefined);
 
-      toast.success(t("checkin.completedSuccess"));
-      window.location.href = "/app/home";
+      // Trigger confetti celebration
+      const { default: confetti } = await import('canvas-confetti');
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#E63946', '#FF6B6B', '#2EC4B6'],
+      });
+
+      toast.success(t("checkin.completedSuccess") + " 🎉");
+      
+      // Delay navigation to show toast and confetti
+      setTimeout(() => {
+        window.location.href = "/app/home";
+      }, 1000);
     } catch (error) {
       console.error("Error saving morning ritual:", error);
       toast.error("Failed to save data. Please try again.");

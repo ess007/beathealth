@@ -618,6 +618,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_or_create_streak: {
+        Args: { p_type: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "member" | "family" | "doctor" | "admin"
