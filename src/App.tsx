@@ -1,4 +1,4 @@
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as SonnerToaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -48,7 +48,7 @@ const App = () => (
     <ThemeProvider>
       <LanguageProvider>
         <AccessibilityProvider>
-          <Sonner />
+          <SonnerToaster />
           <PWAInstallPrompt />
           <BrowserRouter>
             <AppContent />
