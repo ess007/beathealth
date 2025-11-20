@@ -18,21 +18,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, UserPlus, AlertCircle } from "lucide-react";
+import { Users, UserPlus, AlertCircle, Settings, Shield } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useFamilyLinks } from "@/hooks/useFamilyLinks";
-import FamilyMemberCard from "@/components/FamilyMemberCard";
+import { FamilyMemberPermissionsDialog } from "@/components/FamilyMemberPermissionsDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Logo } from "@/components/Logo";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Family = () => {
   const { t } = useLanguage();
-  const { familyMembers, myCaregivers, isLoading, createLink, isCreating, removeLink } =
-    useFamilyLinks();
+  const { 
+    familyMembers, 
+    myCaregivers, 
+    isLoading, 
+    createLink, 
+    isCreating, 
+    removeLink,
+    updateLink,
+    isUpdating
+  } = useFamilyLinks();
+  
   const [inviteOpen, setInviteOpen] = useState(false);
   const [memberEmail, setMemberEmail] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
 
   const handleInvite = () => {
     if (!memberEmail || !relationship) return;
@@ -47,6 +59,15 @@ const Family = () => {
         },
       }
     );
+  };
+
+  const handleEditPermissions = (member: any) => {
+    setSelectedMember(member);
+    setPermissionsDialogOpen(true);
+  };
+
+  const handleSavePermissions = (linkId: string, updates: any) => {
+    updateLink({ linkId, updates });
   };
 
   if (isLoading) {
@@ -71,7 +92,7 @@ const Family = () => {
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">Family Dashboard</h1>
           <p className="text-muted-foreground text-base md:text-lg">
-            Keep track of your loved ones' health
+            Keep track of your loved ones health and manage permissions
           </p>
         </div>
 
@@ -125,6 +146,7 @@ const Family = () => {
                       <SelectItem value="child">Child</SelectItem>
                       <SelectItem value="sibling">Sibling</SelectItem>
                       <SelectItem value="grandparent">Grandparent</SelectItem>
+                      <SelectItem value="grandchild">Grandchild</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -141,63 +163,164 @@ const Family = () => {
           </Dialog>
         </div>
 
-        {/* Family Members Grid */}
-        {familyMembers && familyMembers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-            {familyMembers.map((link: any) => (
-              <FamilyMemberCard
-                key={link.id}
-                memberId={link.member_id}
-                memberName={link.member?.full_name}
-                memberEmail={link.member?.email}
-                relationship={link.relationship}
-                canNudge={link.can_nudge}
-                onRemove={() => removeLink(link.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <Card className="p-8 md:p-12 text-center">
-            <Users className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-lg md:text-xl font-semibold mb-2">No Family Members Yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Start by adding your first family member to track their health
-            </p>
-            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  Add Your First Member
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-          </Card>
-        )}
+        {/* Tabs for Family Members and Caregivers */}
+        <Tabs defaultValue="family" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="family" className="gap-2">
+              <Users className="w-4 h-4" />
+              Family Members ({familyMembers?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="caregivers" className="gap-2">
+              <Shield className="w-4 h-4" />
+              My Caregivers ({myCaregivers?.length || 0})
+            </TabsTrigger>
+          </TabsList>
 
-        {/* My Caregivers Section */}
-        {myCaregivers && myCaregivers.length > 0 && (
-          <div className="mt-8 md:mt-12">
-            <h2 className="text-xl md:text-2xl font-semibold mb-4">People Caring for You</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myCaregivers.map((link: any) => (
-                <Card key={link.id} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">
-                        {link.caregiver?.full_name || link.caregiver?.email.split("@")[0]}
+          {/* Family Members Tab */}
+          <TabsContent value="family" className="space-y-6">
+            {familyMembers && familyMembers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {familyMembers.map((link: any) => (
+                  <Card key={link.id} className="p-6 hover:shadow-elevated transition-all">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-1">
+                            {link.member?.full_name || "Unknown"}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {link.member?.email}
+                          </p>
+                          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                            {link.relationship || "Family"}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground capitalize">
-                        Your {link.relationship}
+
+                      <div className="flex gap-2 text-xs flex-wrap">
+                        {link.can_view && (
+                          <span className="px-2 py-1 bg-secondary/10 text-secondary rounded">
+                            Can View
+                          </span>
+                        )}
+                        {link.can_nudge && (
+                          <span className="px-2 py-1 bg-accent/10 text-accent rounded">
+                            Can Remind
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleEditPermissions(link)}
+                        >
+                          <Settings className="w-4 h-4 mr-1" />
+                          Manage
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm("Remove this family member?")) {
+                              removeLink(link.id);
+                            }
+                          }}
+                        >
+                          Remove
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 md:p-12 text-center">
+                <Users className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg md:text-xl font-semibold mb-2">No Family Members Yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start by adding your first family member to track their health
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Caregivers Tab */}
+          <TabsContent value="caregivers" className="space-y-6">
+            {myCaregivers && myCaregivers.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myCaregivers.map((link: any) => (
+                  <Card key={link.id} className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Shield className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">
+                            {link.caregiver?.full_name || "Unknown"}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {link.caregiver?.email}
+                          </p>
+                          <div className="text-xs text-muted-foreground capitalize mt-1">
+                            Your {link.relationship}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 text-xs flex-wrap">
+                        {link.can_view && (
+                          <span className="px-2 py-1 bg-secondary/10 text-secondary rounded">
+                            Viewing your data
+                          </span>
+                        )}
+                        {link.can_nudge && (
+                          <span className="px-2 py-1 bg-accent/10 text-accent rounded">
+                            Can send reminders
+                          </span>
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          if (confirm("Remove this caregiver's access?")) {
+                            removeLink(link.id);
+                          }
+                        }}
+                      >
+                        Remove Access
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">No Caregivers</h3>
+                <p className="text-muted-foreground">
+                  Family members you add will appear here if they're caring for you
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Permissions Dialog */}
+        {selectedMember && (
+          <FamilyMemberPermissionsDialog
+            open={permissionsDialogOpen}
+            onOpenChange={setPermissionsDialogOpen}
+            member={selectedMember}
+            onSave={handleSavePermissions}
+            isUpdating={isUpdating}
+          />
         )}
       </main>
     </div>
