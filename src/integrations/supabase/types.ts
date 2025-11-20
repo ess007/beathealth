@@ -611,6 +611,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_ai_nudge: {
+        Args: {
+          category?: string
+          delivered_via?: string
+          nudge_text: string
+          target_user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
