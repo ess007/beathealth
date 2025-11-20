@@ -109,10 +109,10 @@ const Landing = () => {
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl" aria-hidden="true"></div>
                   <Card className="relative p-8 shadow-elevated bg-card/80 backdrop-blur-sm border-2">
                     <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <Logo size="md" showText={true} />
-                        <span className="text-xs text-muted-foreground">Today</span>
+                      <div className="flex items-center justify-center mb-4">
+                        <Logo size="lg" showText={true} />
                       </div>
+                      <div className="text-xs text-muted-foreground text-center">Today</div>
                       
                       <div className="text-center space-y-2">
                         <div className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
