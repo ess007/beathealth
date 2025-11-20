@@ -58,6 +58,24 @@ serve(async (req) => {
     
     console.log("Authenticated user:", user.id);
 
+    // Check rate limit: 20 messages per minute
+    const { data: rateLimitOk, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        _user_id: user.id,
+        _endpoint: 'chat-copilot',
+        _max_requests: 20,
+        _window_seconds: 60
+      });
+
+    if (rateLimitError) {
+      console.error("Rate limit check failed:", rateLimitError);
+    } else if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please wait a moment and try again." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Validate and parse input
     const body = await req.json();
     const validated = chatSchema.parse(body);
