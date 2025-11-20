@@ -53,7 +53,7 @@ const Landing = () => {
                 onClick={() => {
                   window.location.href = "/auth";
                 }}
-                aria-label="Start using Beat for free today"
+                aria-label="Start Free Today - Sign up for Beat"
               >
                 Start Free Today
               </Button>
@@ -64,7 +64,7 @@ const Landing = () => {
                 onClick={() => {
                   window.location.href = "/app/home";
                 }}
-                aria-label="View a demo of the Beat app"
+                aria-label="View Demo of the Beat app"
               >
                 View Demo
               </Button>
@@ -122,7 +122,7 @@ const Landing = () => {
             onClick={() => {
               window.location.href = "/auth";
             }}
-            aria-label="Get started with Beat for free"
+            aria-label="Get Started Free with Beat"
           >
             Get Started Free
           </Button>
