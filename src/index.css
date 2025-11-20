@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --primary-glow: 0 85% 70%;
     
     /* Secondary - Vitality Green */
-    --secondary: 160 70% 45%;
+    --secondary: 160 70% 38%;
     --secondary-foreground: 0 0% 100%;
     
     /* Accent - Warm Spice Orange */
@@ -36,7 +36,7 @@ All colors MUST be HSL.
     
     /* Muted & Subtle States */
     --muted: 30 15% 94%;
-    --muted-foreground: 240 5% 50%;
+    --muted-foreground: 240 10% 40%;
     
     /* Destructive */
     --destructive: 0 85% 55%;
@@ -91,7 +91,7 @@ All colors MUST be HSL.
     --accent-foreground: 0 0% 100%;
     
     --muted: 240 8% 20%;
-    --muted-foreground: 240 5% 65%;
+    --muted-foreground: 240 5% 70%;
     
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
