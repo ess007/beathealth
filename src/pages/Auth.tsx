@@ -47,10 +47,12 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <Logo size="lg" showText={false} className="mx-auto mb-4" />
-          <h1 className="text-3xl font-bold">Welcome to Beat</h1>
-          <p className="text-muted-foreground mt-2">Keep Your Beat Strong</p>
+        <div className="text-center space-y-4">
+          <Logo size="xl" showText={false} className="mx-auto" />
+          <div>
+            <h1 className="text-4xl font-bold">Welcome to Beat</h1>
+            <p className="text-muted-foreground mt-2">Keep Your Beat Strong</p>
+          </div>
         </div>
 
         <Card className="p-8 shadow-elevated">
