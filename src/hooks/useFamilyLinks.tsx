@@ -64,7 +64,7 @@ export const useFamilyLinks = () => {
 
       if (profileError) throw profileError;
       if (!memberProfile) {
-        throw new Error("No user found with that email. They need to create an account first.");
+        throw new Error("Unable to add family member. Please verify the email address and try again.");
       }
 
       // Create family link

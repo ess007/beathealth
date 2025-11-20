@@ -9,6 +9,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { Logo } from "@/components/Logo";
+import { z } from "zod";
+
+const healthDataSchema = z.object({
+  bpSystolic: z.number().int().min(40, "Systolic must be at least 40").max(300, "Systolic must be at most 300"),
+  bpDiastolic: z.number().int().min(20, "Diastolic must be at least 20").max(200, "Diastolic must be at most 200"),
+  fastingSugar: z.number().int().min(20, "Sugar must be at least 20").max(600, "Sugar must be at most 600").optional(),
+  sleepQuality: z.number().int().min(0).max(4),
+});
 
 const MorningCheckin = () => {
   const { t } = useLanguage();
@@ -41,6 +49,24 @@ const MorningCheckin = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Validate input data
+      const validationData = {
+        bpSystolic: data.bpSystolic ? parseInt(data.bpSystolic) : undefined,
+        bpDiastolic: data.bpDiastolic ? parseInt(data.bpDiastolic) : undefined,
+        fastingSugar: data.fastingSugar ? parseInt(data.fastingSugar) : undefined,
+        sleepQuality: parseInt(data.sleepQuality),
+      };
+
+      // Only validate if BP data is provided
+      if (data.bpSystolic && data.bpDiastolic) {
+        const validation = healthDataSchema.safeParse(validationData);
+        if (!validation.success) {
+          const errors = validation.error.errors.map(e => e.message).join(", ");
+          toast.error(errors);
+          return;
+        }
+      }
+
       const now = new Date().toISOString();
 
       // Save BP
@@ -54,11 +80,16 @@ const MorningCheckin = () => {
         });
       }
 
-      // Save Sugar
+      // Save Sugar (validate separately if provided)
       if (data.fastingSugar) {
+        const sugarValue = parseInt(data.fastingSugar);
+        if (sugarValue < 20 || sugarValue > 600) {
+          toast.error("Sugar reading must be between 20 and 600 mg/dL");
+          return;
+        }
         await supabase.from("sugar_logs").insert({
           user_id: user.id,
-          glucose_mg_dl: parseInt(data.fastingSugar),
+          glucose_mg_dl: sugarValue,
           measured_at: now,
           measurement_type: "fasting",
           ritual_type: "morning",
