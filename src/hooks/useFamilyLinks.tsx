@@ -42,8 +42,8 @@ export const useFamilyLinks = () => {
       
       return data;
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Fetch my caregivers (people caring for me)
@@ -129,10 +129,44 @@ export const useFamilyLinks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["familyMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["myCaregivers"] });
       toast.success("Family member removed");
     },
     onError: () => {
       toast.error("Failed to remove family member");
+    },
+  });
+
+  // Update family link permissions
+  const updateLink = useMutation({
+    mutationFn: async ({ 
+      linkId, 
+      updates 
+    }: { 
+      linkId: string; 
+      updates: { 
+        can_view?: boolean; 
+        can_nudge?: boolean; 
+        relationship?: string;
+      };
+    }) => {
+      const { data, error } = await supabase
+        .from("family_links")
+        .update(updates)
+        .eq("id", linkId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["familyMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["myCaregivers"] });
+      toast.success("Permissions updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update permissions");
     },
   });
 
@@ -144,5 +178,7 @@ export const useFamilyLinks = () => {
     isCreating: createLink.isPending,
     removeLink: removeLink.mutate,
     isRemoving: removeLink.isPending,
+    updateLink: updateLink.mutate,
+    isUpdating: updateLink.isPending,
   };
 };
