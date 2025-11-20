@@ -65,6 +65,24 @@ serve(async (req) => {
 
     console.log(`Calculating HeartScore for user ${user.id} on ${targetDate}`);
 
+    // Check rate limit: 10 calculations per hour
+    const { data: rateLimitOk, error: rateLimitError } = await supabase
+      .rpc('check_rate_limit', {
+        _user_id: user.id,
+        _endpoint: 'calculate-heart-score',
+        _max_requests: 10,
+        _window_seconds: 3600
+      });
+
+    if (rateLimitError) {
+      console.error("Rate limit check failed:", rateLimitError);
+    } else if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ error: "Too many HeartScore calculations. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch BP logs for the day
     const { data: bpLogs, error: bpError } = await supabase
       .from("bp_logs")

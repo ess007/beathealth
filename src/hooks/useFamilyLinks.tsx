@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuditLog } from "./useAuditLog";
 
 export const useFamilyLinks = () => {
   const queryClient = useQueryClient();
+  const { logAccess } = useAuditLog();
 
   // Fetch family members I'm caring for (as caregiver)
   const { data: familyMembers, isLoading: loadingMembers } = useQuery({
@@ -21,6 +23,23 @@ export const useFamilyLinks = () => {
         .eq("caregiver_id", user.id);
 
       if (error) throw error;
+      
+      // Log audit trail for caregiver viewing family members
+      if (data && data.length > 0) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          for (const link of data) {
+            await logAccess({
+              actor_id: user.id,
+              target_user_id: link.member_id,
+              action: 'view',
+              resource_type: 'family_members',
+              resource_id: link.id,
+            });
+          }
+        }
+      }
+      
       return data;
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

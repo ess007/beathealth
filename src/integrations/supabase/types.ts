@@ -68,6 +68,39 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          id: string
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string
+          target_user_id: string
+          timestamp: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          target_user_id: string
+          timestamp?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          target_user_id?: string
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
       behavior_logs: {
         Row: {
           created_at: string | null
@@ -522,6 +555,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          request_count: number | null
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          request_count?: number | null
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          request_count?: number | null
+          user_id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       streaks: {
         Row: {
           count: number
@@ -611,6 +671,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          _endpoint: string
+          _max_requests: number
+          _user_id: string
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       create_ai_nudge: {
         Args: {
           category?: string
