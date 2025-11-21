@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Logo } from "@/components/Logo";
+import { haptic } from "@/lib/haptics";
 
 const Onboarding = () => {
   const { t, language, setLanguage } = useLanguage();
@@ -53,9 +54,11 @@ const Onboarding = () => {
       });
 
       toast.success(t("onboarding.success"));
+      haptic('success');
       window.location.href = "/app/home";
     } catch (error) {
       console.error("Onboarding error:", error);
+      haptic('error');
       toast.error(t("onboarding.error"));
     }
   };

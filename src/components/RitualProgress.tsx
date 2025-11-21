@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 
 interface RitualProgressProps {
   title: string;
@@ -23,26 +24,26 @@ const RitualProgress = ({
   const progress = (completedTasks / tasks.length) * 100;
 
   return (
-    <Card className="p-6 shadow-card hover:shadow-elevated transition-smooth border-2">
+    <Card className="p-4 md:p-6 shadow-card hover:shadow-elevated transition-smooth border-2">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">{icon}</div>
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg shrink-0">{icon}</div>
           <div>
-            <h3 className="font-semibold text-lg">{title}</h3>
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <h3 className="font-semibold text-base md:text-lg">{title}</h3>
+            <p className="text-xs md:text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-4">
-        <div className="flex justify-between text-sm mb-2">
+        <div className="flex justify-between text-xs md:text-sm mb-2">
           <span className="text-muted-foreground">
             {completedTasks} of {tasks.length} tasks
           </span>
           <span className="font-medium">{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 md:h-2.5 bg-muted rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-primary to-primary-glow transition-smooth"
             style={{ width: `${progress}%` }}
@@ -55,16 +56,16 @@ const RitualProgress = ({
         {tasks.map((task, index) => (
           <div
             key={index}
-            className="flex items-center gap-2 text-sm"
+            className="flex items-center gap-2 text-xs md:text-sm"
           >
             <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-smooth ${
+              className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center transition-smooth shrink-0 ${
                 task.done
                   ? "bg-primary border-primary"
                   : "border-muted-foreground/30"
               }`}
             >
-              {task.done && <Check className="w-3 h-3 text-white" />}
+              {task.done && <Check className="w-3 h-3 md:w-4 md:h-4 text-white" />}
             </div>
             <span className={task.done ? "text-muted-foreground line-through" : ""}>
               {task.label}
@@ -75,8 +76,13 @@ const RitualProgress = ({
 
       {/* Action Button */}
       <Button
-        className="w-full h-12 gradient-primary text-white shadow-card"
-        onClick={onStart}
+        className="w-full h-12 md:h-14 gradient-primary text-white shadow-card text-base md:text-lg font-semibold touch-manipulation"
+        onClick={() => {
+          if (!completed) {
+            haptic('medium');
+            onStart();
+          }
+        }}
         disabled={completed}
       >
         {completed ? "✓ Completed" : "Start Ritual"}

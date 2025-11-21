@@ -14,6 +14,7 @@ import { StreakCelebration } from "@/components/StreakCelebration";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
+import { haptic } from "@/lib/haptics";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -28,6 +29,7 @@ const Dashboard = () => {
   });
 
   const navigateTo = (path: string) => {
+    haptic('light');
     window.location.href = path;
   };
 
