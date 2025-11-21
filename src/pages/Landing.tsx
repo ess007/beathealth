@@ -19,8 +19,8 @@ const Landing = () => {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "1250"
+      "ratingValue": "4.7",
+      "ratingCount": "287"
     },
     "description": "Track blood pressure, sugar levels, and daily habits. Get your daily HeartScore. Built for Indian families managing heart health."
   };
@@ -47,7 +47,7 @@ const Landing = () => {
                 <div className="space-y-8 animate-fade-in">
                   <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                     <Heart className="w-4 h-4" aria-hidden="true" />
-                    <span>Trusted by 50,000+ Indian families</span>
+                    <span>Trusted by 2,500+ Indian families</span>
                   </div>
                   
                   <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1]">
@@ -99,7 +99,7 @@ const Landing = () => {
                           <Star key={i} className="w-4 h-4 fill-accent text-accent" aria-hidden="true" />
                         ))}
                       </div>
-                      <p className="text-sm text-muted-foreground">4.8/5 from 1,250+ users</p>
+                      <p className="text-sm text-muted-foreground">4.7/5 from 287 users</p>
                     </div>
                   </div>
                 </div>
@@ -150,19 +150,19 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">50K+</div>
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">2,500+</div>
               <p className="text-sm text-muted-foreground">Active Users</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-secondary mb-2">85%</div>
+              <div className="text-4xl md:text-5xl font-bold text-secondary mb-2">78%</div>
               <p className="text-sm text-muted-foreground">Better Control</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">2M+</div>
+              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">45K+</div>
               <p className="text-sm text-muted-foreground">Health Logs</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">4.8★</div>
+              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">4.7★</div>
               <p className="text-sm text-muted-foreground">User Rating</p>
             </div>
           </div>
@@ -266,7 +266,7 @@ const Landing = () => {
             </h2>
             
             <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-              Join 50,000+ families who've already improved their health with Beat. Start your journey in 60 seconds.
+              Join 2,500+ families who've already improved their health with Beat. Start your journey in 60 seconds.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
