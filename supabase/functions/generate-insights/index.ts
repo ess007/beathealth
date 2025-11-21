@@ -27,6 +27,29 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Check rate limit (10 insight generations per hour)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: rateLimitOk, error: rateLimitError } = await supabaseAdmin
+      .rpc('check_rate_limit', {
+        _user_id: user.id,
+        _endpoint: 'generate-insights',
+        _max_requests: 10,
+        _window_seconds: 3600
+      });
+
+    if (rateLimitError) {
+      console.error("Rate limit check failed:", rateLimitError);
+    } else if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ error: "Too many insight requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch last 30 days of health data
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
