@@ -9,7 +9,7 @@ import RitualProgress from "@/components/RitualProgress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useStreaks } from "@/hooks/useStreaks";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { StreakCelebration } from "@/components/StreakCelebration";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementBadge } from "@/components/AchievementBadge";
@@ -18,6 +18,7 @@ import { haptic } from "@/lib/haptics";
 
 const Dashboard = () => {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { mainStreakCount, isLoading: streaksLoading, updateStreak } = useStreaks();
@@ -128,7 +129,7 @@ const Dashboard = () => {
         },
         (payload) => {
           console.log('Behavior log changed:', payload);
-          refetchRituals();
+          queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
         }
       )
       .subscribe();
@@ -146,7 +147,7 @@ const Dashboard = () => {
         },
         (payload) => {
           console.log('BP log changed:', payload);
-          refetchRituals();
+          queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
         }
       )
       .subscribe();
@@ -164,7 +165,7 @@ const Dashboard = () => {
         },
         (payload) => {
           console.log('Sugar log changed:', payload);
-          refetchRituals();
+          queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
         }
       )
       .subscribe();
@@ -174,7 +175,7 @@ const Dashboard = () => {
       supabase.removeChannel(bpChannel);
       supabase.removeChannel(sugarChannel);
     };
-  }, [user?.id, refetchRituals]);
+  }, [user?.id, queryClient]);
 
   // Check for both rituals completed and trigger celebration (only once per day)
   useEffect(() => {
