@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 export const useStreaks = (userId?: string) => {
   const queryClient = useQueryClient();
@@ -22,7 +23,46 @@ export const useStreaks = (userId?: string) => {
       return data;
     },
     enabled: !!userId || true,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
+
+  // Set up real-time subscription for streak updates
+  useEffect(() => {
+    let streaksChannel: any;
+
+    const setupRealtimeSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const targetUserId = userId || user?.id;
+      
+      if (!targetUserId) return;
+
+      streaksChannel = supabase
+        .channel('streaks-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'streaks',
+            filter: `user_id=eq.${targetUserId}`
+          },
+          (payload) => {
+            console.log('Streak updated in real-time:', payload);
+            queryClient.invalidateQueries({ queryKey: ["streaks", userId] });
+          }
+        )
+        .subscribe();
+    };
+
+    setupRealtimeSubscription();
+
+    return () => {
+      if (streaksChannel) {
+        supabase.removeChannel(streaksChannel);
+      }
+    };
+  }, [userId, queryClient]);
 
   const updateStreak = useMutation({
     mutationFn: async ({ type }: { type: string }) => {
