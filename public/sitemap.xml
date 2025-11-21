@@ -3,12 +3,19 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/</loc>
-    <lastmod>2024-11-19</lastmod>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/icon-512.png</image:loc>
-      <image:title>Beat - Heart Health App</image:title>
+      <image:title>Beat - Heart Health Tracking App for Indian Families</image:title>
+      <image:caption>Track blood pressure, sugar levels, and get your daily HeartScore with Beat</image:caption>
     </image:image>
+  </url>
+  <url>
+    <loc>https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/auth</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
