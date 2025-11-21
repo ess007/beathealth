@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { Logo } from "@/components/Logo";
 import { z } from "zod";
+import { haptic } from "@/lib/haptics";
 
 const healthDataSchema = z.object({
   bpSystolic: z.number().int().min(40, "Systolic must be at least 40").max(300, "Systolic must be at most 300"),
@@ -33,12 +34,14 @@ const EveningCheckin = () => {
   });
 
   const handleNext = () => {
+    haptic('light');
     if (step < 5) {
       setStep(step + 1);
     }
   };
 
   const handleBack = () => {
+    haptic('light');
     if (step > 1) {
       setStep(step - 1);
     } else {
@@ -65,6 +68,7 @@ const EveningCheckin = () => {
         const validation = healthDataSchema.safeParse(validationData);
         if (!validation.success) {
           const errors = validation.error.errors.map(e => e.message).join(", ");
+          haptic('error');
           toast.error(errors);
           return;
         }
@@ -159,6 +163,7 @@ const EveningCheckin = () => {
       });
 
       toast.success(t("checkin.completedSuccess") + " 🎉");
+      haptic('success');
       
       // Delay navigation to show toast and confetti
       setTimeout(() => {
@@ -166,6 +171,7 @@ const EveningCheckin = () => {
       }, 1000);
     } catch (error) {
       console.error("Error saving evening ritual:", error);
+      haptic('error');
       toast.error("Failed to save data. Please try again.");
     }
   };

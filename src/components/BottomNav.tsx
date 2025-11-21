@@ -1,6 +1,7 @@
 import { Home, Activity, TrendingUp, Users, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { haptic } from "@/lib/haptics";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/app/home" },
@@ -24,10 +25,13 @@ export const BottomNav = () => {
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                haptic('light');
+                navigate(item.path);
+              }}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full gap-1",
-                "transition-all duration-200 active:scale-95",
+                "flex flex-col items-center justify-center flex-1 h-full gap-1 min-w-[52px]",
+                "transition-all duration-200 active:scale-95 touch-manipulation",
                 isActive
                   ? "text-primary scale-105"
                   : "text-muted-foreground hover:text-foreground"
