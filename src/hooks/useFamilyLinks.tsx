@@ -24,21 +24,8 @@ export const useFamilyLinks = () => {
 
       if (error) throw error;
       
-      // Log audit trail for caregiver viewing family members
-      if (data && data.length > 0) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          for (const link of data) {
-            await logAccess({
-              actor_id: user.id,
-              target_user_id: link.member_id,
-              action: 'view',
-              resource_type: 'family_members',
-              resource_id: link.id,
-            });
-          }
-        }
-      }
+      // Note: Removed excessive audit logging from read queries
+      // Audit logging only happens on state-changing actions (create, update, delete, nudge)
       
       return data;
     },
@@ -74,15 +61,12 @@ export const useFamilyLinks = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Find member by email
-      const { data: memberProfile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", memberEmail)
-        .maybeSingle();
+      // Find member by email using secure lookup function
+      const { data: memberId, error: lookupError } = await supabase
+        .rpc("lookup_user_by_email", { _email: memberEmail });
 
-      if (profileError) throw profileError;
-      if (!memberProfile) {
+      if (lookupError) throw lookupError;
+      if (!memberId) {
         throw new Error("Unable to add family member. Please verify the email address and try again.");
       }
 
@@ -91,7 +75,7 @@ export const useFamilyLinks = () => {
         .from("family_links")
         .insert({
           caregiver_id: user.id,
-          member_id: memberProfile.id,
+          member_id: memberId,
           relationship,
           can_view: true,
           can_nudge: true,

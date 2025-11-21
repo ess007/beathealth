@@ -27,6 +27,37 @@ serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    console.log("Generating PDF report for user:", user.id);
+
+    // Rate limiting: 5 PDF generations per hour
+    const supabaseServiceRole = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    const { data: rateLimitOk, error: rateLimitError } = await supabaseServiceRole
+      .rpc('check_rate_limit', {
+        _user_id: user.id,
+        _endpoint: 'generate-pdf-report',
+        _max_requests: 5,
+        _window_seconds: 3600
+      });
+
+    if (rateLimitError) {
+      console.error("Rate limit check failed:", rateLimitError);
+    } else if (!rateLimitOk) {
+      return new Response(
+        JSON.stringify({ error: "Too many PDF reports generated. Please try again in an hour." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch user profile
     const { data: profile } = await supabase
       .from('profiles')

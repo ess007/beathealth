@@ -696,6 +696,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_user_by_email: { Args: { _email: string }; Returns: string }
       update_or_create_streak: {
         Args: { p_type: string; p_user_id: string }
         Returns: undefined
