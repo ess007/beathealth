@@ -34,7 +34,36 @@ export const useHeartScore = (userId?: string) => {
       return data;
     },
     enabled: !!currentUserId,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
+
+  // Set up real-time subscription for heart score updates
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const heartScoreChannel = supabase
+      .channel('heart-scores-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'heart_scores',
+          filter: `user_id=eq.${currentUserId}`
+        },
+        (payload) => {
+          console.log('HeartScore updated in real-time:', payload);
+          queryClient.invalidateQueries({ queryKey: ["heartScore", "today", currentUserId] });
+          queryClient.invalidateQueries({ queryKey: ["heartScore", "history", currentUserId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(heartScoreChannel);
+    };
+  }, [currentUserId, queryClient]);
 
   // Calculate heart score mutation
   const calculateScore = useMutation({
@@ -77,6 +106,8 @@ export const useHeartScore = (userId?: string) => {
       return data;
     },
     enabled: !!currentUserId,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
 
   return {

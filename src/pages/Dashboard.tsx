@@ -107,8 +107,74 @@ const Dashboard = () => {
       };
     },
     enabled: !!user?.id,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache
   });
+
+  // Set up real-time subscriptions for ritual updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Subscribe to behavior logs changes
+    const behaviorChannel = supabase
+      .channel('behavior-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'behavior_logs',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Behavior log changed:', payload);
+          refetchRituals();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to BP logs changes
+    const bpChannel = supabase
+      .channel('bp-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bp_logs',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('BP log changed:', payload);
+          refetchRituals();
+        }
+      )
+      .subscribe();
+
+    // Subscribe to sugar logs changes
+    const sugarChannel = supabase
+      .channel('sugar-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'sugar_logs',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Sugar log changed:', payload);
+          refetchRituals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(behaviorChannel);
+      supabase.removeChannel(bpChannel);
+      supabase.removeChannel(sugarChannel);
+    };
+  }, [user?.id, refetchRituals]);
 
   // Check for both rituals completed and trigger celebration (only once per day)
   useEffect(() => {
