@@ -43,7 +43,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: "Bottom Navigation",
-    description: "Navigate the app using these buttons: Home shows your dashboard, Check-in for daily rituals, Pulse for AI health coach, Insights for trends, Family to connect with caregivers.",
+    description: "Navigate the app using these buttons: Home shows your dashboard, Check-in for daily rituals, Beat for AI health coach, Insights for trends, Family to connect with caregivers.",
     highlightId: "bottom-nav",
     position: "bottom"
   },

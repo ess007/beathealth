@@ -113,7 +113,7 @@ const AICoach = () => {
         <div className="mb-4 md:mb-6 flex items-center gap-3">
           <Logo size="md" showText={false} />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Pulse AI Coach</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Beat AI Coach</h1>
             <p className="text-muted-foreground text-sm md:text-base">Your personal health advisor</p>
           </div>
         </div>

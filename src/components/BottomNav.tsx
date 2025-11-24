@@ -6,7 +6,7 @@ import { haptic } from "@/lib/haptics";
 const navItems = [
   { icon: Home, label: "Home", path: "/app/home" },
   { icon: Activity, label: "Check-in", path: "/app/checkin" },
-  { icon: MessageCircle, label: "Pulse", path: "/app/coach" },
+  { icon: MessageCircle, label: "Beat", path: "/app/coach" },
   { icon: TrendingUp, label: "Insights", path: "/app/insights" },
   { icon: Users, label: "Family", path: "/app/family" },
 ];
