@@ -1,619 +1,607 @@
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Users, TrendingUp, Shield, Heart, Zap, Clock, Star, CheckCircle2, ArrowRight, Check, X } from "lucide-react";
-import { Logo } from "@/components/Logo";
-import { Card } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowRight, CheckCircle2, Sun, Moon, Menu, X } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
+  const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Structured Data for SEO
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Beat",
-    "applicationCategory": "HealthApplication",
-    "operatingSystem": "Any",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "INR"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.7",
-      "ratingCount": "287"
-    },
-    "description": "Track blood pressure, sugar levels, and daily habits. Get your daily HeartScore. Built for Indian families managing heart health."
-  };
+  // Infinite Scroll State
+  const [articles, setArticles] = useState<
+    Array<{ title: string; category: string; color: string; img: string; desc: string }>
+  >([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadTriggerRef = useRef<HTMLDivElement>(null);
+
+  // 3D Tilt Ref
+  const heroCardRef = useRef<HTMLDivElement>(null);
+  const tiltContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle 3D Tilt
+  useEffect(() => {
+    const card = heroCardRef.current;
+    const container = tiltContainerRef.current;
+
+    if (!card || !container) return;
+
+    const handleMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
+
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    };
+
+    const handleLeave = () => {
+      card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    };
+
+    container.addEventListener("mousemove", handleMove);
+    container.addEventListener("mouseleave", handleLeave);
+
+    return () => {
+      container.removeEventListener("mousemove", handleMove);
+      container.removeEventListener("mouseleave", handleLeave);
+    };
+  }, []);
+
+  // Handle Spotlight Effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cards = document.querySelectorAll(".spotlight-card");
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
+        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
+      });
+    };
+
+    const grid = document.getElementById("features-grid");
+    if (grid) {
+      grid.addEventListener("mousemove", handleMouseMove);
+    }
+    return () => {
+      if (grid) grid.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
+  // Initial Articles
+  useEffect(() => {
+    setArticles([
+      {
+        title: "Hidden Salt in Indian Diets",
+        category: "Nutrition",
+        color: "text-orange-500",
+        img: "https://images.unsplash.com/photo-1596522354195-e84e9c0a5d30?auto=format&fit=crop&w=500&q=80",
+        desc: "Pickles and papadums might be the reason your BP isn't dropping.",
+      },
+      {
+        title: "What is Heart Rate Variability?",
+        category: "Science",
+        color: "text-purple-500",
+        img: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=500&q=80",
+        desc: "Why tracking your HRV is more important than tracking your step count.",
+      },
+      {
+        title: "Truth About 'Sugar-Free' Sweets",
+        category: "Diabetes",
+        color: "text-rose-500",
+        img: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?auto=format&fit=crop&w=500&q=80",
+        desc: "Are diabetic-friendly mithais actually safe? We analyze the ingredients.",
+      },
+    ]);
+  }, []);
+
+  // Simulated Infinite Scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isLoadingMore) {
+        setIsLoadingMore(true);
+        setTimeout(() => {
+          setArticles((prev) => [
+            ...prev,
+            {
+              title: "Walking: Speed vs Distance",
+              category: "Fitness",
+              color: "text-blue-500",
+              img: "https://images.unsplash.com/photo-1552674605-46d536d2348c?auto=format&fit=crop&w=500&q=80",
+              desc: "Should you walk faster or longer? New research reveals the ideal pace.",
+            },
+            {
+              title: "Sleep Debt & Monday Spikes",
+              category: "Sleep",
+              color: "text-indigo-500",
+              img: "https://images.unsplash.com/photo-1541781777621-af13b2caa5e3?auto=format&fit=crop&w=500&q=80",
+              desc: "Why catching up on sleep on weekends might actually hurt your heart.",
+            },
+            {
+              title: "White Coat Syndrome",
+              category: "Medical",
+              color: "text-rose-500",
+              img: "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=500&q=80",
+              desc: "High BP only at the doctor? It might be anxiety, but it's still risky.",
+            },
+          ]);
+          setIsLoadingMore(false);
+        }, 1500);
+      }
+    });
+
+    if (loadTriggerRef.current) {
+      observer.observe(loadTriggerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isLoadingMore]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify(structuredData)}
-      </script>
+    <div className="min-h-screen bg-[#FDF2F4] dark:bg-[#030712] text-slate-900 dark:text-slate-100 transition-colors duration-500 font-sans selection:bg-rose-500 selection:text-white">
+      {/* Noise Overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none z-50 opacity-[0.04]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      ></div>
 
-      {/* Hero Section - Redesigned */}
-      <header>
-        <section className="relative overflow-hidden min-h-[90vh] flex items-center" role="banner">
-          {/* Animated Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" aria-hidden="true"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(226,57,70,0.1),transparent_50%)]" aria-hidden="true"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(46,196,182,0.08),transparent_50%)]" aria-hidden="true"></div>
-          
-          <div className="container mx-auto px-4 py-20 relative z-10">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                {/* Left Column - Hero Copy */}
-                <div className="space-y-8 animate-fade-in">
-                  <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                    <Heart className="w-4 h-4" aria-hidden="true" />
-                    <span>Trusted by 2,500+ Indian families</span>
-                  </div>
-                  
-                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1]">
-                    Your Heart's
-                    <span className="block bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mt-2">
-                      Daily Credit Score
-                    </span>
-                  </h1>
-                  
-                  <p className="text-xl md:text-2xl text-foreground/80 leading-relaxed max-w-xl">
-                    Track what matters. BP, sugar, habits—all in one place. Get your HeartScore every morning, like checking your bank balance.
-                  </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Button 
-                      size="lg" 
-                      className="gradient-primary text-white shadow-glow hover:shadow-elevated transition-all h-16 px-10 text-lg group"
-                      onClick={() => {
-                        window.location.href = "/auth";
-                      }}
-                      aria-label="Start Free Today - Sign up for Beat"
-                    >
-                      Start Free Today
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
-                    </Button>
-                    <Button 
-                      size="lg" 
-                      variant="outline" 
-                      className="h-16 px-10 text-lg border-2 hover:bg-muted/50"
-                      onClick={() => {
-                        window.location.href = "/app/home";
-                      }}
-                      aria-label="View Demo of the Beat app"
-                    >
-                      View Demo
-                    </Button>
-                  </div>
-                  
-                  {/* Social Proof */}
-                  <div className="flex items-center gap-6 pt-4">
-                    <div className="flex -space-x-2">
-                      {[1,2,3,4].map((i) => (
-                        <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-background" />
-                      ))}
-                    </div>
-                    <div>
-                      <div className="flex gap-1 mb-1">
-                        {[1,2,3,4,5].map((i) => (
-                          <Star key={i} className="w-4 h-4 fill-accent text-accent" aria-hidden="true" />
-                        ))}
-                      </div>
-                      <p className="text-sm text-muted-foreground">4.7/5 from 287 users</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Column - Hero Visual */}
-                <div className="relative animate-scale-in lg:block hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl" aria-hidden="true"></div>
-                  <Card className="relative p-8 shadow-elevated bg-card/80 backdrop-blur-sm border-2">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-center mb-4">
-                        <Logo size="lg" showText={true} />
-                      </div>
-                      <div className="text-xs text-muted-foreground text-center">Today</div>
-                      
-                      <div className="text-center space-y-2">
-                        <div className="text-6xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                          87
-                        </div>
-                        <p className="text-sm text-muted-foreground">Your HeartScore</p>
-                        <p className="text-xs text-secondary font-medium">↑ 12 points this week</p>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-secondary">✓</div>
-                          <p className="text-xs text-muted-foreground mt-1">BP Normal</p>
-                        </div>
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-secondary">✓</div>
-                          <p className="text-xs text-muted-foreground mt-1">Sugar OK</p>
-                        </div>
-                        <div className="text-center p-3 bg-muted/50 rounded-lg">
-                          <div className="text-2xl font-bold text-accent">🔥</div>
-                          <p className="text-xs text-muted-foreground mt-1">7 Day Streak</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
+      {/* Dynamic Background Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-rose-400/30 dark:bg-rose-600/20 rounded-full blur-[100px] animate-blob mix-blend-multiply dark:mix-blend-screen"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[35vw] h-[35vw] bg-orange-300/30 dark:bg-orange-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen"></div>
+        <div className="absolute bottom-[-10%] left-[20%] w-[45vw] h-[45vw] bg-pink-300/30 dark:bg-pink-900/20 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen"></div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="fixed w-full z-40 top-0 border-b border-transparent transition-all duration-300 bg-white/70 dark:bg-[#030712]/70 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => window.scrollTo(0, 0)}>
+              <div className="relative w-9 h-9 flex items-center justify-center">
+                <div className="absolute inset-0 bg-[#E11D48] rounded-xl transform rotate-3 group-hover:rotate-6 transition-transform"></div>
+                <span className="relative text-white font-bold text-lg italic font-serif">B</span>
               </div>
+              <span className="font-bold text-xl tracking-tight">Beat</span>
             </div>
-          </div>
-        </section>
-      </header>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-muted/30 border-y">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">2,500+</div>
-              <p className="text-sm text-muted-foreground">Active Users</p>
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center gap-1 p-1 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-full border border-white/20 dark:border-white/10 shadow-sm">
+              {["Features", "Method", "Stories"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#E11D48] dark:hover:text-white transition-colors rounded-full hover:bg-white/50 dark:hover:bg-white/5"
+                >
+                  {item}
+                </a>
+              ))}
             </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-secondary mb-2">78%</div>
-              <p className="text-sm text-muted-foreground">Better Control</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-accent mb-2">45K+</div>
-              <p className="text-sm text-muted-foreground">Health Logs</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-primary mb-2">4.7★</div>
-              <p className="text-sm text-muted-foreground">User Rating</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features Section - Redesigned */}
-      <main>
-        <section className="py-24" aria-labelledby="features-heading">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
-              <span className="text-primary font-semibold text-sm uppercase tracking-wide">How It Works</span>
-              <h2 id="features-heading" className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                Health Tracking That Actually{" "}
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Works
-                </span>
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Designed for busy Indian families. Simple enough for seniors, powerful enough for everyone.
-              </p>
-            </div>
-          
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              <FeatureCard
-                icon={<Heart className="w-10 h-10" aria-hidden="true" />}
-                title="Daily HeartScore"
-                description="One number that tells you everything. Like a credit score, but for your heart health."
-                gradient="from-primary to-primary/60"
-              />
-              <FeatureCard
-                icon={<Users className="w-10 h-10" aria-hidden="true" />}
-                title="Family Dashboard"
-                description="Check on mom's BP from anywhere. Get alerts when something's off. Stay connected."
-                gradient="from-secondary to-secondary/60"
-              />
-              <FeatureCard
-                icon={<Clock className="w-10 h-10" aria-hidden="true" />}
-                title="2-Minute Rituals"
-                description="Morning with chai, evening after dinner. Log your health in less time than brewing tea."
-                gradient="from-accent to-accent/60"
-              />
-              <FeatureCard
-                icon={<Zap className="w-10 h-10" aria-hidden="true" />}
-                title="Smart Insights"
-                description="AI notices patterns you'd miss. Get personalized tips that actually help."
-                gradient="from-primary to-accent"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="py-24 bg-muted/20">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-primary font-semibold text-sm uppercase tracking-wide">Loved By Families</span>
-              <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                Real People, Real Results
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <TestimonialCard
-                quote="My BP dropped 20 points in 3 months. The daily reminders and family support made all the difference."
-                author="Rajesh M."
-                role="Managing Hypertension"
-                rating={5}
-              />
-              <TestimonialCard
-                quote="I can check Dad's numbers from Bangalore while he's in Delhi. Finally, peace of mind for our whole family."
-                author="Priya S."
-                role="Family Caregiver"
-                rating={5}
-              />
-              <TestimonialCard
-                quote="The HeartScore makes health tracking so simple. My 68-year-old mother uses it every single day."
-                author="Amit K."
-                role="Son & Developer"
-                rating={5}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Comparison Table Section */}
-        <section className="py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-primary font-semibold text-sm uppercase tracking-wide">Why Beat?</span>
-              <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                Built Different From{" "}
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  Day One
-                </span>
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Unlike generic health trackers, Beat is purpose-built for Indian families managing heart health.
-              </p>
-            </div>
-            
-            <div className="max-w-5xl mx-auto overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b-2 border-border">
-                    <th className="text-left p-4 md:p-6 font-bold text-lg">Feature</th>
-                    <th className="text-center p-4 md:p-6">
-                      <div className="flex flex-col items-center gap-2">
-                        <Logo size="sm" showText={false} />
-                        <span className="font-bold text-lg text-primary">Beat</span>
-                      </div>
-                    </th>
-                    <th className="text-center p-4 md:p-6 text-muted-foreground font-medium">Traditional Apps</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <ComparisonRow 
-                    feature="Daily HeartScore"
-                    beat={true}
-                    traditional={false}
-                    description="One number that tells you everything about your heart health"
-                  />
-                  <ComparisonRow 
-                    feature="Family Dashboard"
-                    beat={true}
-                    traditional={false}
-                    description="Remote monitoring for caregivers and loved ones"
-                  />
-                  <ComparisonRow 
-                    feature="AI Health Coach (Pulse)"
-                    beat={true}
-                    traditional="Limited"
-                    description="Medical-grade coaching aware of your conditions"
-                  />
-                  <ComparisonRow 
-                    feature="2-Minute Rituals"
-                    beat={true}
-                    traditional={false}
-                    description="Morning & evening check-ins designed for consistency"
-                  />
-                  <ComparisonRow 
-                    feature="Senior-Friendly Design"
-                    beat={true}
-                    traditional="Rarely"
-                    description="Large text, Hindi support, one-action-per-screen"
-                  />
-                  <ComparisonRow 
-                    feature="WhatsApp Integration"
-                    beat={true}
-                    traditional={false}
-                    description="Reminders and summaries on your favorite platform"
-                  />
-                  <ComparisonRow 
-                    feature="Medication Tracking"
-                    beat={true}
-                    traditional={true}
-                    description="Smart reminders tied to your ritual times"
-                  />
-                  <ComparisonRow 
-                    feature="Doctor Reports (PDF)"
-                    beat={true}
-                    traditional="Sometimes"
-                    description="Professional 30-day summaries ready to share"
-                  />
-                  <ComparisonRow 
-                    feature="Works Offline"
-                    beat={true}
-                    traditional={false}
-                    description="View past 7 days of data without internet"
-                  />
-                  <ComparisonRow 
-                    feature="Price"
-                    beat="Free"
-                    traditional="Varies"
-                    description="Core features free forever, premium at ₹199/month"
-                  />
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-24 bg-muted/20">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-primary font-semibold text-sm uppercase tracking-wide">Questions?</span>
-              <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                Everything You Need to Know
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Common questions about Beat, HeartScore, and how we help families stay healthy.
-              </p>
-            </div>
-            
-            <div className="max-w-3xl mx-auto">
-              <Accordion type="single" collapsible className="space-y-4">
-                <AccordionItem value="item-1" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">What is HeartScore and how is it calculated?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    HeartScore is your daily health score out of 100—like a credit score for your heart. It's calculated using a weighted average of four key factors: your blood pressure readings (30%), blood sugar levels (30%), lifestyle habits like sleep and steps (30%), and consistency of logging (10%). The AI analyzes your data daily and provides a simple, actionable score that shows how well you're managing your cardiovascular and metabolic health.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">Is Beat really free? What does the premium plan include?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    Yes! Beat's core features are completely free forever—including blood pressure tracking, sugar logging, HeartScore calculation, medication reminders, and family dashboard access. Our Beat Coach Premium plan (₹199/month with 7-day free trial) adds AI-powered daily health nudges, personalized weekly health plans, unlimited PDF report generation for doctors, and priority support from our health coaching team.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">How does the Family Dashboard work? Who can see my data?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    You're in complete control of your health data. The Family Dashboard lets you grant specific family members permission to view your blood pressure, sugar readings, and HeartScore remotely. You can set view-only access or allow them to send gentle nudges when they're concerned. You can add or remove family members and change their permissions anytime. They'll never see your data without your explicit approval, and you can revoke access instantly.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-4" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">Is my health data private and secure?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    Absolutely. Beat uses bank-level encryption to protect your health data. All your information is stored securely in compliance with India's Digital Personal Data Protection (DPDP) Act. We never sell your personal health information to third parties. Your data is backed up automatically, and you can export or delete your data anytime from your account settings. Only you control who sees your health information through the Family Dashboard permissions system.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-5" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">Does Beat work offline? What if I have poor internet?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    Yes! Beat is a Progressive Web App (PWA) that works seamlessly even with intermittent connectivity. You can view your past 7 days of blood pressure logs, sugar readings, HeartScores, and insights when offline. Any new data you log is saved locally and automatically syncs to the cloud when you reconnect. This makes Beat perfect for users in areas with unreliable internet connections.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-6" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">Who should use Beat? Is it only for seniors?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    Beat is designed for Indian adults aged 40-70 managing hypertension, diabetes, or heart disease risk—but anyone concerned about their cardiovascular health can benefit. It's also perfect for adult children and caregivers who want to monitor and support elderly parents remotely. The app is senior-friendly with large text, Hindi support, and simple workflows, but younger users managing chronic conditions find it just as valuable for consistent health tracking.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-7" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">Can I connect my BP monitor or fitness tracker to Beat?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    We support integration with Google Fit, Apple Health, and other popular fitness platforms to automatically sync your step count, heart rate, and sleep data. For blood pressure monitors and glucose meters, we're working on direct Bluetooth connections with major brands. Currently, you can manually log readings in under 30 seconds using our simple morning and evening ritual flows, or use the "fetch latest reading" feature for compatible devices.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-8" className="bg-card border border-border rounded-lg px-6">
-                  <AccordionTrigger className="text-left hover:no-underline py-6">
-                    <span className="text-lg font-semibold">What makes Pulse AI Coach different from generic chatbots?</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                    Pulse isn't a generic AI chatbot—it's a medical-grade health coach that knows your complete health profile. It has access to your BP history, sugar trends, medication schedule, health conditions (diabetes, hypertension), and current readings. This means Pulse gives you contextually aware advice specific to YOUR situation, not generic tips. It can detect concerning patterns, suggest lifestyle adjustments, and help you understand what's affecting your HeartScore. Plus, it includes built-in safety guardrails—it will never diagnose conditions or replace your doctor's advice.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </div>
-        </section>
-
-      {/* Final CTA Section */}
-      <section className="py-24 relative overflow-hidden" aria-labelledby="cta-heading">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-secondary opacity-95" aria-hidden="true"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30" aria-hidden="true"></div>
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
-              <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-              <span>Free forever. No credit card required.</span>
-            </div>
-            
-            <h2 id="cta-heading" className="text-4xl md:text-6xl font-bold text-white leading-tight">
-              Take Control of Your
-              <span className="block mt-2">Heart Health Today</span>
-            </h2>
-            
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-              Join 2,500+ families who've already improved their health with Beat. Start your journey in 60 seconds.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 h-16 px-12 text-lg font-semibold shadow-elevated group"
-                onClick={() => {
-                  window.location.href = "/auth";
-                }}
-                aria-label="Get Started Free with Beat"
+            {/* Right Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="rounded-full hover:bg-black/5 dark:hover:bg-white/10"
               >
-                Get Started Free
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </Button>
+
+              <Button
+                onClick={() => navigate("/auth")}
+                className="group relative px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-full overflow-hidden"
+              >
+                <span className="relative z-10 group-hover:text-rose-200 dark:group-hover:text-rose-600 transition-colors">
+                  Get Started
+                </span>
+                <div className="absolute inset-0 bg-[#E11D48] dark:bg-rose-100 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </Button>
             </div>
-            
-            <div className="flex items-center justify-center gap-8 pt-8 text-white/80 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                <span>No credit card</span>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className="md:hidden p-2 text-slate-800 dark:text-white"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-20 left-0 w-full bg-white/95 dark:bg-[#0B101B]/95 backdrop-blur-md p-6 md:hidden shadow-xl border-t border-slate-200 dark:border-slate-800 flex flex-col gap-4">
+            {["Features", "Method", "Stories"].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-base font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item}
+              </a>
+            ))}
+            <Button onClick={() => navigate("/auth")} className="w-full bg-[#E11D48] text-white">
+              Get Started
+            </Button>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden perspective-1000">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+            {/* Content */}
+            <div className="flex-1 text-center lg:text-left z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10 backdrop-blur-md text-xs font-semibold mb-8 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+                <span className="text-slate-700 dark:text-slate-300">The #1 Heart App in India</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                <span>Free forever</span>
+
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tighter text-slate-900 dark:text-white leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+                Your heart <br />
+                <span className="font-serif italic font-light bg-clip-text text-transparent bg-gradient-to-r from-[#E11D48] to-[#F97316] dark:from-[#FB7185] dark:to-[#FDA4AF] pr-4">
+                  deserves clarity.
+                </span>
+              </h1>
+
+              <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-light animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+                Stop guessing. We turn your blood pressure, sugar, and habits into a single, daily{" "}
+                <strong className="text-slate-900 dark:text-white font-semibold">HeartScore™</strong>. It's health,
+                decoded.
+              </p>
+
+              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                <Button
+                  size="lg"
+                  onClick={() => navigate("/auth")}
+                  className="h-14 rounded-full px-8 text-base bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200"
+                >
+                  Download Now <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="lg" className="h-14 rounded-full px-8 text-base" asChild>
+                  <a href="#how-it-works">How it works</a>
+                </Button>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
-                <span>Cancel anytime</span>
+            </div>
+
+            {/* 3D Interactive Card */}
+            <div
+              className="flex-1 relative w-full flex justify-center lg:justify-end"
+              ref={tiltContainerRef}
+              style={{ perspective: "1000px" }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-rose-500/20 to-orange-500/20 rounded-full blur-[100px] -z-10"></div>
+
+              <div
+                id="hero-card"
+                ref={heroCardRef}
+                className="relative w-[340px] bg-white dark:bg-[#0B101B] rounded-[3rem] shadow-2xl border border-white/50 dark:border-white/10 p-2 z-20 select-none cursor-default transition-transform duration-100 ease-out"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                <div className="h-8 flex justify-center items-start mb-2 px-6 pt-3">
+                  <div className="w-20 h-5 bg-black rounded-full absolute top-3"></div>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-[#151b2b] rounded-[2.5rem] h-[640px] overflow-hidden relative border border-slate-100 dark:border-white/5 flex flex-col">
+                  <div className="p-6 pt-8 pb-10 bg-white dark:bg-[#1A2030] rounded-b-[2.5rem] shadow-sm z-10">
+                    <div className="flex justify-between items-center mb-8">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold">
+                          RK
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                            Good Morning
+                          </div>
+                          <div className="text-sm font-bold text-slate-800 dark:text-white">Ravi Kumar</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center relative">
+                      <div className="text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-1">87</div>
+                      <div className="text-xs text-rose-500 font-bold bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 rounded-full inline-block">
+                        Excellent
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 space-y-4">
+                    <div className="bg-white dark:bg-[#1A2030] p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4 shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 text-xl">
+                        🫀
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-slate-400 font-medium">Blood Pressure</div>
+                        <div className="text-base font-bold text-slate-800 dark:text-white">118/78</div>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-[#1A2030] p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4 shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500 text-xl">
+                        🩸
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-slate-400 font-medium">Sugar (Fasting)</div>
+                        <div className="text-base font-bold text-slate-800 dark:text-white">92 mg/dL</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Badge */}
+                <div className="absolute -right-8 top-1/4 bg-white/80 dark:bg-[#1A2030]/80 backdrop-blur-md px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-bounce z-30 border border-white/20">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs font-bold text-slate-700 dark:text-white">BP Normalized</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="py-12 border-t bg-muted/20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex items-center gap-3">
-                <Logo size="sm" showText={true} />
-              </div>
-              
-              <div className="flex gap-6 text-sm text-muted-foreground">
-                <button className="hover:text-foreground transition-colors">Privacy</button>
-                <button className="hover:text-foreground transition-colors">Terms</button>
-                <button className="hover:text-foreground transition-colors">Contact</button>
+      {/* Marquee */}
+      <section className="py-10 border-y border-slate-200/50 dark:border-slate-800/50 bg-white/30 dark:bg-slate-900/30 overflow-hidden">
+        <div className="relative w-full overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#FDF2F4] dark:from-[#030712] to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#FDF2F4] dark:from-[#030712] to-transparent z-10"></div>
+          <div className="flex animate-marquee gap-16 items-center whitespace-nowrap min-w-full">
+            {[
+              "HealthDaily",
+              "MedTech India",
+              "Wellness Now",
+              "The Family Doctor",
+              "Apollo Clinic",
+              "HealthDaily",
+              "MedTech India",
+            ].map((brand, i) => (
+              <span key={i} className="text-xl font-bold text-slate-400 dark:text-slate-600 opacity-70">
+                {brand}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid with Spotlight */}
+      <section className="py-32 relative" id="features">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="mb-20">
+            <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+              Designed for <span className="font-serif italic text-rose-500">real life.</span>
+            </h2>
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
+              Traditional medical apps are ugly and confusing. Beat is built to be used before your morning chai, in
+              less than 30 seconds.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]" id="features-grid">
+            <div className="spotlight-card md:col-span-2 group relative bg-white dark:bg-[#0B101B] rounded-[2rem] border border-slate-200 dark:border-white/5 p-8 flex flex-col justify-between hover:border-slate-300 dark:hover:border-white/10 transition-colors overflow-hidden">
+              {/* Spotlight overlay handled by CSS/JS */}
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 mb-6">
+                  <CheckCircle2 />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">The HeartScore™ Algorithm</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-sm">
+                  We process 50+ biomarkers into a single, understandable score from 0-100. It's like a credit score for
+                  your body.
+                </p>
               </div>
             </div>
-            
-            <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-              <p>© 2024 Beat. Keep Your Beat Strong. Made with ❤️ for Indian families.</p>
+
+            <div className="spotlight-card md:col-span-1 relative bg-slate-900 dark:bg-[#151b2b] rounded-[2rem] p-8 flex flex-col justify-between overflow-hidden text-white">
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold mb-2">Family Dashboard</h3>
+                <p className="text-slate-400 text-sm">Monitor parents remotely. Get alerts for sudden spikes.</p>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-[60px] opacity-20"></div>
+            </div>
+
+            <div className="spotlight-card md:col-span-1 relative bg-white dark:bg-[#0B101B] rounded-[2rem] border border-slate-200 dark:border-white/5 p-8 flex flex-col justify-end hover:border-slate-300 dark:hover:border-white/10 transition-colors">
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Smart Insights</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  "Your BP is usually higher on Mondays." We find patterns you miss.
+                </p>
+              </div>
+            </div>
+
+            <div className="spotlight-card md:col-span-2 relative bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-950/30 dark:to-orange-950/30 rounded-[2rem] border border-slate-200 dark:border-white/5 p-8 flex items-center hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors">
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Connects with everything</h3>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                  Omron, Apple Health, Google Fit, AccuChek. We sync with your existing devices instantly.
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Health Hub / Infinite Feed */}
+      <section className="py-24 relative" id="health-feed">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Health Hub</h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-2">Latest tips for a stronger heart.</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {articles.map((article, i) => (
+              <article
+                key={i}
+                className="group bg-white dark:bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden shadow-sm border border-slate-200 dark:border-white/10 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              >
+                <div className="relative overflow-hidden h-56">
+                  <div
+                    className={`absolute top-4 left-4 z-10 ${article.color} bg-white/90 dark:bg-black/80 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}
+                  >
+                    {article.category}
+                  </div>
+                  <img
+                    src={article.img}
+                    alt={article.title}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif font-bold text-xl text-slate-900 dark:text-white mb-3">{article.title}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                    {article.desc}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Load Trigger */}
+          <div ref={loadTriggerRef} className="flex justify-center mt-12 h-20">
+            {isLoadingMore && (
+              <div className="w-8 h-8 border-4 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Experts / Medical Board */}
+      <section className="py-24 relative" id="experts">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-12">
+            Backed by <span className="font-serif italic text-rose-500">top cardiologists.</span>
+          </h2>
+          <div className="flex flex-wrap justify-center gap-8">
+            {[
+              {
+                name: "Dr. Arun Gupta",
+                role: "Cardiologist, AIIMS",
+                img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=300&q=80",
+              },
+              {
+                name: "Dr. Meera Rao",
+                role: "Diabetologist",
+                img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=300&q=80",
+              },
+              {
+                name: "Dr. Sanjay K.",
+                role: "General Physician",
+                img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=300&q=80",
+              },
+            ].map((expert, i) => (
+              <div
+                key={i}
+                className="group bg-white/60 dark:bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-slate-200 dark:border-white/10 w-64 hover:-translate-y-2 transition-transform"
+              >
+                <div className="w-20 h-20 mx-auto rounded-full overflow-hidden mb-4 border-2 border-rose-100 dark:border-rose-900/50">
+                  <img src={expert.img} alt={expert.name} className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <h3 className="font-bold font-serif text-lg text-slate-900 dark:text-white">{expert.name}</h3>
+                <p className="text-xs text-rose-500 font-bold uppercase tracking-wider mb-2">{expert.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Accordion */}
+      <section className="py-24 bg-white/50 dark:bg-white/5">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-white mb-12">
+            Frequently Asked Questions
+          </h2>
+          <Accordion type="single" collapsible className="space-y-4">
+            <AccordionItem value="item-1" className="border bg-white dark:bg-[#0B101B] rounded-2xl px-4">
+              <AccordionTrigger className="hover:no-underline font-semibold">
+                Is my health data secure?
+              </AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-400">
+                Yes. We use bank-grade 256-bit encryption. Your health data is stored locally on your device and
+                encrypted in the cloud. We are HIPAA and GDPR compliant.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2" className="border bg-white dark:bg-[#0B101B] rounded-2xl px-4">
+              <AccordionTrigger className="hover:no-underline font-semibold">Do I need a smartwatch?</AccordionTrigger>
+              <AccordionContent className="text-slate-600 dark:text-slate-400">
+                No! While we sync with Apple Watch and other devices, you can manually enter your BP and sugar readings
+                using our simple input interface.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-32 relative overflow-hidden bg-black">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(225,29,72,0.4),black)]"></div>
+        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
+          <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tighter">
+            Your health, <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">
+              mastered.
+            </span>
+          </h2>
+          <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
+            Join 50,000+ families. No credit card required.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button
+              size="lg"
+              className="bg-white text-black hover:bg-slate-200 h-14 px-8 text-lg rounded-full"
+              onClick={() => navigate("/auth")}
+            >
+              Get the App
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#030712] border-t border-white/5 pt-16 pb-8 text-slate-400">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-lg text-white">Beat</span>
+          </div>
+          <div className="text-sm">&copy; 2024 Beat Health Inc.</div>
+        </div>
       </footer>
+
+      <style>{`
+        .spotlight-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
+          z-index: 1;
+          opacity: 0;
+          transition: opacity 0.5s;
+          pointer-events: none;
+        }
+        .spotlight-card:hover::before {
+          opacity: 1;
+        }
+      `}</style>
     </div>
   );
 };
-
-const FeatureCard = ({ 
-  icon, 
-  title, 
-  description, 
-  gradient 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string;
-  gradient: string;
-}) => (
-  <article className="group relative bg-card p-8 rounded-2xl border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-elevated">
-    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity`} aria-hidden="true"></div>
-    <div className="relative z-10">
-      <div className={`mb-6 w-16 h-16 rounded-xl bg-gradient-to-br ${gradient} p-3 text-white flex items-center justify-center`}>
-        {icon}
-      </div>
-      <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{title}</h3>
-      <p className="text-muted-foreground leading-relaxed">{description}</p>
-    </div>
-  </article>
-);
-
-const TestimonialCard = ({
-  quote,
-  author,
-  role,
-  rating
-}: {
-  quote: string;
-  author: string;
-  role: string;
-  rating: number;
-}) => (
-  <Card className="p-8 hover:shadow-elevated transition-all duration-300 bg-card border-2">
-    <div className="flex gap-1 mb-4">
-      {[...Array(rating)].map((_, i) => (
-        <Star key={i} className="w-4 h-4 fill-accent text-accent" aria-hidden="true" />
-      ))}
-    </div>
-    <blockquote className="text-foreground/90 mb-6 leading-relaxed text-lg">
-      "{quote}"
-    </blockquote>
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent"></div>
-      <div>
-        <div className="font-semibold">{author}</div>
-        <div className="text-sm text-muted-foreground">{role}</div>
-      </div>
-    </div>
-  </Card>
-);
-
-const ComparisonRow = ({ 
-  feature, 
-  beat, 
-  traditional, 
-  description 
-}: { 
-  feature: string; 
-  beat: boolean | string; 
-  traditional: boolean | string; 
-  description: string;
-}) => (
-  <tr className="border-b border-border hover:bg-muted/30 transition-colors">
-    <td className="p-4 md:p-6">
-      <div className="font-medium text-foreground mb-1">{feature}</div>
-      <div className="text-sm text-muted-foreground hidden md:block">{description}</div>
-    </td>
-    <td className="p-4 md:p-6 text-center">
-      {typeof beat === 'boolean' ? (
-        beat ? (
-          <Check className="w-6 h-6 text-secondary mx-auto" aria-label="Yes" />
-        ) : (
-          <X className="w-6 h-6 text-muted-foreground mx-auto" aria-label="No" />
-        )
-      ) : (
-        <span className="font-semibold text-primary">{beat}</span>
-      )}
-    </td>
-    <td className="p-4 md:p-6 text-center">
-      {typeof traditional === 'boolean' ? (
-        traditional ? (
-          <Check className="w-6 h-6 text-muted-foreground mx-auto" aria-label="Yes" />
-        ) : (
-          <X className="w-6 h-6 text-muted-foreground mx-auto" aria-label="No" />
-        )
-      ) : (
-        <span className="text-muted-foreground">{traditional}</span>
-      )}
-    </td>
-  </tr>
-);
 
 export default Landing;
