@@ -37,7 +37,7 @@ const translations = {
     "dashboard.quickActions": "Quick Actions",
     "dashboard.viewTrends": "View Trends",
     "dashboard.familyDashboard": "Family Dashboard",
-    "dashboard.aiCopilot": "Pulse",
+    "dashboard.aiCopilot": "Beat AI",
     
     // Rituals
     "ritual.morning": "Morning Ritual",
@@ -102,7 +102,7 @@ const translations = {
     "checkin.completedSuccess": "Ritual completed! 🎉",
     
     // AI Coach
-    "coach.title": "Pulse",
+    "coach.title": "Beat AI",
     "coach.subtitle": "Your medical-grade AI health coach",
     "coach.placeholder": "Ask me anything about your health...",
     "coach.send": "Send",

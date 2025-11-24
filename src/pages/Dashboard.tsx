@@ -155,8 +155,8 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Main HeartScore Card with 3D Tilt (If wrapped) */}
-        <div className="mb-8 transform transition-all duration-500 hover:scale-[1.01]">
+        {/* Main HeartScore Card - Optimized */}
+        <div className="mb-8 will-change-transform">
           <HeartScoreCard />
         </div>
 
@@ -167,9 +167,9 @@ const Dashboard = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Morning Ritual - Glass Style */}
-            <div className="glass-card rounded-3xl overflow-hidden relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            {/* Morning Ritual - Optimized Glass Card */}
+            <div className="glass-card rounded-3xl overflow-hidden relative group will-change-transform">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               <RitualProgress
                 title={t("ritual.morning")}
                 subtitle={t("ritual.morningSubtitle")}
@@ -185,9 +185,9 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Evening Ritual - Glass Style */}
-            <div className="glass-card rounded-3xl overflow-hidden relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            {/* Evening Ritual - Optimized Glass Card */}
+            <div className="glass-card rounded-3xl overflow-hidden relative group will-change-transform">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               <RitualProgress
                 title={t("ritual.evening")}
                 subtitle={t("ritual.eveningSubtitle")}

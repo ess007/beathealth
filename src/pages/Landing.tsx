@@ -742,7 +742,7 @@ const Landing = () => {
               <ul className="space-y-4 mb-8">
                 {[
                   "Everything in Free, plus:",
-                  "AI-powered Pulse Health Coach",
+                  "AI-powered Beat Health Coach",
                   "Advanced correlation insights",
                   "PDF reports for doctors",
                   "Priority family nudges",
@@ -824,7 +824,7 @@ const Landing = () => {
                 What's included in Beat Coach Premium?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                Premium (₹199/month) adds: AI-powered Pulse health coach with personalized advice, advanced correlation insights (e.g., "Your BP is 12% higher after late dinners"), PDF health reports for doctors, WhatsApp weekly summaries, goal tracking with achievements, and priority support. Free tier still includes all core tracking features.
+                Premium (₹199/month) adds: AI-powered Beat health coach with personalized advice, advanced correlation insights (e.g., "Your BP is 12% higher after late dinners"), PDF health reports for doctors, WhatsApp weekly summaries, goal tracking with achievements, and priority support. Free tier still includes all core tracking features.
               </AccordionContent>
             </AccordionItem>
 
@@ -900,7 +900,7 @@ const Landing = () => {
                 <li><a href="#features" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#features')?.scrollIntoView({ behavior: 'smooth' }); }}>Features</a></li>
                 <li><a href="#pricing" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a></li>
                 <li><a href="#how-it-works" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }}>How It Works</a></li>
-                <li><button onClick={() => navigate("/app/coach")} className="hover:text-primary transition-colors text-left">Pulse AI Coach</button></li>
+                <li><button onClick={() => navigate("/app/coach")} className="hover:text-primary transition-colors text-left">Beat AI Coach</button></li>
               </ul>
             </div>
 
