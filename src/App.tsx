@@ -11,7 +11,7 @@ import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useMedicationReminders } from "@/hooks/useMedicationReminders";
 import { lazy, Suspense } from "react";
 
-// Lazy load pages for better performance
+// Lazy load pages
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -26,12 +26,11 @@ const Achievements = lazy(() => import("./pages/Achievements"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Optimized QueryClient with better defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       retry: 1,
@@ -39,14 +38,30 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading fallback component
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background">
+  <div className="flex items-center justify-center min-h-screen bg-transparent">
     <div className="flex flex-col items-center gap-4">
       <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-muted-foreground">Loading...</p>
+      <p className="text-muted-foreground font-medium animate-pulse">Syncing Health Data...</p>
     </div>
   </div>
+);
+
+// Global Background Component
+const CinematicBackground = () => (
+  <>
+    <div
+      className="fixed inset-0 pointer-events-none z-[-1] opacity-[0.03]"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+      }}
+    ></div>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-2]">
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/20 rounded-full blur-[120px] animate-blob mix-blend-multiply dark:mix-blend-screen opacity-50"></div>
+      <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-accent/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen opacity-50"></div>
+      <div className="absolute bottom-[-10%] left-[20%] w-[50vw] h-[50vw] bg-secondary/20 rounded-full blur-[120px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen opacity-50"></div>
+    </div>
+  </>
 );
 
 const AppContent = () => {
@@ -54,37 +69,25 @@ const AppContent = () => {
   const navigate = useNavigate();
   const showBottomNav = location.pathname.startsWith("/app/");
 
-  // Enable medication reminders
   useMedicationReminders();
 
-  // App routes for swipe navigation
-  const appRoutes = [
-    "/app/home",
-    "/app/checkin",
-    "/app/insights",
-    "/app/family",
-    "/app/coach",
-  ];
-
+  // Swipe Navigation Logic
+  const appRoutes = ["/app/home", "/app/checkin", "/app/coach", "/app/insights", "/app/family"];
   const currentIndex = appRoutes.indexOf(location.pathname);
 
-  // Enable swipe navigation on app routes
   useSwipeNavigation({
     onSwipeLeft: () => {
-      if (currentIndex >= 0 && currentIndex < appRoutes.length - 1) {
-        navigate(appRoutes[currentIndex + 1]);
-      }
+      if (currentIndex >= 0 && currentIndex < appRoutes.length - 1) navigate(appRoutes[currentIndex + 1]);
     },
     onSwipeRight: () => {
-      if (currentIndex > 0) {
-        navigate(appRoutes[currentIndex - 1]);
-      }
+      if (currentIndex > 0) navigate(appRoutes[currentIndex - 1]);
     },
     threshold: 100,
   });
 
   return (
     <>
+      <CinematicBackground />
       <Suspense fallback={<LoadingFallback />}>
         <PageTransition key={location.pathname}>
           <Routes location={location}>
@@ -100,7 +103,6 @@ const AppContent = () => {
             <Route path="/app/coach" element={<AICoach />} />
             <Route path="/app/medications" element={<Medications />} />
             <Route path="/app/achievements" element={<Achievements />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
@@ -115,7 +117,7 @@ const App = () => (
     <ThemeProvider>
       <LanguageProvider>
         <AccessibilityProvider>
-          <SonnerToaster />
+          <SonnerToaster position="top-center" toastOptions={{ className: "glass-panel border-0 shadow-lg" }} />
           <PWAInstallPrompt />
           <BrowserRouter>
             <AppContent />
