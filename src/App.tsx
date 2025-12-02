@@ -9,6 +9,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageTransition } from "@/components/PageTransition";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useMedicationReminders } from "@/hooks/useMedicationReminders";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/hooks/useAuth";
 import { lazy, Suspense } from "react";
 
 // Lazy load pages
@@ -24,6 +27,8 @@ const AICoach = lazy(() => import("./pages/AICoach"));
 const Medications = lazy(() => import("./pages/Medications"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -94,15 +99,17 @@ const AppContent = () => {
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/app/home" element={<Dashboard />} />
-            <Route path="/app/checkin" element={<Rituals />} />
-            <Route path="/app/checkin/morning" element={<MorningCheckin />} />
-            <Route path="/app/checkin/evening" element={<EveningCheckin />} />
-            <Route path="/app/insights" element={<Insights />} />
-            <Route path="/app/family" element={<Family />} />
-            <Route path="/app/coach" element={<AICoach />} />
-            <Route path="/app/medications" element={<Medications />} />
-            <Route path="/app/achievements" element={<Achievements />} />
+            <Route path="/app/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/app/checkin" element={<ProtectedRoute><Rituals /></ProtectedRoute>} />
+            <Route path="/app/checkin/morning" element={<ProtectedRoute><MorningCheckin /></ProtectedRoute>} />
+            <Route path="/app/checkin/evening" element={<ProtectedRoute><EveningCheckin /></ProtectedRoute>} />
+            <Route path="/app/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+            <Route path="/app/family" element={<ProtectedRoute><Family /></ProtectedRoute>} />
+            <Route path="/app/coach" element={<ProtectedRoute><AICoach /></ProtectedRoute>} />
+            <Route path="/app/medications" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
+            <Route path="/app/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
+            <Route path="/app/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
@@ -113,19 +120,23 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <LanguageProvider>
-        <AccessibilityProvider>
-          <SonnerToaster position="top-center" toastOptions={{ className: "glass-panel border-0 shadow-lg" }} />
-          <PWAInstallPrompt />
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
-        </AccessibilityProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AccessibilityProvider>
+            <SonnerToaster position="top-center" toastOptions={{ className: "glass-panel border-0 shadow-lg" }} />
+            <PWAInstallPrompt />
+            <BrowserRouter>
+              <AuthProvider>
+                <AppContent />
+              </AuthProvider>
+            </BrowserRouter>
+          </AccessibilityProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

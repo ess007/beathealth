@@ -11,3 +11,18 @@ verify_jwt = true
 
 [functions.generate-pdf-report]
 verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.verify-payment]
+verify_jwt = true
+
+[functions.generate-daily-nudge]
+verify_jwt = true
+
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.send-family-nudge]
+verify_jwt = true
