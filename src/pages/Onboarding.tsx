@@ -258,12 +258,23 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex justify-between items-center mb-2">
-            <CardTitle>{t("app.title")}</CardTitle>
-            <span className="text-sm text-muted-foreground">{step}/4</span>
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-between items-center mb-4">
+            <Logo size="md" />
+            <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">{step}/4</span>
           </div>
-          <CardDescription>{t("app.tagline")}</CardDescription>
+          <CardDescription className="text-base">{t("app.tagline")}</CardDescription>
+          {/* Progress dots */}
+          <div className="flex justify-center gap-2 mt-4">
+            {[1, 2, 3, 4].map((s) => (
+              <div
+                key={s}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  s === step ? "bg-primary w-6" : s < step ? "bg-primary" : "bg-muted"
+                }`}
+              />
+            ))}
+          </div>
         </CardHeader>
         <CardContent>
           {renderStep()}

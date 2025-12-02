@@ -10,6 +10,10 @@ interface LanguageContextType {
 
 const translations = {
   en: {
+    // App
+    "app.title": "Beat",
+    "app.tagline": "Keep Your Beat Strong",
+    
     // Header
     "header.insights": "Insights",
     "header.family": "Family",
@@ -152,6 +156,10 @@ const translations = {
     "dashboard.daysStrong": "Days Strong"
   },
   hi: {
+    // App
+    "app.title": "बीट",
+    "app.tagline": "अपना बीट मजबूत रखें",
+    
     // Header
     "header.insights": "जानकारी",
     "header.family": "परिवार",
