@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Activity, Droplets, Moon, Footprints } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { haptic } from "@/lib/haptics";
@@ -15,51 +14,49 @@ export const QuickLogActions = () => {
 
   const actions = [
     {
-      label: language === "hi" ? "बीपी लॉग करें" : "Log BP",
+      label: language === "hi" ? "बीपी" : "BP",
       icon: Activity,
       path: "/app/checkin/morning",
-      color: "from-rose-500 to-pink-600",
-      bgColor: "bg-rose-500/10",
+      gradient: "from-primary to-accent",
+      iconBg: "bg-primary/10",
     },
     {
-      label: language === "hi" ? "शुगर लॉग करें" : "Log Sugar",
+      label: language === "hi" ? "शुगर" : "Sugar",
       icon: Droplets,
       path: "/app/checkin/morning",
-      color: "from-blue-500 to-cyan-600",
-      bgColor: "bg-blue-500/10",
+      gradient: "from-blue-500 to-cyan-500",
+      iconBg: "bg-blue-500/10",
     },
     {
-      label: language === "hi" ? "नींद लॉग करें" : "Log Sleep",
+      label: language === "hi" ? "नींद" : "Sleep",
       icon: Moon,
       path: "/app/checkin/morning",
-      color: "from-indigo-500 to-purple-600",
-      bgColor: "bg-indigo-500/10",
+      gradient: "from-indigo-500 to-violet-500",
+      iconBg: "bg-indigo-500/10",
     },
     {
-      label: language === "hi" ? "कदम लॉग करें" : "Log Steps",
+      label: language === "hi" ? "कदम" : "Steps",
       icon: Footprints,
       path: "/app/checkin/evening",
-      color: "from-emerald-500 to-teal-600",
-      bgColor: "bg-emerald-500/10",
+      gradient: "from-secondary to-emerald-500",
+      iconBg: "bg-secondary/10",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3">
       {actions.map((action, index) => (
         <button
           key={index}
           onClick={() => handleAction(action.path)}
-          className={`group relative overflow-hidden rounded-2xl ${action.bgColor} p-4 md:p-5 text-left transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-transparent hover:border-primary/20`}
+          className="group flex flex-col items-center gap-2 p-3 sm:p-4 rounded-2xl bg-card border border-border/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
         >
-          <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity`} />
-          
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${action.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
-              <action.icon className="w-7 h-7 md:w-8 md:h-8" />
-            </div>
-            <span className="font-medium text-sm md:text-base">{action.label}</span>
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center text-white shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
+            <action.icon className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
           </div>
+          <span className="text-xs sm:text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
+            {action.label}
+          </span>
         </button>
       ))}
     </div>

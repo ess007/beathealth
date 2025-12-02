@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame, Pill, Award, ShoppingBag, Trophy, Crown } from "lucide-react";
+import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -24,27 +23,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
-  const { achievements, checkAndAwardBadges } = useAchievements();
+  const { achievements } = useAchievements();
   const [showCelebration, setShowCelebration] = useState(false);
-  const tiltRef = useRef<HTMLDivElement>(null);
-
-  // Spotlight Effect Logic
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll(".spotlight-card");
-      cards.forEach((card) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        (card as HTMLElement).style.setProperty("--mouse-x", `${x}px`);
-        (card as HTMLElement).style.setProperty("--mouse-y", `${y}px`);
-      });
-    };
-
-    const container = document.getElementById("dashboard-grid");
-    if (container) container.addEventListener("mousemove", handleMouseMove);
-    return () => container?.removeEventListener("mousemove", handleMouseMove);
-  }, []);
 
   const navigateTo = (path: string) => {
     haptic("light");
@@ -61,25 +41,18 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  const { data: ritualData, refetch: refetchRituals } = useQuery({
+  const { data: ritualData } = useQuery({
     queryKey: ["rituals", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       const today = new Date().toISOString().split("T")[0];
 
-      // Efficiently fetch only what's needed
       const [behaviorLogs, bpLogs, sugarLogs] = await Promise.all([
         supabase.from("behavior_logs").select("*").eq("user_id", user.id).eq("log_date", today),
-        supabase
-          .from("bp_logs")
-          .select("*")
-          .eq("user_id", user.id)
+        supabase.from("bp_logs").select("*").eq("user_id", user.id)
           .gte("measured_at", `${today}T00:00:00`)
           .lt("measured_at", `${today}T23:59:59`),
-        supabase
-          .from("sugar_logs")
-          .select("*")
-          .eq("user_id", user.id)
+        supabase.from("sugar_logs").select("*").eq("user_id", user.id)
           .gte("measured_at", `${today}T00:00:00`)
           .lt("measured_at", `${today}T23:59:59`),
       ]);
@@ -119,76 +92,73 @@ const Dashboard = () => {
   }, [navigate]);
 
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
+  const greeting = hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
+
+  const quickAccessItems = [
+    { title: t("dashboard.viewTrends"), icon: TrendingUp, color: "text-blue-500", bg: "bg-blue-500/10", path: "/app/insights" },
+    { title: t("dashboard.familyDashboard"), icon: Users, color: "text-violet-500", bg: "bg-violet-500/10", path: "/app/family" },
+    { title: t("dashboard.aiCopilot"), icon: MessageCircle, color: "text-primary", bg: "bg-primary/10", path: "/app/coach" },
+    { title: "Medications", icon: Pill, color: "text-secondary", bg: "bg-secondary/10", path: "/app/medications" },
+  ];
 
   return (
-    <div className="min-h-screen pb-24 md:pb-6">
+    <div className="min-h-screen pb-24 md:pb-6 bg-background">
       <Header />
       <InteractiveTutorial />
-      <StreakCelebration
-        show={showCelebration}
-        streakCount={mainStreakCount}
-        onClose={() => setShowCelebration(false)}
-      />
+      <StreakCelebration show={showCelebration} streakCount={mainStreakCount} onClose={() => setShowCelebration(false)} />
 
-      <main className="container mx-auto px-4 py-6 max-w-5xl">
+      <main className="container mx-auto px-4 py-5 max-w-2xl">
         {/* Header Section */}
-        <div className="mb-8 flex items-start justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-2 text-gradient-primary">
-              {greeting}
-              {profile?.full_name && ", " + profile.full_name.split(" ")[0]}
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg font-light">{t("dashboard.tagline")}</p>
-          </div>
-
-          {!streaksLoading && (
-            <div className="glass-panel p-3 rounded-2xl flex items-center gap-3 shrink-0 border border-orange-200/20 bg-orange-500/5">
-              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 animate-pulse">
-                <Flame className="w-6 h-6" />
-              </div>
-              <div className="text-right">
-                <p className="text-xl font-bold tabular-nums leading-none">{mainStreakCount}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Streak</p>
-              </div>
+        <section className="mb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1 text-foreground">
+                {greeting}
+                {profile?.full_name && <span className="text-primary">, {profile.full_name.split(" ")[0]}</span>}
+              </h1>
+              <p className="text-sm text-muted-foreground">{t("dashboard.tagline")}</p>
             </div>
-          )}
-        </div>
 
-        {/* Quick Log Actions - Giant Buttons */}
-        <div className="mb-8">
-          <h2 className="text-xl font-serif font-semibold mb-4 flex items-center gap-2">
-            <span className="w-1 h-6 bg-primary rounded-full"></span>
-            {t("dashboard.quickActions") || "Quick Actions"}
-          </h2>
+            {!streaksLoading && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <div className="text-right">
+                  <p className="text-lg font-bold leading-none text-orange-600">{mainStreakCount}</p>
+                  <p className="text-[10px] text-orange-500/70 uppercase tracking-wide">days</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Quick Log Actions */}
+        <section className="mb-6">
           <QuickLogActions />
-        </div>
+        </section>
 
         {/* Daily Nudge Card */}
-        <div className="mb-8">
+        <section className="mb-6">
           <DailyNudgeCard userId={user?.id} />
-        </div>
+        </section>
 
-        {/* Main HeartScore Card - Optimized */}
-        <div className="mb-8 will-change-transform">
+        {/* HeartScore Card */}
+        <section className="mb-6">
           <HeartScoreCard />
-        </div>
+        </section>
 
-        <div className="mb-8">
-          <h2 className="text-xl font-serif font-semibold mb-4 flex items-center gap-2">
-            <span className="w-1 h-6 bg-primary rounded-full"></span>
+        {/* Today's Rituals */}
+        <section className="mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span className="w-1 h-5 bg-primary rounded-full" />
             {t("dashboard.todaysRituals")}
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Morning Ritual - Optimized Glass Card */}
-            <div className="glass-card rounded-3xl overflow-hidden relative group will-change-transform">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Card className="overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300">
               <RitualProgress
                 title={t("ritual.morning")}
                 subtitle={t("ritual.morningSubtitle")}
-                icon={<Sun className="w-6 h-6 text-orange-500" />}
+                icon={<Sun className="w-5 h-5 text-orange-500" />}
                 completed={ritualData?.morning.completed || false}
                 tasks={[
                   { label: t("ritual.bloodPressure"), done: ritualData?.morning.hasBP || false },
@@ -198,115 +168,90 @@ const Dashboard = () => {
                 ]}
                 onStart={() => navigateTo("/app/checkin/morning")}
               />
-            </div>
+            </Card>
 
-            {/* Evening Ritual - Optimized Glass Card */}
-            <div className="glass-card rounded-3xl overflow-hidden relative group will-change-transform">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+            <Card className="overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300">
               <RitualProgress
                 title={t("ritual.evening")}
                 subtitle={t("ritual.eveningSubtitle")}
-                icon={<Moon className="w-6 h-6 text-indigo-500" />}
+                icon={<Moon className="w-5 h-5 text-indigo-500" />}
                 completed={ritualData?.evening.completed || false}
                 tasks={[
                   { label: t("ritual.bloodPressure"), done: ritualData?.evening.hasBP || false },
                   { label: t("ritual.randomSugar"), done: ritualData?.evening.hasSugar || false },
                   { label: t("ritual.stepsCount"), done: ritualData?.evening.hasSteps || false },
-                  { label: t("ritual.stressLevel"), done: false },
+                  { label: t("ritual.medsTaken"), done: ritualData?.evening.hasMeds || false },
                 ]}
                 onStart={() => navigateTo("/app/checkin/evening")}
               />
-            </div>
+            </Card>
           </div>
-        </div>
+        </section>
 
-        {/* Quick Actions Grid with Spotlight */}
-        <h2 className="text-xl font-serif font-semibold mb-4 flex items-center gap-2">
-          <span className="w-1 h-6 bg-secondary rounded-full"></span>
-          Quick Access
-        </h2>
-        <div id="dashboard-grid" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            {
-              title: t("dashboard.viewTrends"),
-              icon: TrendingUp,
-              color: "text-blue-500",
-              bg: "bg-blue-500/10",
-              action: () => navigateTo("/app/insights"),
-            },
-            {
-              title: t("dashboard.familyDashboard"),
-              icon: Users,
-              color: "text-purple-500",
-              bg: "bg-purple-500/10",
-              action: () => navigateTo("/app/family"),
-            },
-            {
-              title: t("dashboard.aiCopilot"),
-              icon: MessageCircle,
-              color: "text-rose-500",
-              bg: "bg-rose-500/10",
-              action: () => navigateTo("/app/coach"),
-            },
-            {
-              title: "Medications",
-              icon: Pill,
-              color: "text-emerald-500",
-              bg: "bg-emerald-500/10",
-              action: () => navigateTo("/app/medications"),
-            },
-          ].map((item, i) => (
-            <button
-              key={i}
-              onClick={item.action}
-              className="spotlight-card relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 text-left transition-all hover:bg-accent/5 group"
-            >
-              <div
-                className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+        {/* Quick Access */}
+        <section className="mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span className="w-1 h-5 bg-secondary rounded-full" />
+            Quick Access
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {quickAccessItems.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => navigateTo(item.path)}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
               >
-                <item.icon className={`w-6 h-6 ${item.color}`} />
-              </div>
-              <span className="font-medium text-sm md:text-base">{item.title}</span>
-            </button>
-          ))}
-        </div>
+                <div className={`w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center`}>
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                </div>
+                <span className="text-xs font-medium text-center leading-tight">{item.title}</span>
+              </button>
+            ))}
+          </div>
+        </section>
 
         {/* More Features */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          <button
-            onClick={() => navigateTo("/app/shop")}
-            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-200/20 hover:scale-[1.02] transition-transform"
-          >
-            <ShoppingBag className="w-6 h-6 text-amber-600 mb-2" />
-            <span className="text-xs font-medium">Shop</span>
-          </button>
-          <button
-            onClick={() => navigateTo("/app/challenges")}
-            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-200/20 hover:scale-[1.02] transition-transform"
-          >
-            <Trophy className="w-6 h-6 text-emerald-600 mb-2" />
-            <span className="text-xs font-medium">Challenges</span>
-          </button>
-          <button
-            onClick={() => navigateTo("/app/subscription")}
-            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 hover:scale-[1.02] transition-transform"
-          >
-            <Crown className="w-6 h-6 text-primary mb-2" />
-            <span className="text-xs font-medium">Premium</span>
-          </button>
-        </div>
+        <section className="mb-6">
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => navigateTo("/app/shop")}
+              className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 border border-amber-200/30 dark:border-amber-500/20 transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <ShoppingBag className="w-5 h-5 text-amber-600 mb-1.5" />
+              <span className="text-xs font-medium">Shop</span>
+            </button>
+            <button
+              onClick={() => navigateTo("/app/challenges")}
+              className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200/30 dark:border-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <Trophy className="w-5 h-5 text-emerald-600 mb-1.5" />
+              <span className="text-xs font-medium">Challenges</span>
+            </button>
+            <button
+              onClick={() => navigateTo("/app/subscription")}
+              className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 dark:from-primary/10 dark:to-accent/10 border border-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <Crown className="w-5 h-5 text-primary mb-1.5" />
+              <span className="text-xs font-medium">Premium</span>
+            </button>
+          </div>
+        </section>
 
-        {/* Achievements Ticker */}
+        {/* Achievements */}
         {achievements && achievements.length > 0 && (
-          <div className="mt-8 p-1 overflow-hidden">
-            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x">
+          <section>
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-amber-500 rounded-full" />
+              Achievements
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
               {achievements.map((achievement) => (
-                <div key={achievement.id} className="snap-center shrink-0 w-64">
+                <div key={achievement.id} className="shrink-0 w-56">
                   <AchievementBadge type={achievement.badge_type} earnedAt={achievement.earned_at} size="small" />
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
       </main>
     </div>

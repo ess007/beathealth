@@ -1,9 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { Info, RefreshCw } from "lucide-react";
+import { RefreshCw, Heart, Activity, Droplets, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Logo } from "@/components/Logo";
 import { haptic } from "@/lib/haptics";
 
 const HeartScoreCard = () => {
@@ -17,18 +16,26 @@ const HeartScoreCard = () => {
   const aiExplanation = todayScore?.ai_explanation;
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-score-excellent";
+    if (score >= 80) return "text-secondary";
     if (score >= 70) return "text-score-good";
     if (score >= 60) return "text-score-moderate";
     if (score >= 50) return "text-score-poor";
-    return "text-score-critical";
+    return "text-primary";
+  };
+
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return "bg-secondary/10";
+    if (score >= 70) return "bg-score-good/10";
+    if (score >= 60) return "bg-score-moderate/10";
+    if (score >= 50) return "bg-score-poor/10";
+    return "bg-primary/10";
   };
 
   const getScoreGradient = (score: number) => {
-    if (score >= 80) return "from-score-excellent to-score-good";
-    if (score >= 70) return "from-score-good to-score-moderate";
-    if (score >= 60) return "from-score-moderate to-score-poor";
-    return "from-score-poor to-score-critical";
+    if (score >= 80) return "from-secondary to-secondary/70";
+    if (score >= 70) return "from-score-good to-score-good/70";
+    if (score >= 60) return "from-score-moderate to-score-moderate/70";
+    return "from-primary to-primary/70";
   };
 
   const getScoreLabel = (score: number) => {
@@ -41,68 +48,59 @@ const HeartScoreCard = () => {
 
   if (isLoading) {
     return (
-      <Card className="p-4 md:p-6 lg:p-8 shadow-elevated border-2 bg-gradient-to-br from-card via-card to-muted/30">
-        <div className="flex items-center justify-center h-32 md:h-48">
-          <RefreshCw className="w-6 h-6 md:w-8 md:h-8 animate-spin text-primary" />
+      <Card className="p-5 border-border/50 bg-card">
+        <div className="flex items-center justify-center h-40">
+          <RefreshCw className="w-6 h-6 animate-spin text-primary" />
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className="p-4 md:p-6 lg:p-8 shadow-elevated border-2 bg-gradient-to-br from-card via-card to-muted/30 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl"></div>
+    <Card className="overflow-hidden border-border/50 bg-card relative">
+      {/* Subtle gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${getScoreBg(score)} opacity-50`} />
       
-      <div className="relative">
-        <div className="flex items-start justify-between mb-4 md:mb-6">
+      <div className="relative p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-xl md:text-2xl font-semibold mb-1">{t("heartScore.title")}</h2>
-            <p className="text-sm md:text-base text-muted-foreground">Today's health snapshot</p>
+            <h2 className="text-lg font-semibold">{t("heartScore.title")}</h2>
+            <p className="text-xs text-muted-foreground">Today's health snapshot</p>
           </div>
-          <div className="flex gap-1 md:gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full h-10 w-10 md:h-12 md:w-12 touch-manipulation"
-              onClick={() => {
-                haptic('light');
-                calculateScore(undefined);
-              }}
-              disabled={isCalculating}
-            >
-              <RefreshCw className={`w-5 h-5 ${isCalculating ? "animate-spin" : ""}`} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full h-10 w-10 md:h-12 md:w-12 touch-manipulation"
-              onClick={() => haptic('light')}
-            >
-              <Info className="w-5 h-5" />
-            </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full h-9 w-9"
+            onClick={() => {
+              haptic('light');
+              calculateScore(undefined);
+            }}
+            disabled={isCalculating}
+          >
+            <RefreshCw className={`w-4 h-4 ${isCalculating ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
+
+        {/* Main Score */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className={`w-20 h-20 rounded-2xl ${getScoreBg(score)} flex items-center justify-center`}>
+            <Heart className={`w-10 h-10 ${getScoreColor(score)}`} fill="currentColor" />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className={`text-5xl font-bold ${getScoreColor(score)}`}>{score}</span>
+              <span className="text-xl text-muted-foreground">/100</span>
+            </div>
+            <p className={`text-sm font-medium ${getScoreColor(score)}`}>{getScoreLabel(score)}</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4 md:mb-6">
-          <div className="flex items-baseline gap-2 md:gap-3">
-            <span className={`text-5xl md:text-6xl lg:text-7xl font-bold ${getScoreColor(score)}`}>
-              {score}
-            </span>
-            <span className="text-2xl md:text-3xl text-muted-foreground">/100</span>
-          </div>
-          <div className={getScoreColor(score)}>
-            <Logo size="lg" showText={false} />
-          </div>
-        </div>
-
-        {/* Score Bar */}
-        <div className="space-y-2 mb-4 md:mb-6">
-          <div className="flex justify-between text-xs md:text-sm">
-            <span className="font-medium">{getScoreLabel(score)}</span>
-          </div>
-          <div className="h-2.5 md:h-3 bg-muted rounded-full overflow-hidden">
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-smooth rounded-full`}
+              className={`h-full bg-gradient-to-r ${getScoreGradient(score)} rounded-full transition-all duration-500`}
               style={{ width: `${score}%` }}
             />
           </div>
@@ -110,34 +108,43 @@ const HeartScoreCard = () => {
 
         {/* Sub-Scores */}
         {todayScore && (
-          <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
-            <div className="bg-muted/50 rounded-lg p-2 md:p-3 text-center">
-              <div className="text-xs md:text-sm text-muted-foreground mb-1">BP</div>
-              <div className={`text-xl md:text-2xl font-bold ${getScoreColor(bpScore)}`}>{bpScore}</div>
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
+              <Activity className="w-4 h-4 text-primary" />
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">BP</p>
+                <p className={`text-lg font-bold leading-none ${getScoreColor(bpScore)}`}>{bpScore}</p>
+              </div>
             </div>
-            <div className="bg-muted/50 rounded-lg p-2 md:p-3 text-center">
-              <div className="text-xs md:text-sm text-muted-foreground mb-1">Sugar</div>
-              <div className={`text-xl md:text-2xl font-bold ${getScoreColor(sugarScore)}`}>{sugarScore}</div>
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
+              <Droplets className="w-4 h-4 text-blue-500" />
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Sugar</p>
+                <p className={`text-lg font-bold leading-none ${getScoreColor(sugarScore)}`}>{sugarScore}</p>
+              </div>
             </div>
-            <div className="bg-muted/50 rounded-lg p-2 md:p-3 text-center">
-              <div className="text-xs md:text-sm text-muted-foreground mb-1">Ritual</div>
-              <div className={`text-xl md:text-2xl font-bold ${getScoreColor(consistencyScore)}`}>{consistencyScore}</div>
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
+              <Calendar className="w-4 h-4 text-violet-500" />
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase">Ritual</p>
+                <p className={`text-lg font-bold leading-none ${getScoreColor(consistencyScore)}`}>{consistencyScore}</p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* AI Insight */}
+        {/* AI Insight or CTA */}
         {aiExplanation ? (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 md:p-4">
-            <p className="text-xs md:text-sm leading-relaxed">
-              <span className="font-semibold text-primary">💡 {t("heartScore.aiExplanation")}:</span>{" "}
+          <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
+            <p className="text-xs leading-relaxed">
+              <span className="font-semibold text-primary">💡</span>{" "}
               {aiExplanation}
             </p>
           </div>
         ) : !todayScore ? (
-          <div className="bg-muted/50 border border-border rounded-xl p-3 md:p-4 text-center">
-            <p className="text-xs md:text-sm text-muted-foreground mb-3">
-              Complete your morning or evening ritual to calculate today's HeartScore
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground mb-2">
+              Complete a ritual to calculate your HeartScore
             </p>
             <Button
               onClick={() => {
@@ -145,13 +152,13 @@ const HeartScoreCard = () => {
                 calculateScore(undefined);
               }}
               disabled={isCalculating}
-              variant="outline"
               size="sm"
-              className="touch-manipulation h-10 md:h-11"
+              variant="outline"
+              className="h-9"
             >
               {isCalculating ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <RefreshCw className="w-3 h-3 mr-1.5 animate-spin" />
                   Calculating...
                 </>
               ) : (
