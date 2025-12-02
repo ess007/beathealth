@@ -7,14 +7,17 @@ import { useHeartScore } from "@/hooks/useHeartScore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, Droplet, TrendingUp, Brain, Sparkles } from "lucide-react";
+import { Activity, Droplet, TrendingUp, FileText, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
 import { Logo } from "@/components/Logo";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Insights = () => {
   const { history } = useHeartScore();
+  const { language } = useLanguage();
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   // Fetch AI-generated insights
   const { data: aiInsights, refetch: refetchInsights } = useQuery({
@@ -110,16 +113,77 @@ const Insights = () => {
     return acc;
   }, []) || [];
 
+  // Generate PDF Report
+  const handleGeneratePdf = async () => {
+    setGeneratingPdf(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-pdf-report');
+      
+      if (error) {
+        if (error.message?.includes('429')) {
+          toast.error(language === 'hi' ? 'बहुत सारी PDF रिपोर्ट। कृपया एक घंटे बाद पुनः प्रयास करें।' : 'Too many PDF reports. Please try again in an hour.');
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      if (data?.pdf) {
+        // Convert base64 to blob and download
+        const byteCharacters = atob(data.pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `beat-health-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        toast.success(language === 'hi' ? 'रिपोर्ट डाउनलोड हो गई!' : 'Report downloaded!');
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast.error(language === 'hi' ? 'रिपोर्ट बनाने में त्रुटि' : 'Failed to generate report');
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-6">
       <Header />
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
-        <div className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">Health Insights</h1>
-          <p className="text-muted-foreground text-base md:text-lg">
-            Track your health trends and get personalized recommendations
-          </p>
+        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
+              {language === 'hi' ? 'स्वास्थ्य इनसाइट्स' : 'Health Insights'}
+            </h1>
+            <p className="text-muted-foreground text-base md:text-lg">
+              {language === 'hi' ? 'अपने स्वास्थ्य रुझान देखें और व्यक्तिगत सिफारिशें प्राप्त करें' : 'Track your health trends and get personalized recommendations'}
+            </p>
+          </div>
+          <Button 
+            onClick={handleGeneratePdf} 
+            disabled={generatingPdf}
+            className="gap-2 shrink-0"
+          >
+            {generatingPdf ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+            {language === 'hi' ? 'PDF रिपोर्ट डाउनलोड करें' : 'Download PDF Report'}
+          </Button>
         </div>
 
         {/* Summary Metrics */}
