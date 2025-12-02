@@ -185,6 +185,80 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_members: {
+        Row: {
+          challenge_id: string
+          completed: boolean | null
+          completed_at: string | null
+          id: string
+          joined_at: string
+          progress: number | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_members_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          reward_points: number | null
+          rule_json: Json | null
+          start_date: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          reward_points?: number | null
+          rule_json?: Json | null
+          start_date: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          reward_points?: number | null
+          rule_json?: Json | null
+          start_date?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string | null
@@ -477,6 +551,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          daily_reminder_enabled: boolean | null
+          email_enabled: boolean | null
+          id: string
+          push_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+          weekly_summary_enabled: boolean | null
+          whatsapp_enabled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          daily_reminder_enabled?: boolean | null
+          email_enabled?: boolean | null
+          id?: string
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+          weekly_summary_enabled?: boolean | null
+          whatsapp_enabled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          daily_reminder_enabled?: boolean | null
+          email_enabled?: boolean | null
+          id?: string
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+          weekly_summary_enabled?: boolean | null
+          whatsapp_enabled?: boolean | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -582,6 +698,39 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_id: string | null
+          referrer_id: string
+          reward_given: boolean | null
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_id?: string | null
+          referrer_id: string
+          reward_given?: boolean | null
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_id?: string | null
+          referrer_id?: string
+          reward_given?: boolean | null
+          status?: string
+        }
+        Relationships: []
+      }
       streaks: {
         Row: {
           count: number
@@ -605,6 +754,48 @@ export type Database = {
           id?: string
           last_logged_at?: string
           type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_type: string
+          razorpay_customer_id: string | null
+          razorpay_subscription_id: string | null
+          status: string
+          trial_end: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          trial_end?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_type?: string
+          razorpay_customer_id?: string | null
+          razorpay_subscription_id?: string | null
+          status?: string
+          trial_end?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

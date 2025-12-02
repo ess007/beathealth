@@ -1,0 +1,98 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { 
+      razorpay_order_id, 
+      razorpay_payment_id, 
+      razorpay_signature,
+      userId,
+      planType 
+    } = await req.json();
+
+    console.log(`Verifying payment for user ${userId}, order: ${razorpay_order_id}`);
+
+    const razorpayKeySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
+
+    if (!razorpayKeySecret) {
+      console.log("Razorpay not configured, assuming demo mode success");
+      return new Response(
+        JSON.stringify({ success: true, message: "Demo mode verification" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify signature using HMAC SHA256
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(razorpayKeySecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const message = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(message));
+    const expectedSignature = Array.from(new Uint8Array(signature))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    if (expectedSignature !== razorpay_signature) {
+      console.error("Signature verification failed");
+      throw new Error("Payment verification failed");
+    }
+
+    console.log("Payment signature verified successfully");
+
+    // Update subscription
+    const currentPeriodEnd = new Date();
+    currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
+
+    const { error: updateError } = await supabaseClient
+      .from("subscriptions")
+      .update({
+        plan_type: planType,
+        status: "active",
+        razorpay_subscription_id: razorpay_payment_id,
+        current_period_start: new Date().toISOString(),
+        current_period_end: currentPeriodEnd.toISOString(),
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("Error updating subscription:", updateError);
+      throw new Error("Failed to update subscription");
+    }
+
+    console.log(`Subscription updated for user ${userId}`);
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Payment verified and subscription activated" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
