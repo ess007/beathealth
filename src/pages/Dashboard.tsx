@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame, Pill, Award } from "lucide-react";
+import { Sun, Moon, Activity, TrendingUp, Users, MessageCircle, Flame, Pill, Award, ShoppingBag, Trophy, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -225,7 +225,7 @@ const Dashboard = () => {
           <span className="w-1 h-6 bg-secondary rounded-full"></span>
           Quick Access
         </h2>
-        <div id="dashboard-grid" className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="dashboard-grid" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
             {
               title: t("dashboard.viewTrends"),
@@ -269,6 +269,31 @@ const Dashboard = () => {
               <span className="font-medium text-sm md:text-base">{item.title}</span>
             </button>
           ))}
+        </div>
+
+        {/* More Features */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          <button
+            onClick={() => navigateTo("/app/shop")}
+            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-200/20 hover:scale-[1.02] transition-transform"
+          >
+            <ShoppingBag className="w-6 h-6 text-amber-600 mb-2" />
+            <span className="text-xs font-medium">Shop</span>
+          </button>
+          <button
+            onClick={() => navigateTo("/app/challenges")}
+            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-200/20 hover:scale-[1.02] transition-transform"
+          >
+            <Trophy className="w-6 h-6 text-emerald-600 mb-2" />
+            <span className="text-xs font-medium">Challenges</span>
+          </button>
+          <button
+            onClick={() => navigateTo("/app/subscription")}
+            className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 hover:scale-[1.02] transition-transform"
+          >
+            <Crown className="w-6 h-6 text-primary mb-2" />
+            <span className="text-xs font-medium">Premium</span>
+          </button>
         </div>
 
         {/* Achievements Ticker */}

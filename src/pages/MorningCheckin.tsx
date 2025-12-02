@@ -11,6 +11,7 @@ import { useHeartScore } from "@/hooks/useHeartScore";
 import { Logo } from "@/components/Logo";
 import { z } from "zod";
 import { haptic } from "@/lib/haptics";
+import { useNavigate } from "react-router-dom";
 
 const healthDataSchema = z.object({
   bpSystolic: z.number().int().min(40, "Systolic must be at least 40").max(300, "Systolic must be at most 300"),
@@ -21,6 +22,7 @@ const healthDataSchema = z.object({
 
 const MorningCheckin = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { calculateScore } = useHeartScore();
   const [step, setStep] = useState(1);
   const [data, setData] = useState({
@@ -43,7 +45,7 @@ const MorningCheckin = () => {
     if (step > 1) {
       setStep(step - 1);
     } else {
-      window.location.href = "/app/home";
+      navigate("/app/home");
     }
   };
 
@@ -154,7 +156,7 @@ const MorningCheckin = () => {
       
       // Delay navigation to show toast and confetti
       setTimeout(() => {
-        window.location.href = "/app/home";
+        navigate("/app/home");
       }, 1000);
     } catch (error) {
       console.error("Error saving morning ritual:", error);
