@@ -4,68 +4,98 @@
 
 @layer base {
   :root {
-    /* Core Palette - "Vitality & Warmth" */
-    --background: 30 20% 98%;
-    --foreground: 240 10% 10%;
+    /* Core Palette - Beat Brand Colors */
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 18%; /* #2E2E2E Slate Text */
 
     /* Glass Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card-foreground: 0 0% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover-foreground: 0 0% 18%;
 
-    /* Brand Colors */
-    --primary: 343 91% 50%; /* Deep Rose */
+    /* Brand Colors - Beat Spec */
+    --primary: 355 82% 56%; /* #E63946 Beat Red */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 343 91% 65%;
+    --primary-glow: 355 82% 70%;
 
-    --secondary: 160 84% 30%; /* Medical Emerald */
+    --secondary: 172 66% 45%; /* #2EC4B6 Beat Mint/Teal */
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 25 95% 55%; /* Energy Orange */
+    --accent: 355 82% 56%; /* Beat Red for accent */
     --accent-foreground: 0 0% 100%;
 
     /* UI Neutrals */
-    --muted: 30 20% 96%;
-    --muted-foreground: 240 5% 45%;
-    --border: 240 5% 90%;
-    --input: 240 5% 90%;
-    --ring: 343 91% 60%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 355 82% 56%;
 
     /* Semantic Health Scores */
-    --score-excellent: 160 84% 39%;
+    --score-excellent: 172 66% 45%; /* Beat Mint */
     --score-good: 142 71% 45%;
     --score-moderate: 35 95% 55%;
     --score-poor: 15 85% 55%;
-    --score-critical: 343 91% 50%;
+    --score-critical: 355 82% 56%; /* Beat Red */
 
     --radius: 1rem;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
   }
 
   .dark {
-    --background: 240 10% 6%; /* Deep Midnight */
+    --background: 0 0% 6%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 10%;
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 10%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 343 91% 60%;
+    --primary: 355 82% 60%; /* Lighter Beat Red for dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 60% 45%;
+    --secondary: 172 60% 50%; /* Lighter Beat Mint */
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 25 90% 60%;
+    --accent: 355 82% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --muted: 240 5% 18%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
 
-    --border: 240 5% 18%;
-    --input: 240 5% 18%;
-    --ring: 343 91% 60%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 355 82% 60%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  /* High Contrast Mode */
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --primary: 355 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 172 100% 30%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 20%;
+    --border: 0 0% 0%;
+  }
+
+  .dark.high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
   }
 }
 
