@@ -14,10 +14,14 @@ import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementBadge } from "@/components/AchievementBadge";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { haptic } from "@/lib/haptics";
+import { QuickLogActions } from "@/components/QuickLogActions";
+import { DailyNudgeCard } from "@/components/DailyNudgeCard";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
   const { achievements, checkAndAwardBadges } = useAchievements();
@@ -42,12 +46,9 @@ const Dashboard = () => {
     return () => container?.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // ... [Preserving existing auth/data fetching logic from your original file] ...
-  // (I'm re-injecting the critical data fetching hooks here to ensure functionality persists)
-
   const navigateTo = (path: string) => {
     haptic("light");
-    window.location.href = path;
+    navigate(path);
   };
 
   const { data: profile } = useQuery({
@@ -113,9 +114,9 @@ const Dashboard = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setUser(session.user);
-      else navigateTo("/auth");
+      else navigate("/auth");
     });
-  }, []);
+  }, [navigate]);
 
   const hour = new Date().getHours();
   const greeting =
@@ -153,6 +154,20 @@ const Dashboard = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Quick Log Actions - Giant Buttons */}
+        <div className="mb-8">
+          <h2 className="text-xl font-serif font-semibold mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-primary rounded-full"></span>
+            {t("dashboard.quickActions") || "Quick Actions"}
+          </h2>
+          <QuickLogActions />
+        </div>
+
+        {/* Daily Nudge Card */}
+        <div className="mb-8">
+          <DailyNudgeCard userId={user?.id} />
         </div>
 
         {/* Main HeartScore Card - Optimized */}

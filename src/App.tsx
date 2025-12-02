@@ -29,6 +29,9 @@ const Achievements = lazy(() => import("./pages/Achievements"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Admin = lazy(() => import("./pages/Admin"));
+const Shop = lazy(() => import("./pages/Shop"));
+const Challenges = lazy(() => import("./pages/Challenges"));
+const Subscription = lazy(() => import("./pages/Subscription"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -109,6 +112,9 @@ const AppContent = () => {
             <Route path="/app/medications" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
             <Route path="/app/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
             <Route path="/app/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/app/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+            <Route path="/app/challenges" element={<ProtectedRoute><Challenges /></ProtectedRoute>} />
+            <Route path="/app/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
