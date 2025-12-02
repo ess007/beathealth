@@ -97,14 +97,14 @@ const Dashboard = () => {
           hasBP: !!morningBP,
           hasSugar: !!fastingSugar,
           hasSleep: !!morningBehavior?.sleep_quality,
-          hasMeds: morningBehavior?.meds_taken !== null,
+          hasMeds: morningBehavior?.meds_taken === true,
         },
         evening: {
           completed: !!eveningBehavior && !!eveningBP,
           hasBP: !!eveningBP,
           hasSugar: !!randomSugar,
           hasSteps: !!eveningBehavior?.steps_count,
-          hasMeds: eveningBehavior?.meds_taken !== null,
+          hasMeds: eveningBehavior?.meds_taken === true,
         },
       };
     },
