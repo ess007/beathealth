@@ -306,46 +306,98 @@ const Landing = () => {
                 </div>
 
                 <div className="bg-muted rounded-[2.5rem] h-[640px] overflow-hidden relative border border-border flex flex-col">
-                  <div className="p-6 pt-8 pb-10 bg-card rounded-b-[2.5rem] shadow-sm z-10">
-                    <div className="flex justify-between items-center mb-8">
+                  {/* Dashboard Header */}
+                  <div className="p-5 pt-6 pb-4 bg-card border-b border-border">
+                    <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-white">
                           RK
                         </div>
                         <div>
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
                             Good Morning
                           </div>
                           <div className="text-sm font-bold">Ravi Kumar</div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="text-center relative">
-                      <div className="text-5xl font-bold tracking-tighter mb-1">87</div>
-                      <div className="text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-full inline-block">
-                        Excellent
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                        <span className="text-orange-500">🔥</span>
+                        <span className="text-sm font-bold text-orange-600">12</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 space-y-4">
-                    <div className="bg-card p-4 rounded-2xl border border-border flex items-center gap-4 shadow-sm">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl">
+                  {/* HeartScore Card */}
+                  <div className="p-4">
+                    <div className="bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-2xl p-4 border border-primary/20 shadow-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                            <Heart className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-xs text-muted-foreground">HeartScore™</div>
+                            <div className="text-2xl font-bold">87</div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-primary font-bold bg-primary/10 px-2 py-1 rounded-full">
+                          Excellent
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="bg-card/60 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">BP</div>
+                          <div className="text-sm font-bold text-blue-500">85</div>
+                        </div>
+                        <div className="bg-card/60 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">Sugar</div>
+                          <div className="text-sm font-bold text-purple-500">88</div>
+                        </div>
+                        <div className="bg-card/60 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">Ritual</div>
+                          <div className="text-sm font-bold text-emerald-500">90</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="px-4 space-y-2">
+                    <div className="bg-card p-3 rounded-xl border border-border flex items-center gap-3 shadow-sm">
+                      <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-lg">
                         🫀
                       </div>
                       <div className="flex-1">
-                        <div className="text-xs text-muted-foreground font-medium">Blood Pressure</div>
-                        <div className="text-base font-bold">118/78</div>
+                        <div className="text-[10px] text-muted-foreground font-medium">Blood Pressure</div>
+                        <div className="text-sm font-bold">118/78 mmHg</div>
                       </div>
+                      <div className="text-[10px] text-emerald-500 font-medium">Normal</div>
                     </div>
-                    <div className="bg-card p-4 rounded-2xl border border-border flex items-center gap-4 shadow-sm">
-                      <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-xl">
+                    <div className="bg-card p-3 rounded-xl border border-border flex items-center gap-3 shadow-sm">
+                      <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-lg">
                         🩸
                       </div>
                       <div className="flex-1">
-                        <div className="text-xs text-muted-foreground font-medium">Sugar (Fasting)</div>
-                        <div className="text-base font-bold">92 mg/dL</div>
+                        <div className="text-[10px] text-muted-foreground font-medium">Fasting Sugar</div>
+                        <div className="text-sm font-bold">92 mg/dL</div>
+                      </div>
+                      <div className="text-[10px] text-emerald-500 font-medium">Optimal</div>
+                    </div>
+                  </div>
+
+                  {/* Rituals */}
+                  <div className="p-4 mt-auto">
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Today's Rituals</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
+                        <div className="text-lg mb-1">☀️</div>
+                        <div className="text-[10px] font-bold text-emerald-600">Morning</div>
+                        <div className="text-[9px] text-emerald-500">✓ Complete</div>
+                      </div>
+                      <div className="bg-muted border border-border rounded-xl p-3 text-center">
+                        <div className="text-lg mb-1">🌙</div>
+                        <div className="text-[10px] font-bold">Evening</div>
+                        <div className="text-[9px] text-muted-foreground">Pending</div>
                       </div>
                     </div>
                   </div>
@@ -700,31 +752,65 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {/* Free Plan */}
             <div className="bg-muted rounded-3xl border-2 border-border p-8">
               <div className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Free Forever</div>
-              <h3 className="text-3xl font-bold mb-2">Beat Basic</h3>
+              <h3 className="text-2xl font-bold mb-2">Beat Free</h3>
               <div className="text-4xl font-bold mb-6">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></div>
               
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 {[
-                  "Daily HeartScore calculation",
-                  "BP & Sugar tracking",
+                  "Daily BP & Sugar logging",
+                  "Basic HeartScore",
                   "Morning & Evening rituals",
-                  "Basic insights & trends",
-                  "Family dashboard (view-only)",
-                  "Medication reminders"
+                  "Streak tracking",
+                  "Medication reminders",
+                  "Basic insights"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">{feature}</span>
+                    <span className="text-sm text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Button variant="outline" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-12">
                 Start Free
+              </Button>
+            </div>
+
+            {/* Basic Plan */}
+            <div className="bg-card rounded-3xl border-2 border-secondary/50 p-8 shadow-lg">
+              <div className="text-sm font-bold text-secondary uppercase tracking-wider mb-2">Starter</div>
+              <h3 className="text-2xl font-bold mb-2">Beat Basic</h3>
+              <div className="text-4xl font-bold mb-1">₹99<span className="text-lg font-normal text-muted-foreground">/month</span></div>
+              <div className="text-sm text-muted-foreground mb-6">Billed monthly</div>
+              
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Everything in Free, plus:",
+                  "Family dashboard access",
+                  "Weekly health summaries",
+                  "Goal tracking & progress",
+                  "Advanced trend charts",
+                  "Export health data"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    {i === 0 ? (
+                      <span className="text-sm font-semibold text-foreground">{feature}</span>
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <Button variant="secondary" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-12">
+                Get Basic
               </Button>
             </div>
 
@@ -735,28 +821,28 @@ const Landing = () => {
               </div>
               
               <div className="text-sm font-bold text-primary uppercase tracking-wider mb-2">Premium</div>
-              <h3 className="text-3xl font-bold mb-2">Beat Coach</h3>
+              <h3 className="text-2xl font-bold mb-2">Beat Coach</h3>
               <div className="text-4xl font-bold mb-1">₹199<span className="text-lg font-normal text-muted-foreground">/month</span></div>
               <div className="text-sm text-muted-foreground mb-6">7-day free trial • Cancel anytime</div>
               
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 {[
-                  "Everything in Free, plus:",
-                  "AI-powered Beat Health Coach",
+                  "Everything in Basic, plus:",
+                  "AI Beat Health Coach",
                   "Advanced correlation insights",
                   "PDF reports for doctors",
-                  "Priority family nudges",
                   "WhatsApp health summaries",
-                  "Goal tracking & achievements",
+                  "Priority family nudges",
+                  "Teleconsult discounts",
                   "Priority support"
                 ].map((feature, i) => (
                   <li key={i} className="flex items-start gap-3">
                     {i === 0 ? (
-                      <span className="font-semibold">{feature}</span>
+                      <span className="text-sm font-semibold text-foreground">{feature}</span>
                     ) : (
                       <>
                         <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </>
                     )}
                   </li>
@@ -821,10 +907,10 @@ const Landing = () => {
 
             <AccordionItem value="item-5" className="border bg-card rounded-2xl px-6 border-border">
               <AccordionTrigger className="hover:no-underline font-semibold text-left">
-                What's included in Beat Coach Premium?
+                What are the pricing tiers?
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed">
-                Premium (₹199/month) adds: AI-powered Beat health coach with personalized advice, advanced correlation insights (e.g., "Your BP is 12% higher after late dinners"), PDF health reports for doctors, WhatsApp weekly summaries, goal tracking with achievements, and priority support. Free tier still includes all core tracking features.
+                Beat offers 3 tiers: <strong>Free</strong> (₹0) includes BP/sugar logging, basic HeartScore, rituals, and medication reminders. <strong>Basic</strong> (₹99/month) adds family dashboard, weekly summaries, and goal tracking. <strong>Premium</strong> (₹199/month) includes everything plus AI Beat health coach, PDF reports for doctors, WhatsApp summaries, teleconsult discounts, and priority support. Start free—upgrade anytime.
               </AccordionContent>
             </AccordionItem>
 
