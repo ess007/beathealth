@@ -260,9 +260,9 @@ const Landing = () => {
                 <span className="text-muted-foreground">The #1 Heart App in India</span>
               </div>
 
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tighter leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold tracking-tighter leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
                 Your heart <br />
-                <span className="font-serif italic font-light bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent pr-4">
+                <span className="italic font-light bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent pr-4">
                   deserves clarity.
                 </span>
               </h1>
@@ -618,7 +618,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl font-bold">Health Hub</h2>
+              <h2 className="text-3xl font-serif font-bold">Health Hub</h2>
               <p className="text-muted-foreground mt-2">Latest tips for a stronger heart.</p>
             </div>
           </div>
@@ -664,8 +664,8 @@ const Landing = () => {
       {/* Experts / Medical Board */}
       <section className="py-24 relative bg-muted/30" id="experts">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-12">
-            Backed by <span className="font-serif italic text-primary">top cardiologists.</span>
+          <h2 className="text-3xl font-serif font-bold mb-12">
+            Backed by <span className="italic text-primary">top cardiologists.</span>
           </h2>
           <div className="flex flex-wrap justify-center gap-8">
             {[
@@ -704,8 +704,8 @@ const Landing = () => {
       <section className="py-32 bg-gradient-to-b from-muted/30 to-background" id="testimonials">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              Real stories from <span className="font-serif italic text-primary">real families</span>
+            <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
+              Real stories from <span className="italic text-primary">real families</span>
             </h2>
             <p className="text-xl text-muted-foreground">
               Over 50,000 families trust Beat to keep their hearts healthy
@@ -744,8 +744,8 @@ const Landing = () => {
       <section className="py-32 bg-background" id="pricing">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              Start free. <span className="font-serif italic text-primary">Upgrade anytime.</span>
+            <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
+              Start free. <span className="italic text-primary">Upgrade anytime.</span>
             </h2>
             <p className="text-xl text-muted-foreground">
               Core features are free forever. No credit card required.
@@ -865,8 +865,8 @@ const Landing = () => {
       {/* FAQ Accordion */}
       <section className="py-24 bg-muted/30" id="faq">
         <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-12">
-            Got questions? <span className="font-serif italic text-primary">We've got answers.</span>
+          <h2 className="text-4xl font-serif font-bold text-center mb-12">
+            Got questions? <span className="italic text-primary">We've got answers.</span>
           </h2>
           <Accordion type="single" collapsible className="space-y-4">
             <AccordionItem value="item-1" className="border bg-card rounded-2xl px-6 border-border">

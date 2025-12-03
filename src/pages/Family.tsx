@@ -100,7 +100,7 @@ const Family = () => {
             </p>
           </div>
           
-          <FeatureGate feature="family_dashboard">
+          <FeatureGate feature="family_dashboard" requiredTier="basic">
             <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -170,7 +170,7 @@ const Family = () => {
         )}
 
         {/* Tabs */}
-        <FeatureGate feature="family_dashboard">
+        <FeatureGate feature="family_dashboard" requiredTier="basic">
           <Tabs defaultValue="family" className="w-full">
             <TabsList className="grid w-full grid-cols-2 h-12 mb-6">
               <TabsTrigger value="family" className="gap-2">
