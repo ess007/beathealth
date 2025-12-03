@@ -260,9 +260,9 @@ const Landing = () => {
                 <span className="text-muted-foreground">The #1 Heart App in India</span>
               </div>
 
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold tracking-tighter leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-bold tracking-tighter leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 pr-4">
                 Your heart <br />
-                <span className="italic font-light bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent pr-4">
+                <span className="italic font-light bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                   deserves clarity.
                 </span>
               </h1>
@@ -558,14 +558,17 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-xl">
-            <div className="grid grid-cols-3 gap-px bg-border">
-              <div className="bg-card p-6"></div>
-              <div className="bg-muted p-6 text-center">
-                <div className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Traditional Apps</div>
+          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-xl overflow-x-auto">
+            <div className="grid grid-cols-3 gap-px bg-border min-w-[400px]">
+              <div className="bg-card p-4 md:p-6"></div>
+              <div className="bg-muted p-3 md:p-6 text-center">
+                <div className="text-[10px] md:text-sm font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Traditional Apps</div>
               </div>
-              <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-6 text-center border-2 border-primary/30">
-                <div className="text-sm font-bold text-primary uppercase tracking-wider">Beat</div>
+              <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-6 text-center border-2 border-primary/30">
+                <div className="flex flex-col items-center gap-1">
+                  <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                  <div className="text-[10px] md:text-sm font-bold text-primary uppercase tracking-wider">Beat</div>
+                </div>
               </div>
             </div>
 
@@ -581,24 +584,24 @@ const Landing = () => {
               { feature: "Medication Reminders", traditional: true, beat: true },
               { feature: "Basic BP/Sugar Logging", traditional: true, beat: true }
             ].map((row, i) => (
-              <div key={i} className="grid grid-cols-3 gap-px bg-border">
-                <div className="bg-card p-4 flex items-center">
-                  <span className="text-sm font-medium">{row.feature}</span>
+              <div key={i} className="grid grid-cols-3 gap-px bg-border min-w-[400px]">
+                <div className="bg-card p-3 md:p-4 flex items-center">
+                  <span className="text-xs md:text-sm font-medium">{row.feature}</span>
                 </div>
-                <div className="bg-muted p-4 flex items-center justify-center">
+                <div className="bg-muted p-3 md:p-4 flex items-center justify-center">
                   {row.traditional === true ? (
-                    <Check className="w-5 h-5 text-muted-foreground" />
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
                   ) : row.traditional === false ? (
-                    <X className="w-5 h-5 text-muted-foreground/30" />
+                    <X className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground/30" />
                   ) : (
-                    <span className="text-xs text-muted-foreground">{row.traditional}</span>
+                    <span className="text-[10px] md:text-xs text-muted-foreground">{row.traditional}</span>
                   )}
                 </div>
-                <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-4 flex items-center justify-center">
+                <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-3 md:p-4 flex items-center justify-center">
                   {row.beat === true ? (
-                    <Check className="w-5 h-5 text-primary" />
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                   ) : (
-                    <span className="text-xs text-muted-foreground">{row.beat}</span>
+                    <span className="text-[10px] md:text-xs text-muted-foreground">{row.beat}</span>
                   )}
                 </div>
               </div>

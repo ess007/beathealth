@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export type PlanType = "free" | "basic" | "premium";
 
@@ -20,8 +21,9 @@ interface Subscription {
 
 export const useSubscription = () => {
   const queryClient = useQueryClient();
+  const [checkoutPlan, setCheckoutPlan] = useState<"basic" | "premium" | null>(null);
 
-  const { data: subscription, isLoading } = useQuery({
+  const { data: subscription, isLoading, refetch } = useQuery({
     queryKey: ["subscription"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -67,26 +69,24 @@ export const useSubscription = () => {
     return false;
   };
 
+  const openCheckout = (planType: "basic" | "premium") => {
+    setCheckoutPlan(planType);
+  };
+
+  const closeCheckout = () => {
+    setCheckoutPlan(null);
+  };
+
+  const onCheckoutSuccess = () => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: ["subscription"] });
+  };
+
+  // Legacy mutation for backwards compatibility
   const createCheckout = useMutation({
     mutationFn: async (planType: PlanType) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { planType, userId: user.id, email: user.email },
-      });
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      if (data?.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      }
-    },
-    onError: (error) => {
-      console.error("Checkout error:", error);
-      toast.error("Failed to create checkout session");
+      if (planType === "free") return;
+      openCheckout(planType as "basic" | "premium");
     },
   });
 
@@ -97,7 +97,16 @@ export const useSubscription = () => {
     isBasic,
     isFree,
     canAccessFeature,
-    createCheckout: createCheckout.mutate,
-    isCreatingCheckout: createCheckout.isPending,
+    // New checkout flow
+    checkoutPlan,
+    openCheckout,
+    closeCheckout,
+    onCheckoutSuccess,
+    refetch,
+    // Legacy
+    createCheckout: (planType: PlanType) => {
+      if (planType !== "free") openCheckout(planType as "basic" | "premium");
+    },
+    isCreatingCheckout: false,
   };
 };
