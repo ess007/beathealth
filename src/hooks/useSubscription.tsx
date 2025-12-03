@@ -48,12 +48,21 @@ export const useSubscription = () => {
   const isFree = !subscription || subscription?.plan_type === "free";
 
   const canAccessFeature = (feature: string): boolean => {
-    const premiumFeatures = ["ai_coach", "pdf_reports", "advanced_insights", "priority_support"];
-    const basicFeatures = ["family_dashboard", "weekly_summary"];
+    // Premium-only features (₹199/month)
+    const premiumFeatures = ["ai_coach", "pdf_reports", "advanced_insights", "priority_support", "teleconsult", "whatsapp_summary"];
+    // Basic features (₹99/month)
+    const basicFeatures = ["family_dashboard", "weekly_summary", "goal_tracking"];
+    // Free features (always accessible)
+    const freeFeatures = ["bp_logging", "sugar_logging", "streak_tracking", "basic_insights", "medication_reminders"];
 
+    // Premium users get everything
     if (isPremium) return true;
+    
+    // Basic users get basic + free features
     if (isBasic && !premiumFeatures.includes(feature)) return true;
-    if (!premiumFeatures.includes(feature) && !basicFeatures.includes(feature)) return true;
+    
+    // Free users get free features only
+    if (freeFeatures.includes(feature)) return true;
 
     return false;
   };

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Send, User, Trash2, MessageSquare } from "lucide-react";
+import { Send, User, Trash2, MessageSquare, Sparkles, AlertTriangle } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { VoiceInput } from "@/components/VoiceInput";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { FeatureGate } from "@/components/FeatureGate";
 
 interface Message {
   role: "user" | "assistant";
@@ -61,7 +62,7 @@ const AICoach = () => {
       .order("created_at", { ascending: true });
 
     if (error) {
-      toast.error("Failed to load conversation");
+      toast.error(language === 'hi' ? 'बातचीत लोड करने में त्रुटि' : 'Failed to load conversation');
       return;
     }
 
@@ -78,7 +79,7 @@ const AICoach = () => {
         .insert({
           user_id: user.id,
           language,
-          title: "New Conversation",
+          title: language === 'hi' ? 'नई बातचीत' : 'New Conversation',
         })
         .select()
         .single();
@@ -91,16 +92,6 @@ const AICoach = () => {
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
     },
   });
-
-  // Save message to database
-  const saveMessage = async (role: "user" | "assistant", content: string) => {
-    if (!conversationId) return;
-    await supabase.from("chat_messages").insert({
-      conversation_id: conversationId,
-      role,
-      content,
-    });
-  };
 
   // Delete conversation
   const deleteConversation = useMutation({
@@ -121,7 +112,6 @@ const AICoach = () => {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    // Create conversation if not exists
     let currentConvId = conversationId;
     if (!currentConvId && user?.id) {
       const { data: newConv } = await supabase
@@ -145,7 +135,6 @@ const AICoach = () => {
     setInput("");
     setIsLoading(true);
 
-    // Save user message
     if (currentConvId) {
       await supabase.from("chat_messages").insert({
         conversation_id: currentConvId,
@@ -164,9 +153,9 @@ const AICoach = () => {
 
       if (error) {
         if (error.message?.includes("429")) {
-          toast.error("Rate limit exceeded. Please try again later.");
+          toast.error(language === 'hi' ? 'सीमा पार। कृपया बाद में प्रयास करें।' : "Rate limit exceeded. Please try again later.");
         } else if (error.message?.includes("402")) {
-          toast.error("Payment required. Please add credits to continue.");
+          toast.error(language === 'hi' ? 'भुगतान आवश्यक। कृपया क्रेडिट जोड़ें।' : "Payment required. Please add credits to continue.");
         } else {
           throw error;
         }
@@ -207,13 +196,12 @@ const AICoach = () => {
                   });
                 }
               } catch (e) {
-                // Ignore parsing errors for incomplete chunks
+                // Ignore parsing errors
               }
             }
           }
         }
 
-        // Save assistant message
         if (currentConvId && assistantContent) {
           await supabase.from("chat_messages").insert({
             conversation_id: currentConvId,
@@ -224,23 +212,43 @@ const AICoach = () => {
       }
     } catch (error) {
       console.error("Chat error:", error);
-      toast.error("Failed to send message. Please try again.");
+      toast.error(language === 'hi' ? 'संदेश भेजने में त्रुटि' : "Failed to send message. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const suggestedQuestions = language === 'hi' 
+    ? [
+        "मेरा BP 140/90 है, क्या यह खतरनाक है?",
+        "शुगर कम करने के लिए क्या खाएं?",
+        "रात को अच्छी नींद के लिए टिप्स",
+        "क्या चाय पीना BP बढ़ाता है?"
+      ]
+    : [
+        "Is 140/90 BP dangerous for me?",
+        "What foods help lower blood sugar?",
+        "Tips for better sleep at night",
+        "Does drinking tea raise BP?"
+      ];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-background flex flex-col pb-24 md:pb-0">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-4 md:py-6 max-w-4xl flex flex-col">
-        <div className="mb-4 md:mb-6 flex items-center justify-between">
+      <main className="flex-1 container mx-auto px-4 py-5 max-w-4xl flex flex-col">
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo size="md" showText={false} />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Logo size="sm" showText={false} />
+            </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Beat AI Coach</h1>
-              <p className="text-muted-foreground text-sm md:text-base">
+              <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+                Beat AI Coach
+                <Sparkles className="w-5 h-5 text-primary" />
+              </h1>
+              <p className="text-xs text-muted-foreground">
                 {language === "hi" ? "आपका व्यक्तिगत स्वास्थ्य सलाहकार" : "Your personal health advisor"}
               </p>
             </div>
@@ -250,10 +258,21 @@ const AICoach = () => {
             size="sm"
             onClick={() => createConversation.mutate()}
             disabled={createConversation.isPending}
+            className="gap-2"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            {language === "hi" ? "नई चैट" : "New Chat"}
+            <MessageSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">{language === "hi" ? "नई चैट" : "New Chat"}</span>
           </Button>
+        </div>
+
+        {/* Medical Disclaimer */}
+        <div className="flex items-start gap-2 p-3 mb-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-muted-foreground">
+            {language === 'hi' 
+              ? 'यह AI सलाह है, चिकित्सा निदान नहीं। गंभीर लक्षणों के लिए डॉक्टर से मिलें।'
+              : 'This is AI guidance, not medical diagnosis. Consult a doctor for serious symptoms.'}
+          </p>
         </div>
 
         {/* Conversation History */}
@@ -264,10 +283,10 @@ const AICoach = () => {
                 key={conv.id}
                 variant={conversationId === conv.id ? "default" : "outline"}
                 size="sm"
-                className="shrink-0 gap-2"
+                className="shrink-0 gap-2 rounded-full"
                 onClick={() => loadConversation(conv.id)}
               >
-                {conv.title?.substring(0, 20) || "Conversation"}
+                {conv.title?.substring(0, 20) || "Chat"}
                 {conversationId === conv.id && (
                   <Trash2
                     className="w-3 h-3 opacity-50 hover:opacity-100"
@@ -283,58 +302,79 @@ const AICoach = () => {
         )}
 
         {/* Messages */}
-        <Card className="flex-1 p-4 mb-4 overflow-y-auto shadow-elevated min-h-[400px]">
-          {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center text-muted-foreground">
-              <div>
-                <Logo size="lg" showText={false} className="mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">
-                  {language === "hi" ? "नमस्ते! मैं बीट हूं 👋" : "Hello! I'm Beat 👋"}
+        <FeatureGate feature="ai_coach">
+          <Card className="flex-1 p-4 mb-4 overflow-y-auto border-border/50 min-h-[400px] max-h-[60vh]">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4">
+                  <Logo size="lg" showText={false} className="opacity-50" />
+                </div>
+                <p className="text-lg font-semibold mb-2">
+                  {language === "hi" ? "नमस्ते! मैं Beat हूं 👋" : "Hello! I'm Beat 👋"}
                 </p>
-                <p className="text-sm max-w-md">
+                <p className="text-sm text-muted-foreground max-w-sm mb-6">
                   {language === "hi"
-                    ? "अपने स्वास्थ्य के बारे में कोई भी सवाल पूछें। मैं यहां आपकी मदद के लिए हूं।"
-                    : "Ask me anything about your health. I'm here to help you on your wellness journey."}
+                    ? "अपने स्वास्थ्य के बारे में कोई भी सवाल पूछें।"
+                    : "Ask me anything about your health. I'm here to help."}
                 </p>
+                
+                {/* Suggested Questions */}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {suggestedQuestions.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setInput(q)}
+                      className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((msg, idx) => (
-                <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  {msg.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+            ) : (
+              <div className="space-y-4">
+                {messages.map((msg, idx) => (
+                  <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                    {msg.role === "assistant" && (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
+                        <Logo size="sm" showText={false} />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        msg.role === "user" 
+                          ? "bg-primary text-primary-foreground" 
+                          : "bg-muted"
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    </div>
+                    {msg.role === "user" && (
+                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                        <User className="w-4 h-4 text-secondary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                       <Logo size="sm" showText={false} />
                     </div>
-                  )}
-                  <div
-                    className={`max-w-[80%] rounded-2xl p-4 ${
-                      msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                  </div>
-                  {msg.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-secondary-foreground" />
+                    <div className="bg-muted rounded-2xl px-4 py-3">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <Logo size="sm" showText={false} />
                   </div>
-                  <div className="bg-muted rounded-2xl p-4">
-                    <p className="text-muted-foreground">{t("coach.thinking")}</p>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </Card>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </Card>
+        </FeatureGate>
 
         {/* Input */}
         <div className="flex gap-2">
@@ -344,7 +384,7 @@ const AICoach = () => {
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
             placeholder={language === "hi" ? "अपना सवाल पूछें..." : "Ask your question..."}
             disabled={isLoading}
-            className="h-12 text-base flex-1"
+            className="h-12 text-base flex-1 rounded-xl"
           />
           <VoiceInput
             onTranscript={(text) => {
@@ -353,7 +393,7 @@ const AICoach = () => {
             }}
             disabled={isLoading}
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-12 w-12">
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-12 w-12 rounded-xl">
             <Send className="h-5 w-5" />
           </Button>
         </div>
