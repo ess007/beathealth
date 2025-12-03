@@ -6,29 +6,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Activity, Droplet, TrendingUp, FileText, Loader2, Download } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { Activity, Droplet, TrendingUp, Download, Loader2, Sparkles, Brain, Target } from "lucide-react";
 import { toast } from "sonner";
 import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { FeatureGate } from "@/components/FeatureGate";
 
 const Insights = () => {
-  const { history } = useHeartScore();
+  const { history, todayScore } = useHeartScore();
   const { language } = useLanguage();
-  const [loadingInsights, setLoadingInsights] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
   // Fetch AI-generated insights
-  const { data: aiInsights, refetch: refetchInsights } = useQuery({
+  const { data: aiInsights, isLoading: insightsLoading } = useQuery({
     queryKey: ["ai-insights"],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('generate-insights');
-      
       if (error) throw error;
       return data;
     },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch BP logs for last 30 days
@@ -80,35 +79,27 @@ const Insights = () => {
     consistency: score.consistency_score,
   })) || [];
 
-  // Transform BP data for chart (group by day)
+  // Transform BP data for chart
   const bpData = bpLogs?.reduce((acc: any[], log) => {
     const date = new Date(log.measured_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const existing = acc.find((item) => item.date === date);
     if (existing) {
-      existing.systolic = (existing.systolic + log.systolic) / 2;
-      existing.diastolic = (existing.diastolic + log.diastolic) / 2;
+      existing.systolic = Math.round((existing.systolic + log.systolic) / 2);
+      existing.diastolic = Math.round((existing.diastolic + log.diastolic) / 2);
     } else {
-      acc.push({
-        date,
-        systolic: log.systolic,
-        diastolic: log.diastolic,
-      });
+      acc.push({ date, systolic: log.systolic, diastolic: log.diastolic });
     }
     return acc;
   }, []) || [];
 
-  // Transform sugar data for chart (group by day)
+  // Transform sugar data for chart
   const sugarData = sugarLogs?.reduce((acc: any[], log) => {
     const date = new Date(log.measured_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const existing = acc.find((item) => item.date === date);
     if (existing) {
-      existing.glucose = (existing.glucose + log.glucose_mg_dl) / 2;
+      existing.glucose = Math.round((existing.glucose + log.glucose_mg_dl) / 2);
     } else {
-      acc.push({
-        date,
-        glucose: log.glucose_mg_dl,
-        type: log.measurement_type,
-      });
+      acc.push({ date, glucose: log.glucose_mg_dl, type: log.measurement_type });
     }
     return acc;
   }, []) || [];
@@ -129,7 +120,6 @@ const Insights = () => {
       }
 
       if (data?.pdf) {
-        // Convert base64 to blob and download
         const byteCharacters = atob(data.pdf);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -138,7 +128,6 @@ const Insights = () => {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: 'application/pdf' });
         
-        // Create download link
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -158,232 +147,232 @@ const Insights = () => {
     }
   };
 
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-secondary";
+    if (score >= 70) return "text-score-good";
+    if (score >= 60) return "text-score-moderate";
+    return "text-primary";
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-6">
+    <div className="min-h-screen bg-background pb-24 md:pb-6">
       <Header />
 
-      <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl">
-        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <main className="container mx-auto px-4 py-5 max-w-6xl">
+        {/* Header */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">
               {language === 'hi' ? 'स्वास्थ्य इनसाइट्स' : 'Health Insights'}
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
-              {language === 'hi' ? 'अपने स्वास्थ्य रुझान देखें और व्यक्तिगत सिफारिशें प्राप्त करें' : 'Track your health trends and get personalized recommendations'}
+            <p className="text-sm text-muted-foreground">
+              {language === 'hi' ? 'अपने स्वास्थ्य रुझान देखें' : 'Track your health trends and patterns'}
             </p>
           </div>
-          <Button 
-            onClick={handleGeneratePdf} 
-            disabled={generatingPdf}
-            className="gap-2 shrink-0"
-          >
-            {generatingPdf ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4" />
-            )}
-            {language === 'hi' ? 'PDF रिपोर्ट डाउनलोड करें' : 'Download PDF Report'}
-          </Button>
+          <FeatureGate feature="pdf_reports">
+            <Button 
+              onClick={handleGeneratePdf} 
+              disabled={generatingPdf}
+              className="gap-2 shrink-0"
+            >
+              {generatingPdf ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {language === 'hi' ? 'PDF रिपोर्ट' : 'PDF Report'}
+            </Button>
+          </FeatureGate>
         </div>
 
-        {/* Summary Metrics */}
-        {aiInsights?.summary && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="flex items-center gap-2 mb-2">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Activity className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium text-muted-foreground uppercase">Avg BP</span>
               </div>
-              <p className="text-2xl font-bold">{aiInsights.summary.avgSystolic}/{aiInsights.summary.avgDiastolic}</p>
-              <p className="text-xs text-muted-foreground">{aiInsights.summary.dataPoints.bp} readings</p>
-            </Card>
-            
-            <Card className="p-4 bg-gradient-to-br from-secondary/10 to-secondary/5">
-              <div className="flex items-center gap-2 mb-2">
+            </div>
+            <p className="text-xs text-muted-foreground mb-0.5">Avg BP</p>
+            <p className="text-xl font-bold">{aiInsights?.summary?.avgSystolic || '--'}/{aiInsights?.summary?.avgDiastolic || '--'}</p>
+          </Card>
+          
+          <Card className="p-4 bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
                 <Droplet className="w-4 h-4 text-secondary" />
-                <span className="text-xs font-medium text-muted-foreground uppercase">Avg Sugar</span>
               </div>
-              <p className="text-2xl font-bold">{aiInsights.summary.avgSugar}</p>
-              <p className="text-xs text-muted-foreground">{aiInsights.summary.dataPoints.sugar} readings</p>
-            </Card>
-            
-            <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5">
-              <div className="flex items-center gap-2 mb-2">
-                <Logo size="sm" showText={false} className="w-4 h-4" />
-                <span className="text-xs font-medium text-muted-foreground uppercase">HeartScore</span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-0.5">Avg Sugar</p>
+            <p className="text-xl font-bold">{aiInsights?.summary?.avgSugar || '--'} mg/dL</p>
+          </Card>
+          
+          <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Logo size="sm" showText={false} />
               </div>
-              <p className="text-2xl font-bold">{aiInsights.summary.avgHeartScore}/100</p>
-              <p className="text-xs text-muted-foreground">30-day average</p>
-            </Card>
-            
-            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-xs font-medium text-muted-foreground uppercase">Activity</span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-0.5">HeartScore</p>
+            <p className={`text-xl font-bold ${getScoreColor(todayScore?.heart_score || 0)}`}>
+              {todayScore?.heart_score || '--'}/100
+            </p>
+          </Card>
+          
+          <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-blue-500" />
               </div>
-              <p className="text-2xl font-bold">{aiInsights.summary.avgSteps}</p>
-              <p className="text-xs text-muted-foreground">steps/day</p>
-            </Card>
-          </div>
-        )}
+            </div>
+            <p className="text-xs text-muted-foreground mb-0.5">Avg Steps</p>
+            <p className="text-xl font-bold">{aiInsights?.summary?.avgSteps || '--'}</p>
+          </Card>
+        </div>
 
-        {/* Charts Tabs */}
-        <Tabs defaultValue="heartscore" className="space-y-6 mb-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="heartscore">
-              <Logo size="sm" showText={false} className="w-4 h-4 mr-2" />
-              HeartScore
+        {/* AI Insights Card */}
+        <FeatureGate feature="advanced_insights">
+          {aiInsights?.insights && (
+            <Card className="p-5 mb-6 bg-gradient-to-br from-primary/5 via-card to-secondary/5 border-primary/20">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1 flex items-center gap-2">
+                    AI Health Insights
+                    <Sparkles className="w-4 h-4 text-primary" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Personalized analysis based on your health data</p>
+                </div>
+              </div>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{aiInsights.insights}</p>
+              </div>
+            </Card>
+          )}
+        </FeatureGate>
+
+        {/* Charts */}
+        <Tabs defaultValue="heartscore" className="space-y-4 mb-6">
+          <TabsList className="grid w-full grid-cols-3 h-12">
+            <TabsTrigger value="heartscore" className="gap-2">
+              <Logo size="sm" showText={false} className="w-4 h-4" />
+              <span className="hidden sm:inline">HeartScore</span>
             </TabsTrigger>
-            <TabsTrigger value="bp">
-              <Activity className="w-4 h-4 mr-2" />
-              Blood Pressure
+            <TabsTrigger value="bp" className="gap-2">
+              <Activity className="w-4 h-4" />
+              <span className="hidden sm:inline">BP</span>
             </TabsTrigger>
-            <TabsTrigger value="sugar">
-              <Droplet className="w-4 h-4 mr-2" />
-              Blood Sugar
+            <TabsTrigger value="sugar" className="gap-2">
+              <Droplet className="w-4 h-4" />
+              <span className="hidden sm:inline">Sugar</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="heartscore" className="space-y-6">
-            <Card className="p-6">
+          <TabsContent value="heartscore">
+            <Card className="p-5 border-border/50">
               <h3 className="text-lg font-semibold mb-4">HeartScore Trend (30 Days)</h3>
               {heartScoreData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={heartScoreData}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={heartScoreData}>
+                    <defs>
+                      <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[0, 100]} className="text-xs" />
+                    <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis domain={[0, 100]} className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                       }}
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="score"
                       stroke="hsl(var(--primary))"
                       strokeWidth={3}
-                      dot={{ fill: "hsl(var(--primary))" }}
+                      fill="url(#colorScore)"
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Complete rituals to see your HeartScore trends</p>
+                    <Target className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Complete rituals to see your HeartScore trends</p>
                   </div>
                 </div>
               )}
             </Card>
-
-            {/* Sub-scores */}
-            {heartScoreData.length > 0 && (
-              <div className="grid md:grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Avg BP Score</div>
-                  <div className="text-3xl font-bold text-score-good">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.bp, 0) / heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Avg Sugar Score</div>
-                  <div className="text-3xl font-bold text-score-good">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.sugar, 0) / heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="text-sm text-muted-foreground mb-2">Ritual Consistency</div>
-                  <div className="text-3xl font-bold text-score-excellent">
-                    {Math.round(
-                      heartScoreData.reduce((sum, d) => sum + d.consistency, 0) /
-                        heartScoreData.length
-                    )}
-                  </div>
-                </Card>
-              </div>
-            )}
           </TabsContent>
 
-          <TabsContent value="bp" className="space-y-6">
-            <Card className="p-6">
+          <TabsContent value="bp">
+            <Card className="p-5 border-border/50">
               <h3 className="text-lg font-semibold mb-4">Blood Pressure Trend (30 Days)</h3>
               {bpData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={bpData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[60, 180]} className="text-xs" />
+                    <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis domain={[60, 180]} className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                       }}
                     />
-                    <Line
-                      type="monotone"
-                      dataKey="systolic"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      name="Systolic"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="diastolic"
-                      stroke="hsl(var(--secondary))"
-                      strokeWidth={2}
-                      name="Diastolic"
-                    />
+                    <Line type="monotone" dataKey="systolic" stroke="hsl(var(--primary))" strokeWidth={2} name="Systolic" dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="diastolic" stroke="hsl(var(--secondary))" strokeWidth={2} name="Diastolic" dot={{ r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
-                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Log BP readings to see trends</p>
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Log BP readings to see trends</p>
                   </div>
                 </div>
               )}
             </Card>
           </TabsContent>
 
-          <TabsContent value="sugar" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Sugar Levels Trend (30 Days)</h3>
+          <TabsContent value="sugar">
+            <Card className="p-5 border-border/50">
+              <h3 className="text-lg font-semibold mb-4">Blood Sugar Trend (30 Days)</h3>
               {sugarData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={sugarData}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={sugarData}>
+                    <defs>
+                      <linearGradient id="colorSugar" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis domain={[60, 250]} className="text-xs" />
+                    <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis domain={[60, 250]} className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
                         border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
+                        borderRadius: "12px",
                       }}
                     />
-                    <Line
-                      type="monotone"
-                      dataKey="glucose"
-                      stroke="hsl(var(--accent))"
-                      strokeWidth={3}
-                      dot={{ fill: "hsl(var(--accent))" }}
-                    />
-                  </LineChart>
+                    <Area type="monotone" dataKey="glucose" stroke="hsl(var(--secondary))" strokeWidth={3} fill="url(#colorSugar)" />
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-64 flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
-                    <Droplet className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Log sugar levels to see trends</p>
+                    <Droplet className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">Log sugar levels to see trends</p>
                   </div>
                 </div>
               )}
@@ -391,11 +380,10 @@ const Insights = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Health Goals Tracker */}
-        <div className="mb-6">
+        {/* Health Goals */}
+        <section>
           <HealthGoalsTracker />
-        </div>
-
+        </section>
       </main>
     </div>
   );
