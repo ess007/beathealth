@@ -81,6 +81,8 @@ const Dashboard = () => {
       };
     },
     enabled: !!user?.id,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   useEffect(() => {
@@ -89,6 +91,40 @@ const Dashboard = () => {
       else navigate("/auth");
     });
   }, [navigate]);
+
+  // Real-time subscription for ritual updates
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const behaviorChannel = supabase
+      .channel('dashboard-behavior-logs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'behavior_logs', filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
+      })
+      .subscribe();
+
+    const bpChannel = supabase
+      .channel('dashboard-bp-logs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bp_logs', filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
+      })
+      .subscribe();
+
+    const sugarChannel = supabase
+      .channel('dashboard-sugar-logs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sugar_logs', filter: `user_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["rituals", user.id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(behaviorChannel);
+      supabase.removeChannel(bpChannel);
+      supabase.removeChannel(sugarChannel);
+    };
+  }, [user?.id, queryClient]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
