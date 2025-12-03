@@ -6,10 +6,11 @@ import { Check, Crown, Sparkles, Shield, MessageCircle, FileText, Phone, Zap } f
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Logo } from "@/components/Logo";
+import { RazorpayCheckout } from "@/components/RazorpayCheckout";
 
 const Subscription = () => {
   const { language } = useLanguage();
-  const { subscription, isPremium, isBasic, createCheckout, isCreatingCheckout } = useSubscription();
+  const { subscription, isPremium, isBasic, checkoutPlan, openCheckout, closeCheckout, onCheckoutSuccess } = useSubscription();
 
   const plans = [
     {
@@ -184,16 +185,16 @@ const Subscription = () => {
                   <Button 
                     className={`w-full ${plan.popular ? "bg-gradient-to-r from-primary to-accent" : ""}`}
                     variant={plan.popular ? "default" : "outline"}
-                    onClick={() => createCheckout(plan.id as any)}
-                    disabled={isCreatingCheckout}
+                    onClick={() => plan.id !== "free" && openCheckout(plan.id as "basic" | "premium")}
+                    disabled={plan.id === "free"}
                   >
-                    {isCreatingCheckout ? (
-                      language === "hi" ? "लोड हो रहा..." : "Loading..."
-                    ) : plan.id === "premium" ? (
+                    {plan.id === "premium" ? (
                       <>
                         <Zap className="w-4 h-4 mr-2" />
                         {language === "hi" ? "7 दिन मुफ्त ट्राई करें" : "Start 7-day Free Trial"}
                       </>
+                    ) : plan.id === "free" ? (
+                      language === "hi" ? "मुफ्त प्लान" : "Free Plan"
                     ) : (
                       language === "hi" ? "अपग्रेड करें" : "Upgrade"
                     )}
@@ -220,6 +221,16 @@ const Subscription = () => {
           </div>
         </div>
       </main>
+
+      {/* Razorpay Checkout Modal */}
+      {checkoutPlan && (
+        <RazorpayCheckout 
+          open={!!checkoutPlan}
+          onClose={closeCheckout}
+          planType={checkoutPlan}
+          onSuccess={onCheckoutSuccess}
+        />
+      )}
     </div>
   );
 };
