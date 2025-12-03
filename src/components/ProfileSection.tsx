@@ -96,7 +96,7 @@ export const ProfileSection = () => {
                 <span className="hidden md:inline">Connect Devices</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Connect Fitness Trackers</DialogTitle>
               </DialogHeader>

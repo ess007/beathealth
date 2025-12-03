@@ -48,12 +48,12 @@ export const useSubscription = () => {
   const isFree = !subscription || subscription?.plan_type === "free";
 
   const canAccessFeature = (feature: string): boolean => {
-    // Premium-only features (₹199/month)
-    const premiumFeatures = ["ai_coach", "pdf_reports", "advanced_insights", "priority_support", "teleconsult", "whatsapp_summary"];
-    // Basic features (₹99/month)
-    const basicFeatures = ["family_dashboard", "weekly_summary", "goal_tracking"];
-    // Free features (always accessible)
-    const freeFeatures = ["bp_logging", "sugar_logging", "streak_tracking", "basic_insights", "medication_reminders"];
+    // Premium-only features (₹199/month) - AI coaching, PDF reports, advanced insights, priority support, teleconsult, whatsapp summaries
+    const premiumFeatures = ["ai_coach", "pdf_reports", "advanced_insights", "priority_support", "teleconsult", "whatsapp_summary", "priority_nudges", "correlation_insights"];
+    // Basic features (₹99/month) - Family dashboard, weekly summaries, goal tracking, trend charts, data export
+    const basicFeatures = ["family_dashboard", "weekly_summary", "goal_tracking", "trend_charts", "data_export"];
+    // Free features (always accessible) - BP/Sugar logging, basic insights, streaks, medication reminders, rituals
+    const freeFeatures = ["bp_logging", "sugar_logging", "streak_tracking", "basic_insights", "medication_reminders", "rituals", "basic_heartscore"];
 
     // Premium users get everything
     if (isPremium) return true;
