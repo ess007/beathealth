@@ -260,9 +260,9 @@ const Landing = () => {
                 <span className="text-muted-foreground">The #1 Heart App in India</span>
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-serif font-bold tracking-tighter leading-[1] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 pr-4">
-                Your heart <br />
-                <span className="italic font-light bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tight leading-[1.05] mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 pr-4">
+                <span className="font-heading">Your heart</span> <br />
+                <span className="font-serif italic bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#FF8C7A] to-accent">
                   deserves clarity.
                 </span>
               </h1>
@@ -438,55 +438,92 @@ const Landing = () => {
       </section>
 
       {/* Features Grid with Spotlight */}
-      <section className="py-32 relative" id="features">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="mb-20">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+      <section className="py-24 md:py-32 relative" id="features">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="mb-16 md:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
               Designed for <span className="font-serif italic text-primary">real life.</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
               Traditional medical apps are ugly and confusing. Beat is built to be used before your morning chai, in
               less than 30 seconds.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]" id="features-grid">
-            <div className="spotlight-card md:col-span-2 group relative bg-card rounded-[2rem] border border-border p-8 flex flex-col justify-between hover:border-primary/50 transition-colors overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-auto md:auto-rows-[300px]" id="features-grid">
+            {/* HeartScore - Large Card */}
+            <div className="spotlight-card md:col-span-2 group relative bg-gradient-to-br from-primary/5 via-card to-accent/5 rounded-[2rem] border border-border p-6 md:p-8 flex flex-col justify-between hover:border-primary/50 transition-all duration-300 overflow-hidden hover:shadow-xl hover:shadow-primary/10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-500"></div>
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6">
-                  <CheckCircle2 />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Heart className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">The HeartScore™ Algorithm</h3>
-                <p className="text-muted-foreground max-w-sm">
+                <h3 className="text-xl md:text-2xl font-bold mb-3">The HeartScore™ Algorithm</h3>
+                <p className="text-muted-foreground max-w-sm text-sm md:text-base leading-relaxed">
                   We process 50+ biomarkers into a single, understandable score from 0-100. It's like a credit score for
                   your body.
                 </p>
               </div>
-            </div>
-
-            <div className="spotlight-card md:col-span-1 relative bg-slate-900 dark:bg-[#151b2b] rounded-[2rem] p-8 flex flex-col justify-between overflow-hidden text-white">
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-2">Family Dashboard</h3>
-                <p className="text-slate-400 text-sm">Monitor parents remotely. Get alerts for sudden spikes.</p>
+              <div className="mt-4 flex items-center gap-2 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                Learn more <ArrowRight className="w-4 h-4" />
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-[60px] opacity-20"></div>
             </div>
 
-            <div className="spotlight-card md:col-span-1 relative bg-card rounded-[2rem] border border-border p-8 flex flex-col justify-end hover:border-primary/50 transition-colors">
+            {/* Family Dashboard - Dark Card */}
+            <div className="spotlight-card md:col-span-1 relative bg-gradient-to-br from-slate-900 to-slate-800 dark:from-[#151b2b] dark:to-[#0d1117] rounded-[2rem] p-6 md:p-8 flex flex-col justify-between overflow-hidden text-white group hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full blur-[80px] opacity-30 group-hover:opacity-50 transition-opacity"></div>
               <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Family Dashboard</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">Monitor parents remotely. Get instant alerts for sudden spikes in BP or sugar.</p>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 border-2 border-blue-400/50"></div>
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border-2 border-emerald-400/50 -ml-3"></div>
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 border-2 border-purple-400/50 -ml-3"></div>
+              </div>
+            </div>
+
+            {/* Smart Insights */}
+            <div className="spotlight-card md:col-span-1 relative bg-card rounded-[2rem] border border-border p-6 md:p-8 flex flex-col justify-between hover:border-primary/50 transition-all duration-300 group hover:shadow-xl hover:shadow-purple-500/10 overflow-hidden">
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-[60px] -z-10 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white mb-5 group-hover:scale-110 transition-transform duration-300">
+                  <Brain className="w-6 h-6" />
+                </div>
                 <h3 className="text-xl font-bold mb-2">Smart Insights</h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   "Your BP is usually higher on Mondays." We find patterns you miss.
                 </p>
               </div>
+              <div className="mt-4 flex items-center gap-3">
+                <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full w-3/4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                </div>
+                <span className="text-xs font-medium text-muted-foreground">Pattern detected</span>
+              </div>
             </div>
 
-            <div className="spotlight-card md:col-span-2 relative bg-gradient-to-br from-primary/10 to-accent/10 rounded-[2rem] border border-border p-8 flex items-center hover:border-primary/50 transition-colors">
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-2">Connects with everything</h3>
-                <p className="text-muted-foreground mb-6">
+            {/* Device Connectivity - Wide Card */}
+            <div className="spotlight-card md:col-span-2 relative bg-gradient-to-r from-emerald-500/10 via-card to-cyan-500/10 rounded-[2rem] border border-border p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6 hover:border-primary/50 transition-all duration-300 group hover:shadow-xl hover:shadow-emerald-500/10 overflow-hidden">
+              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-emerald-500/20 rounded-full blur-[80px] -z-10 group-hover:scale-125 transition-transform duration-500"></div>
+              <div className="relative z-10 flex-1">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white mb-5 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold mb-2">Connects with everything</h3>
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-md">
                   Omron, Apple Health, Google Fit, AccuChek. We sync with your existing devices instantly.
                 </p>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                {['Apple Health', 'Google Fit', 'Omron'].map((device, i) => (
+                  <div key={i} className="px-4 py-2 rounded-full bg-card/80 backdrop-blur border border-border text-xs font-medium shadow-sm">
+                    {device}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -494,31 +531,31 @@ const Landing = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-32 bg-gradient-to-b from-background to-muted/30 relative" id="how-it-works">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+      <section className="py-24 md:py-32 bg-gradient-to-b from-background to-muted/30 relative" id="how-it-works">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
               Three steps. <span className="font-serif italic text-primary">Two minutes daily.</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Getting healthier shouldn't be complicated. Beat fits into your morning chai routine.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               { icon: <Clock className="w-8 h-8" />, step: "Step 1", title: "Quick Morning Check-In", desc: "Log BP, sugar, and how you slept. Takes under 30 seconds.", color: "from-blue-500 to-cyan-500" },
               { icon: <Brain className="w-8 h-8" />, step: "Step 2", title: "Get Your HeartScore", desc: "Our AI analyzes 50+ data points instantly and gives you one number that matters.", color: "from-purple-500 to-pink-500" },
               { icon: <TrendingUp className="w-8 h-8" />, step: "Step 3", title: "Track & Improve", desc: "See patterns, set goals, share with family. Watch your score climb over time.", color: "from-orange-500 to-rose-500" }
             ].map((item, i) => (
               <div key={i} className="relative group">
-                <div className="relative bg-card rounded-3xl border border-border p-8 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white mb-6 shadow-lg`}>
+                <div className="relative bg-card rounded-3xl border border-border p-6 md:p-8 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                  <div className={`w-14 md:w-16 h-14 md:h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white mb-5 md:mb-6 shadow-lg`}>
                     {item.icon}
                   </div>
                   <div className="text-xs font-bold text-primary uppercase tracking-wider mb-2">{item.step}</div>
-                  <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <h3 className="text-xl md:text-2xl font-bold mb-3">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -527,19 +564,19 @@ const Landing = () => {
       </section>
 
       {/* Social Proof / Stats Section */}
-      <section className="py-20 border-y border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section className="py-16 md:py-20 border-y border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-center">
             {[
-              { number: "50,000+", label: "Active Families", icon: <Users className="w-6 h-6 mx-auto mb-2 text-primary" /> },
-              { number: "4.7★", label: "App Store Rating", icon: <Star className="w-6 h-6 mx-auto mb-2 text-yellow-500 fill-yellow-500" /> },
-              { number: "2M+", label: "Health Readings", icon: <Heart className="w-6 h-6 mx-auto mb-2 text-rose-500" /> },
-              { number: "92%", label: "Improved in 30 Days", icon: <TrendingUp className="w-6 h-6 mx-auto mb-2 text-emerald-500" /> }
+              { number: "50,000+", label: "Active Families", icon: <Users className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-primary" /> },
+              { number: "4.7★", label: "App Store Rating", icon: <Star className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-yellow-500 fill-yellow-500" /> },
+              { number: "2M+", label: "Health Readings", icon: <Heart className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-rose-500" /> },
+              { number: "92%", label: "Improved in 30 Days", icon: <TrendingUp className="w-5 h-5 md:w-6 md:h-6 mx-auto mb-2 text-emerald-500" /> }
             ].map((stat, i) => (
               <div key={i} className="group">
                 {stat.icon}
-                <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="text-2xl md:text-4xl font-bold mb-1 md:mb-2">{stat.number}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -547,70 +584,72 @@ const Landing = () => {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-32 bg-muted/30" id="comparison">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+      <section className="py-20 md:py-32 bg-muted/30" id="comparison">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
               Not just another <span className="font-serif italic text-primary">health tracker</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Traditional apps track. Beat transforms.
             </p>
           </div>
 
-          <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-xl overflow-x-auto">
-            <div className="grid grid-cols-3 gap-px bg-border min-w-[400px]">
-              <div className="bg-card p-4 md:p-6"></div>
-              <div className="bg-muted p-3 md:p-6 text-center">
-                <div className="text-[10px] md:text-sm font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap">Traditional Apps</div>
-              </div>
-              <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-3 md:p-6 text-center border-2 border-primary/30">
-                <div className="flex flex-col items-center gap-1">
-                  <Heart className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-                  <div className="text-[10px] md:text-sm font-bold text-primary uppercase tracking-wider">Beat</div>
+          <div className="bg-card rounded-2xl md:rounded-3xl border border-border overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-3 gap-px bg-border min-w-[340px]">
+                <div className="bg-card p-3 md:p-6"></div>
+                <div className="bg-muted p-2 md:p-6 text-center">
+                  <div className="text-[9px] md:text-sm font-bold text-muted-foreground uppercase tracking-wider">Other Apps</div>
+                </div>
+                <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-2 md:p-6 text-center border-l-2 border-primary/30">
+                  <div className="flex flex-col items-center gap-0.5 md:gap-1">
+                    <Heart className="w-4 h-4 md:w-6 md:h-6 text-primary" />
+                    <div className="text-[9px] md:text-sm font-bold text-primary uppercase tracking-wider">Beat</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {[
-              { feature: "Daily HeartScore", traditional: false, beat: true },
-              { feature: "Family Dashboard", traditional: false, beat: true },
-              { feature: "AI Health Coaching", traditional: false, beat: true },
-              { feature: "Indian Language Support", traditional: false, beat: true },
-              { feature: "2-Minute Daily Rituals", traditional: false, beat: true },
-              { feature: "Offline Access", traditional: false, beat: true },
-              { feature: "WhatsApp Integration", traditional: false, beat: true },
-              { feature: "PDF Reports for Doctors", traditional: "Paid", beat: true },
-              { feature: "Medication Reminders", traditional: true, beat: true },
-              { feature: "Basic BP/Sugar Logging", traditional: true, beat: true }
-            ].map((row, i) => (
-              <div key={i} className="grid grid-cols-3 gap-px bg-border min-w-[400px]">
-                <div className="bg-card p-3 md:p-4 flex items-center">
-                  <span className="text-xs md:text-sm font-medium">{row.feature}</span>
+              {[
+                { feature: "Daily HeartScore", traditional: false, beat: true },
+                { feature: "Family Dashboard", traditional: false, beat: true },
+                { feature: "AI Health Coaching", traditional: false, beat: true },
+                { feature: "Hindi Support", traditional: false, beat: true },
+                { feature: "2-Minute Rituals", traditional: false, beat: true },
+                { feature: "Offline Access", traditional: false, beat: true },
+                { feature: "WhatsApp Integration", traditional: false, beat: true },
+                { feature: "PDF Reports", traditional: "Paid", beat: true },
+                { feature: "Med Reminders", traditional: true, beat: true },
+                { feature: "BP/Sugar Logging", traditional: true, beat: true }
+              ].map((row, i) => (
+                <div key={i} className="grid grid-cols-3 gap-px bg-border min-w-[340px]">
+                  <div className="bg-card p-2.5 md:p-4 flex items-center">
+                    <span className="text-[10px] md:text-sm font-medium">{row.feature}</span>
+                  </div>
+                  <div className="bg-muted p-2.5 md:p-4 flex items-center justify-center">
+                    {row.traditional === true ? (
+                      <Check className="w-3.5 h-3.5 md:w-5 md:h-5 text-muted-foreground" />
+                    ) : row.traditional === false ? (
+                      <X className="w-3.5 h-3.5 md:w-5 md:h-5 text-muted-foreground/30" />
+                    ) : (
+                      <span className="text-[9px] md:text-xs text-muted-foreground">{row.traditional}</span>
+                    )}
+                  </div>
+                  <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-2.5 md:p-4 flex items-center justify-center">
+                    {row.beat === true ? (
+                      <Check className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
+                    ) : (
+                      <span className="text-[9px] md:text-xs text-muted-foreground">{row.beat}</span>
+                    )}
+                  </div>
                 </div>
-                <div className="bg-muted p-3 md:p-4 flex items-center justify-center">
-                  {row.traditional === true ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
-                  ) : row.traditional === false ? (
-                    <X className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground/30" />
-                  ) : (
-                    <span className="text-[10px] md:text-xs text-muted-foreground">{row.traditional}</span>
-                  )}
-                </div>
-                <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-3 md:p-4 flex items-center justify-center">
-                  {row.beat === true ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-                  ) : (
-                    <span className="text-[10px] md:text-xs text-muted-foreground">{row.beat}</span>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="text-center mt-12">
-            <Button size="lg" onClick={() => navigate("/auth")} className="h-14 px-8 rounded-full">
-              Start Free Today <ArrowRight className="ml-2 w-5 h-5" />
+          <div className="text-center mt-10 md:mt-12">
+            <Button size="lg" onClick={() => navigate("/auth")} className="h-12 md:h-14 px-6 md:px-8 rounded-full text-sm md:text-base">
+              Start Free Today <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
             </Button>
           </div>
         </div>
@@ -704,37 +743,37 @@ const Landing = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-32 bg-gradient-to-b from-muted/30 to-background" id="testimonials">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
+      <section className="py-20 md:py-32 bg-gradient-to-b from-muted/30 to-background" id="testimonials">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-4 md:mb-6">
               Real stories from <span className="italic text-primary">real families</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Over 50,000 families trust Beat to keep their hearts healthy
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               { name: "Priya Sharma", role: "Daughter tracking her father's health", quote: "My dad's BP dropped from 160/100 to 130/85 in just 2 months. The family dashboard lets me check on him daily from Bangalore while he's in Delhi.", avatar: "PS", rating: 5 },
               { name: "Rajesh Kumar", role: "Type 2 Diabetes Patient", quote: "I finally understand my sugar patterns. Beat showed me that my post-lunch readings spike from rice. Switched to roti and my HeartScore went from 65 to 82.", avatar: "RK", rating: 5 },
               { name: "Dr. Meera Patel", role: "General Physician", quote: "I recommend Beat to all my patients over 40. The PDF reports they bring to consultations are more useful than any blood test. I can see behavioral patterns, not just numbers.", avatar: "MP", rating: 5 }
             ].map((testimonial, i) => (
-              <div key={i} className="bg-card rounded-3xl border border-border p-8 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
-                <div className="flex gap-1 mb-4">
+              <div key={i} className="bg-card rounded-2xl md:rounded-3xl border border-border p-5 md:p-8 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 shadow-sm hover:shadow-xl">
+                <div className="flex gap-1 mb-3 md:mb-4">
                   {[...Array(testimonial.rating)].map((_, j) => (
-                    <Star key={j} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    <Star key={j} className="w-4 h-4 md:w-5 md:h-5 text-yellow-500 fill-yellow-500" />
                   ))}
                 </div>
-                <p className="text-muted-foreground leading-relaxed mb-6 italic">"{testimonial.quote}"</p>
+                <p className="text-muted-foreground leading-relaxed mb-5 md:mb-6 italic text-sm md:text-base">"{testimonial.quote}"</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm md:text-base">
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <div className="font-bold">{testimonial.name}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                    <div className="font-bold text-sm md:text-base">{testimonial.name}</div>
+                    <div className="text-xs md:text-sm text-muted-foreground">{testimonial.role}</div>
                   </div>
                 </div>
               </div>
@@ -744,122 +783,74 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-32 bg-background" id="pricing">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
+      <section className="py-20 md:py-32 bg-background" id="pricing">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-4 md:mb-6">
               Start free. <span className="italic text-primary">Upgrade anytime.</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Core features are free forever. No credit card required.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
             {/* Free Plan */}
-            <div className="bg-muted rounded-3xl border-2 border-border p-8">
-              <div className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Free Forever</div>
-              <h3 className="text-2xl font-bold mb-2">Beat Free</h3>
-              <div className="text-4xl font-bold mb-6">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></div>
+            <div className="bg-muted rounded-2xl md:rounded-3xl border-2 border-border p-5 md:p-8">
+              <div className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">Free Forever</div>
+              <h3 className="text-xl md:text-2xl font-bold mb-2">Beat Free</h3>
+              <div className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">₹0<span className="text-base md:text-lg font-normal text-muted-foreground">/month</span></div>
               
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Daily BP & Sugar logging",
-                  "Basic HeartScore",
-                  "Morning & Evening rituals",
-                  "Streak tracking",
-                  "Medication reminders",
-                  "Basic insights"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{feature}</span>
+              <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                {["Daily BP & Sugar logging", "Basic HeartScore", "Morning & Evening rituals", "Streak tracking", "Medication reminders", "Basic insights"].map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2 md:gap-3">
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs md:text-sm text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
-
-              <Button variant="outline" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-12">
-                Start Free
-              </Button>
+              <Button variant="outline" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-10 md:h-12 text-sm">Start Free</Button>
             </div>
 
             {/* Basic Plan */}
-            <div className="bg-card rounded-3xl border-2 border-secondary/50 p-8 shadow-lg">
-              <div className="text-sm font-bold text-secondary uppercase tracking-wider mb-2">Starter</div>
-              <h3 className="text-2xl font-bold mb-2">Beat Basic</h3>
-              <div className="text-4xl font-bold mb-1">₹99<span className="text-lg font-normal text-muted-foreground">/month</span></div>
-              <div className="text-sm text-muted-foreground mb-6">Billed monthly</div>
+            <div className="bg-card rounded-2xl md:rounded-3xl border-2 border-secondary/50 p-5 md:p-8 shadow-lg">
+              <div className="text-xs md:text-sm font-bold text-secondary uppercase tracking-wider mb-2">Starter</div>
+              <h3 className="text-xl md:text-2xl font-bold mb-2">Beat Basic</h3>
+              <div className="text-3xl md:text-4xl font-bold mb-1">₹99<span className="text-base md:text-lg font-normal text-muted-foreground">/month</span></div>
+              <div className="text-xs md:text-sm text-muted-foreground mb-4 md:mb-6">Billed monthly</div>
               
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Everything in Free, plus:",
-                  "Family dashboard access",
-                  "Weekly health summaries",
-                  "Goal tracking & progress",
-                  "Advanced trend charts",
-                  "Export health data"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    {i === 0 ? (
-                      <span className="text-sm font-semibold text-foreground">{feature}</span>
-                    ) : (
-                      <>
-                        <Check className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </>
-                    )}
+              <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                {["Everything in Free, plus:", "Family dashboard access", "Weekly health summaries", "Goal tracking & progress", "Advanced trend charts", "Export health data"].map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2 md:gap-3">
+                    {i === 0 ? <span className="text-xs md:text-sm font-semibold text-foreground">{feature}</span> : <><Check className="w-4 h-4 md:w-5 md:h-5 text-secondary mt-0.5 flex-shrink-0" /><span className="text-xs md:text-sm text-muted-foreground">{feature}</span></>}
                   </li>
                 ))}
               </ul>
-
-              <Button variant="secondary" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-12">
-                Get Basic
-              </Button>
+              <Button variant="secondary" size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-10 md:h-12 text-sm">Get Basic</Button>
             </div>
 
             {/* Premium Plan */}
-            <div className="relative bg-gradient-to-br from-primary/10 via-background to-accent/10 rounded-3xl border-2 border-primary p-8 shadow-2xl">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full">
-                MOST POPULAR
-              </div>
+            <div className="relative bg-gradient-to-br from-primary/10 via-background to-accent/10 rounded-2xl md:rounded-3xl border-2 border-primary p-5 md:p-8 shadow-2xl">
+              <div className="absolute -top-3 md:-top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-3 md:px-4 py-1 rounded-full">MOST POPULAR</div>
               
-              <div className="text-sm font-bold text-primary uppercase tracking-wider mb-2">Premium</div>
-              <h3 className="text-2xl font-bold mb-2">Beat Coach</h3>
-              <div className="text-4xl font-bold mb-1">₹199<span className="text-lg font-normal text-muted-foreground">/month</span></div>
-              <div className="text-sm text-muted-foreground mb-6">7-day free trial • Cancel anytime</div>
+              <div className="text-xs md:text-sm font-bold text-primary uppercase tracking-wider mb-2 mt-1">Premium</div>
+              <h3 className="text-xl md:text-2xl font-bold mb-2">Beat Coach</h3>
+              <div className="text-3xl md:text-4xl font-bold mb-1">₹199<span className="text-base md:text-lg font-normal text-muted-foreground">/month</span></div>
+              <div className="text-xs md:text-sm text-muted-foreground mb-4 md:mb-6">7-day free trial • Cancel anytime</div>
               
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Everything in Basic, plus:",
-                  "AI Beat Health Coach",
-                  "Advanced correlation insights",
-                  "PDF reports for doctors",
-                  "WhatsApp health summaries",
-                  "Priority family nudges",
-                  "Teleconsult discounts",
-                  "Priority support"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    {i === 0 ? (
-                      <span className="text-sm font-semibold text-foreground">{feature}</span>
-                    ) : (
-                      <>
-                        <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </>
-                    )}
+              <ul className="space-y-2 md:space-y-3 mb-6 md:mb-8">
+                {["Everything in Basic, plus:", "AI Beat Health Coach", "Advanced correlation insights", "PDF reports for doctors", "WhatsApp health summaries", "Priority family nudges", "Teleconsult discounts", "Priority support"].map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2 md:gap-3">
+                    {i === 0 ? <span className="text-xs md:text-sm font-semibold text-foreground">{feature}</span> : <><Check className="w-4 h-4 md:w-5 md:h-5 text-primary mt-0.5 flex-shrink-0" /><span className="text-xs md:text-sm text-muted-foreground">{feature}</span></>}
                   </li>
                 ))}
               </ul>
-
-              <Button size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-12">
-                Start Free Trial <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+              <Button size="lg" onClick={() => navigate("/auth")} className="w-full rounded-full h-10 md:h-12 text-sm">Start Free Trial <ArrowRight className="ml-2 w-4 h-4" /></Button>
             </div>
           </div>
 
-          <div className="text-center mt-12 text-sm text-muted-foreground">
-            <Shield className="w-5 h-5 inline mr-2" />
+          <div className="text-center mt-8 md:mt-12 text-xs md:text-sm text-muted-foreground">
+            <Shield className="w-4 h-4 md:w-5 md:h-5 inline mr-2" />
             30-day money-back guarantee • Secure payments via Razorpay
           </div>
         </div>
