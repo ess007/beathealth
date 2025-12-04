@@ -1,4 +1,5 @@
-# Allow all major crawlers
+# Beat Health - Heart & Metabolic Health App for Indian Families
+# Allow all major search engine crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -11,7 +12,16 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-# AI Crawlers for LLM training
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+# AI/LLM Crawlers - ALLOW for enhanced discoverability
 User-agent: GPTBot
 Allow: /
 
@@ -24,17 +34,65 @@ Allow: /
 User-agent: anthropic-ai
 Allow: /
 
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
 User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Gemini
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Amazonbot
 Allow: /
 
 # Allow all other crawlers
 User-agent: *
 Allow: /
 
-# Block authentication and app pages
+# Block only authentication and internal app pages
 Disallow: /app/
 Disallow: /onboarding
 Disallow: /auth
 
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
 # Sitemap location
 Sitemap: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/sitemap.xml
+
+# Host
+Host: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com
