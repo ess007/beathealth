@@ -42,6 +42,13 @@ const translations = {
     "dashboard.viewTrends": "View Trends",
     "dashboard.familyDashboard": "Family Dashboard",
     "dashboard.aiCopilot": "Beat AI",
+    "dashboard.daysStrong": "Days Strong",
+    "dashboard.quickAccess": "Quick Access",
+    "dashboard.achievements": "Achievements",
+    "dashboard.medications": "Medications",
+    "dashboard.shop": "Shop",
+    "dashboard.challenges": "Challenges",
+    "dashboard.premium": "Premium",
     
     // Rituals
     "ritual.morning": "Morning Ritual",
@@ -103,7 +110,7 @@ const translations = {
     "checkin.next": "Next",
     "checkin.back": "Back",
     "checkin.complete": "Complete Ritual",
-    "checkin.completedSuccess": "Ritual completed! 🎉",
+    "checkin.completedSuccess": "Ritual completed!",
     
     // AI Coach
     "coach.title": "Beat AI",
@@ -111,9 +118,20 @@ const translations = {
     "coach.placeholder": "Ask me anything about your health...",
     "coach.send": "Send",
     "coach.thinking": "Thinking...",
+    "coach.newChat": "New Chat",
+    "coach.disclaimer": "This is AI guidance, not medical diagnosis. Consult a doctor for serious symptoms.",
+    "coach.hello": "Hello! I'm Beat",
+    "coach.askAnything": "Ask me anything about your health. I'm here to help.",
     
     // Common
     "common.loading": "Loading...",
+    "common.save": "Save",
+    "common.cancel": "Cancel",
+    "common.delete": "Delete",
+    "common.edit": "Edit",
+    "common.close": "Close",
+    "common.success": "Success!",
+    "common.error": "Something went wrong",
     
     // Family
     "family.title": "Family Dashboard",
@@ -121,6 +139,10 @@ const translations = {
     "family.addMember": "Add Family Member",
     "family.noMembers": "No Family Members Yet",
     "family.addFirst": "Add Your First Member",
+    "family.relationship": "Relationship",
+    "family.permissions": "Permissions",
+    "family.canView": "Can View Health Data",
+    "family.canNudge": "Can Send Nudges",
     
     // Onboarding
     "onboarding.welcome": "Welcome to Beat!",
@@ -152,8 +174,56 @@ const translations = {
     "onboarding.success": "Welcome to Beat!",
     "onboarding.error": "Failed to complete onboarding",
     
-    // Dashboard
-    "dashboard.daysStrong": "Days Strong"
+    // Insights
+    "insights.title": "Health Insights",
+    "insights.subtitle": "Track your health trends and patterns",
+    "insights.pdfReport": "PDF Report",
+    "insights.avgBP": "Avg BP",
+    "insights.avgSugar": "Avg Sugar",
+    "insights.heartScore": "HeartScore",
+    "insights.avgSteps": "Avg Steps",
+    "insights.aiInsights": "AI Health Insights",
+    "insights.personalized": "Personalized analysis based on your health data",
+    "insights.heartScoreTrend": "HeartScore Trend (30 Days)",
+    "insights.bpTrend": "Blood Pressure Trend (30 Days)",
+    "insights.sugarTrend": "Blood Sugar Trend (30 Days)",
+    
+    // Challenges
+    "challenges.title": "Health Challenges",
+    "challenges.subtitle": "Build healthy habits together with the community",
+    "challenges.featured": "Featured Challenges",
+    "challenges.myChallenges": "My Challenges",
+    "challenges.allChallenges": "All Challenges",
+    "challenges.join": "Join",
+    "challenges.leave": "Leave",
+    "challenges.joined": "Joined",
+    "challenges.daysLeft": "days left",
+    "challenges.participants": "participants",
+    
+    // Shop
+    "shop.title": "Health Store",
+    "shop.subtitle": "Recommended products for your health journey",
+    "shop.featured": "Featured Products",
+    "shop.viewProduct": "View Product",
+    
+    // Subscription
+    "subscription.title": "Beat Premium",
+    "subscription.subtitle": "Unlock your full health potential",
+    "subscription.free": "Free",
+    "subscription.basic": "Basic",
+    "subscription.premium": "Premium",
+    "subscription.currentPlan": "Current Plan",
+    "subscription.upgrade": "Upgrade",
+    "subscription.perMonth": "/month",
+    
+    // Profile
+    "profile.title": "Profile",
+    "profile.settings": "Settings",
+    "profile.notifications": "Notifications",
+    "profile.connectDevices": "Connect Devices",
+    "profile.exportData": "Export My Data",
+    "profile.deleteAccount": "Delete Account",
+    "profile.signOut": "Sign Out"
   },
   hi: {
     // App
@@ -187,7 +257,14 @@ const translations = {
     "dashboard.quickActions": "त्वरित कार्य",
     "dashboard.viewTrends": "रुझान देखें",
     "dashboard.familyDashboard": "परिवार डैशबोर्ड",
-    "dashboard.aiCopilot": "पल्स",
+    "dashboard.aiCopilot": "बीट AI",
+    "dashboard.daysStrong": "दिन मजबूत",
+    "dashboard.quickAccess": "त्वरित पहुंच",
+    "dashboard.achievements": "उपलब्धियां",
+    "dashboard.medications": "दवाइयां",
+    "dashboard.shop": "शॉप",
+    "dashboard.challenges": "चुनौतियां",
+    "dashboard.premium": "प्रीमियम",
     
     // Rituals
     "ritual.morning": "सुबह की दिनचर्या",
@@ -249,17 +326,28 @@ const translations = {
     "checkin.next": "आगे",
     "checkin.back": "पीछे",
     "checkin.complete": "पूरा करें",
-    "checkin.completedSuccess": "दिनचर्या पूरी हुई! 🎉",
+    "checkin.completedSuccess": "दिनचर्या पूरी हुई!",
     
     // AI Coach
-    "coach.title": "पल्स",
-    "coach.subtitle": "आपका चिकित्सा-ग्रेड AI स्वास्थ्य कोच",
+    "coach.title": "बीट AI",
+    "coach.subtitle": "आपका व्यक्तिगत स्वास्थ्य सलाहकार",
     "coach.placeholder": "अपने स्वास्थ्य के बारे में कुछ भी पूछें...",
     "coach.send": "भेजें",
     "coach.thinking": "सोच रहे हैं...",
+    "coach.newChat": "नई चैट",
+    "coach.disclaimer": "यह AI सलाह है, चिकित्सा निदान नहीं। गंभीर लक्षणों के लिए डॉक्टर से मिलें।",
+    "coach.hello": "नमस्ते! मैं बीट हूं",
+    "coach.askAnything": "अपने स्वास्थ्य के बारे में कोई भी सवाल पूछें।",
     
     // Common
     "common.loading": "लोड हो रहा है...",
+    "common.save": "सेव करें",
+    "common.cancel": "रद्द करें",
+    "common.delete": "हटाएं",
+    "common.edit": "संपादित करें",
+    "common.close": "बंद करें",
+    "common.success": "सफलता!",
+    "common.error": "कुछ गलत हो गया",
     
     // Family
     "family.title": "परिवार डैशबोर्ड",
@@ -267,6 +355,10 @@ const translations = {
     "family.addMember": "परिवार का सदस्य जोड़ें",
     "family.noMembers": "अभी तक कोई परिवार का सदस्य नहीं",
     "family.addFirst": "अपना पहला सदस्य जोड़ें",
+    "family.relationship": "रिश्ता",
+    "family.permissions": "अनुमतियां",
+    "family.canView": "स्वास्थ्य डेटा देख सकते हैं",
+    "family.canNudge": "नज़ भेज सकते हैं",
     
     // Onboarding
     "onboarding.welcome": "बीट में आपका स्वागत है!",
@@ -298,8 +390,56 @@ const translations = {
     "onboarding.success": "बीट में आपका स्वागत है!",
     "onboarding.error": "ऑनबोर्डिंग पूरी करने में विफल",
     
-    // Dashboard
-    "dashboard.daysStrong": "दिन मजबूत"
+    // Insights
+    "insights.title": "स्वास्थ्य इनसाइट्स",
+    "insights.subtitle": "अपने स्वास्थ्य रुझान देखें",
+    "insights.pdfReport": "PDF रिपोर्ट",
+    "insights.avgBP": "औसत BP",
+    "insights.avgSugar": "औसत शुगर",
+    "insights.heartScore": "हार्टस्कोर",
+    "insights.avgSteps": "औसत कदम",
+    "insights.aiInsights": "AI स्वास्थ्य इनसाइट्स",
+    "insights.personalized": "आपके स्वास्थ्य डेटा पर आधारित व्यक्तिगत विश्लेषण",
+    "insights.heartScoreTrend": "हार्टस्कोर ट्रेंड (30 दिन)",
+    "insights.bpTrend": "रक्तचाप ट्रेंड (30 दिन)",
+    "insights.sugarTrend": "रक्त शर्करा ट्रेंड (30 दिन)",
+    
+    // Challenges
+    "challenges.title": "स्वास्थ्य चुनौतियां",
+    "challenges.subtitle": "समुदाय के साथ मिलकर स्वस्थ आदतें बनाएं",
+    "challenges.featured": "लोकप्रिय चुनौतियां",
+    "challenges.myChallenges": "मेरी चुनौतियां",
+    "challenges.allChallenges": "सभी चुनौतियां",
+    "challenges.join": "शामिल हों",
+    "challenges.leave": "छोड़ें",
+    "challenges.joined": "शामिल",
+    "challenges.daysLeft": "दिन बाकी",
+    "challenges.participants": "प्रतिभागी",
+    
+    // Shop
+    "shop.title": "स्वास्थ्य स्टोर",
+    "shop.subtitle": "आपकी स्वास्थ्य यात्रा के लिए अनुशंसित उत्पाद",
+    "shop.featured": "विशेष उत्पाद",
+    "shop.viewProduct": "उत्पाद देखें",
+    
+    // Subscription
+    "subscription.title": "बीट प्रीमियम",
+    "subscription.subtitle": "अपनी पूरी स्वास्थ्य क्षमता अनलॉक करें",
+    "subscription.free": "मुफ्त",
+    "subscription.basic": "बेसिक",
+    "subscription.premium": "प्रीमियम",
+    "subscription.currentPlan": "वर्तमान प्लान",
+    "subscription.upgrade": "अपग्रेड",
+    "subscription.perMonth": "/महीना",
+    
+    // Profile
+    "profile.title": "प्रोफ़ाइल",
+    "profile.settings": "सेटिंग्स",
+    "profile.notifications": "सूचनाएं",
+    "profile.connectDevices": "डिवाइस कनेक्ट करें",
+    "profile.exportData": "मेरा डेटा एक्सपोर्ट करें",
+    "profile.deleteAccount": "अकाउंट हटाएं",
+    "profile.signOut": "साइन आउट"
   }
 };
 
