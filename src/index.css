@@ -14,15 +14,15 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    /* Brand Colors - Beat Spec */
-    --primary: 355 82% 56%;
+    /* Brand Colors - Beat Spec (WCAG AA Compliant) */
+    --primary: 355 82% 42%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 355 70% 65%;
+    --primary-glow: 355 70% 55%;
 
-    --secondary: 168 60% 48%;
+    --secondary: 168 70% 32%;
     --secondary-foreground: 0 0% 100%;
 
-    --accent: 355 75% 58%;
+    --accent: 355 75% 45%;
     --accent-foreground: 0 0% 100%;
 
     /* UI Neutrals */
@@ -30,7 +30,7 @@
     --muted-foreground: 220 10% 45%;
     --border: 220 10% 92%;
     --input: 220 10% 92%;
-    --ring: 355 82% 56%;
+    --ring: 355 82% 42%;
 
     /* Semantic Health Scores */
     --score-excellent: 168 60% 48%;
