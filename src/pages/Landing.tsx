@@ -1006,7 +1006,11 @@ const Landing = () => {
           </div>
 
           <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <div>&copy; 2024 Beat Health Inc. All rights reserved.</div>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+              <span>&copy; 2024 Beat Health Inc. All rights reserved.</span>
+              <span className="hidden sm:inline text-slate-600">•</span>
+              <span>Built by <a href="https://bwestudios.com" target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-primary transition-colors">BWE Studio</a></span>
+            </div>
             <div className="flex gap-6">
               <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
               <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
