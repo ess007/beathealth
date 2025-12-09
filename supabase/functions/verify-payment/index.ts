@@ -13,10 +13,36 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    // Validate authorization header exists
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      console.error("Missing authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create client with user's auth context to verify their identity
+    const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
     );
+
+    // Get the authenticated user
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
+      console.error("Failed to get authenticated user:", userError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { 
       razorpay_order_id, 
@@ -26,7 +52,22 @@ serve(async (req) => {
       planType 
     } = await req.json();
 
+    // CRITICAL: Validate that the authenticated user matches the userId in the request
+    if (user.id !== userId) {
+      console.error(`User ID mismatch: authenticated user ${user.id} tried to verify payment for ${userId}`);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - User ID mismatch" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log(`Verifying payment for user ${userId}, order: ${razorpay_order_id}`);
+
+    // Use service role client for database operations
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
     const razorpayKeySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
 
@@ -61,7 +102,7 @@ serve(async (req) => {
 
     console.log("Payment signature verified successfully");
 
-    // Update subscription
+    // Update subscription using authenticated user's ID
     const currentPeriodEnd = new Date();
     currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
 
@@ -74,14 +115,14 @@ serve(async (req) => {
         current_period_start: new Date().toISOString(),
         current_period_end: currentPeriodEnd.toISOString(),
       })
-      .eq("user_id", userId);
+      .eq("user_id", user.id); // Use authenticated user's ID, not request body
 
     if (updateError) {
       console.error("Error updating subscription:", updateError);
       throw new Error("Failed to update subscription");
     }
 
-    console.log(`Subscription updated for user ${userId}`);
+    console.log(`Subscription updated for user ${user.id}`);
 
     return new Response(
       JSON.stringify({ success: true, message: "Payment verified and subscription activated" }),
