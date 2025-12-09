@@ -8,6 +8,24 @@ import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { ArrowRight, Loader2, Phone, Mail, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { z } from "zod";
+
+// Validation schemas for authentication inputs
+const emailSchema = z.string()
+  .trim()
+  .min(1, "Email is required")
+  .email("Please enter a valid email address")
+  .max(255, "Email must be less than 255 characters");
+
+const passwordSchema = z.string()
+  .min(8, "Password must be at least 8 characters")
+  .max(100, "Password must be less than 100 characters");
+
+const phoneSchema = z.string()
+  .regex(/^\d{10}$/, "Please enter a valid 10-digit phone number");
+
+const otpSchema = z.string()
+  .regex(/^\d{6}$/, "Please enter a valid 6-digit OTP");
 
 type AuthMode = "select" | "phone" | "email" | "otp";
 
@@ -20,21 +38,45 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset errors
+    setEmailError(null);
+    setPasswordError(null);
+    
+    // Validate inputs
+    const emailValidation = emailSchema.safeParse(email);
+    const passwordValidation = passwordSchema.safeParse(password);
+    
+    if (!emailValidation.success) {
+      setEmailError(emailValidation.error.errors[0].message);
+      return;
+    }
+    
+    if (!passwordValidation.success) {
+      setPasswordError(passwordValidation.error.errors[0].message);
+      return;
+    }
+    
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ 
+          email: emailValidation.data, 
+          password: passwordValidation.data 
+        });
         if (error) throw error;
         toast.success(language === "hi" ? "स्वागत है!" : "Welcome back!");
         window.location.href = "/app/home";
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: emailValidation.data,
+          password: passwordValidation.data,
           options: { emailRedirectTo: `${window.location.origin}/app/home` },
         });
         if (error) throw error;
@@ -49,10 +91,18 @@ const Auth = () => {
 
   const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate phone number
+    const phoneValidation = phoneSchema.safeParse(phone);
+    if (!phoneValidation.success) {
+      toast.error(language === "hi" ? "कृपया 10 अंकों का फ़ोन नंबर दर्ज करें" : phoneValidation.error.errors[0].message);
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const formattedPhone = phone.startsWith("+91") ? phone : `+91${phone.replace(/\D/g, "")}`;
+      const formattedPhone = `+91${phoneValidation.data}`;
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
       });
@@ -68,13 +118,21 @@ const Auth = () => {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate OTP
+    const otpValidation = otpSchema.safeParse(otp);
+    if (!otpValidation.success) {
+      toast.error(language === "hi" ? "कृपया 6 अंकों का OTP दर्ज करें" : otpValidation.error.errors[0].message);
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const formattedPhone = phone.startsWith("+91") ? phone : `+91${phone.replace(/\D/g, "")}`;
+      const formattedPhone = `+91${phone}`;
       const { error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
-        token: otp,
+        token: otpValidation.data,
         type: "sms",
       });
       if (error) throw error;
@@ -259,10 +317,16 @@ const Auth = () => {
           type="email"
           placeholder="name@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setEmailError(null);
+          }}
           required
-          className="h-12 bg-white/50 dark:bg-black/20 border-border/50"
+          className={`h-12 bg-white/50 dark:bg-black/20 border-border/50 ${emailError ? 'border-destructive' : ''}`}
         />
+        {emailError && (
+          <p className="text-sm text-destructive">{emailError}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -274,14 +338,19 @@ const Auth = () => {
           type="password"
           placeholder="••••••••"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setPasswordError(null);
+          }}
           required
-          className="h-12 bg-white/50 dark:bg-black/20 border-border/50"
+          className={`h-12 bg-white/50 dark:bg-black/20 border-border/50 ${passwordError ? 'border-destructive' : ''}`}
         />
+        {passwordError && (
+          <p className="text-sm text-destructive">{passwordError}</p>
+        )}
       </div>
 
       <Button
-        type="submit"
         className="w-full h-12 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
         disabled={loading}
       >
