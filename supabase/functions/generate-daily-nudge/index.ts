@@ -13,12 +13,47 @@ serve(async (req) => {
   }
 
   try {
+    // First, validate the authenticated user from JWT
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create client with user's auth context to validate their identity
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { userId, nudgeType = "morning" } = await req.json();
+
+    // SECURITY: Validate that the authenticated user can only generate nudges for themselves
+    if (user.id !== userId) {
+      console.warn(`User ${user.id} attempted to generate nudge for ${userId}`);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - You can only generate nudges for yourself" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Use service role client for database operations
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    const { userId, nudgeType = "morning" } = await req.json();
 
     console.log(`Generating ${nudgeType} nudge for user ${userId}`);
 
