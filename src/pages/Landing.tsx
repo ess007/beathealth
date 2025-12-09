@@ -139,7 +139,7 @@ const Landing = () => {
   }, [isLoadingMore, articles.length]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-500 font-sans selection:bg-primary selection:text-white" role="main">
+    <main className="min-h-screen bg-background text-foreground transition-colors duration-500 font-sans selection:bg-primary selection:text-white">
       {/* Noise Overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-50 opacity-[0.04]"
@@ -1061,7 +1061,7 @@ const Landing = () => {
           animation-delay: 4s;
         }
       `}</style>
-    </div>
+    </main>
   );
 };
 
