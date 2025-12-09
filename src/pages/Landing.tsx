@@ -139,7 +139,7 @@ const Landing = () => {
   }, [isLoadingMore, articles.length]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-500 font-sans selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-500 font-sans selection:bg-primary selection:text-white" role="main">
       {/* Noise Overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-50 opacity-[0.04]"
@@ -192,6 +192,7 @@ const Landing = () => {
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="rounded-full"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
@@ -320,9 +321,9 @@ const Landing = () => {
                           <div className="text-sm font-bold">Ravi Kumar</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                        <span className="text-orange-500">🔥</span>
-                        <span className="text-sm font-bold text-orange-600">12</span>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-orange-500/15 border border-orange-500/30">
+                        <span className="text-orange-600">🔥</span>
+                        <span className="text-sm font-bold text-orange-700 dark:text-orange-400">12</span>
                       </div>
                     </div>
                   </div>
@@ -371,7 +372,7 @@ const Landing = () => {
                         <div className="text-[10px] text-muted-foreground font-medium">Blood Pressure</div>
                         <div className="text-sm font-bold">118/78 mmHg</div>
                       </div>
-                      <div className="text-[10px] text-emerald-500 font-medium">Normal</div>
+                      <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">Normal</div>
                     </div>
                     <div className="bg-card p-3 rounded-xl border border-border flex items-center gap-3 shadow-sm">
                       <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-lg">
@@ -381,7 +382,7 @@ const Landing = () => {
                         <div className="text-[10px] text-muted-foreground font-medium">Fasting Sugar</div>
                         <div className="text-sm font-bold">92 mg/dL</div>
                       </div>
-                      <div className="text-[10px] text-emerald-500 font-medium">Optimal</div>
+                      <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">Optimal</div>
                     </div>
                   </div>
 
@@ -389,10 +390,10 @@ const Landing = () => {
                   <div className="p-4 mt-auto">
                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Today's Rituals</div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
+                      <div className="bg-emerald-600/15 border border-emerald-600/30 rounded-xl p-3 text-center">
                         <div className="text-lg mb-1">☀️</div>
-                        <div className="text-[10px] font-bold text-emerald-600">Morning</div>
-                        <div className="text-[9px] text-emerald-500">✓ Complete</div>
+                        <div className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300">Morning</div>
+                        <div className="text-[9px] text-emerald-700 dark:text-emerald-400 font-medium">✓ Complete</div>
                       </div>
                       <div className="bg-muted border border-border rounded-xl p-3 text-center">
                         <div className="text-lg mb-1">🌙</div>
@@ -429,7 +430,7 @@ const Landing = () => {
               "HealthDaily",
               "MedTech India",
             ].map((brand, i) => (
-              <span key={i} className="text-xl font-bold text-muted-foreground opacity-70">
+              <span key={i} className="text-xl font-bold text-foreground/50 dark:text-muted-foreground">
                 {brand}
               </span>
             ))}
@@ -553,7 +554,7 @@ const Landing = () => {
                   <div className={`w-14 md:w-16 h-14 md:h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white mb-5 md:mb-6 shadow-lg`}>
                     {item.icon}
                   </div>
-                  <div className="text-xs font-bold text-primary uppercase tracking-wider mb-2">{item.step}</div>
+                  <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2">{item.step}</div>
                   <h3 className="text-xl md:text-2xl font-bold mb-3">{item.title}</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{item.desc}</p>
                 </div>
@@ -735,7 +736,7 @@ const Landing = () => {
                   <img src={expert.img} alt={expert.name} className="w-full h-full object-cover" loading="lazy" />
                 </div>
                 <h3 className="font-bold font-serif text-lg">{expert.name}</h3>
-                <p className="text-xs text-primary font-bold uppercase tracking-wider mb-2">{expert.role}</p>
+                <p className="text-xs text-foreground font-bold uppercase tracking-wider mb-2">{expert.role}</p>
               </div>
             ))}
           </div>
@@ -814,7 +815,7 @@ const Landing = () => {
 
             {/* Basic Plan */}
             <div className="bg-card rounded-2xl md:rounded-3xl border-2 border-secondary/50 p-5 md:p-8 shadow-lg">
-              <div className="text-xs md:text-sm font-bold text-secondary uppercase tracking-wider mb-2">Starter</div>
+              <div className="text-xs md:text-sm font-bold text-foreground uppercase tracking-wider mb-2">Starter</div>
               <h3 className="text-xl md:text-2xl font-bold mb-2">Beat Basic</h3>
               <div className="text-3xl md:text-4xl font-bold mb-1">₹99<span className="text-base md:text-lg font-normal text-muted-foreground">/month</span></div>
               <div className="text-xs md:text-sm text-muted-foreground mb-4 md:mb-6">Billed monthly</div>
@@ -964,18 +965,18 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#030712] border-t border-white/5 pt-16 pb-8 text-slate-400">
+      <footer className="bg-[#030712] border-t border-white/5 pt-16 pb-8 text-slate-300">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
               <Logo size="sm" showText={true} className="mb-4" />
-              <p className="text-sm text-slate-500 leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Keep your beat strong. Daily heart and metabolic health tracking for Indian families.
               </p>
             </div>
             
             <div>
-              <h4 className="font-bold text-white mb-4">Product</h4>
+              <p className="font-bold text-white mb-4">Product</p>
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#features')?.scrollIntoView({ behavior: 'smooth' }); }}>Features</a></li>
                 <li><a href="#pricing" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a></li>
@@ -985,7 +986,7 @@ const Landing = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-white mb-4">Company</h4>
+              <p className="font-bold text-white mb-4">Company</p>
               <ul className="space-y-2 text-sm">
                 <li><a href="#testimonials" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#testimonials')?.scrollIntoView({ behavior: 'smooth' }); }}>Testimonials</a></li>
                 <li><a href="#experts" className="hover:text-primary transition-colors" onClick={(e) => { e.preventDefault(); document.querySelector('#experts')?.scrollIntoView({ behavior: 'smooth' }); }}>Medical Board</a></li>
@@ -994,11 +995,11 @@ const Landing = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-white mb-4">Get Started</h4>
+              <p className="font-bold text-white mb-4">Get Started</p>
               <Button onClick={() => navigate("/auth")} className="w-full mb-4">
                 Download Free
               </Button>
-              <div className="flex gap-2 text-xs text-slate-500">
+              <div className="flex gap-2 text-xs text-slate-400">
                 <Phone className="w-4 h-4" />
                 <span>Available on iOS & Android</span>
               </div>

@@ -25,7 +25,7 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
     <div className={`flex items-center ${showText ? 'gap-2' : 'justify-center'} ${className}`}>
       <img src={beatLogo} alt="Beat Logo" className={sizeClasses[size]} />
       {showText && (
-        <span className={`${textSizeClasses[size]} font-bold text-primary dark:text-white`}>
+        <span className={`${textSizeClasses[size]} font-bold text-foreground dark:text-white`}>
           Beat
         </span>
       )}
