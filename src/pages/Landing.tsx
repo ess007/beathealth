@@ -1012,9 +1012,10 @@ const Landing = () => {
               <span>Built by <a href="https://bwestudios.com" target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-primary transition-colors">BWE Studio</a></span>
             </div>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-primary transition-colors">Contact</a>
+              <button onClick={() => navigate("/about")} className="hover:text-primary transition-colors">About</button>
+              <button onClick={() => navigate("/privacy")} className="hover:text-primary transition-colors">Privacy Policy</button>
+              <button onClick={() => navigate("/terms")} className="hover:text-primary transition-colors">Terms of Service</button>
+              <button onClick={() => navigate("/contact")} className="hover:text-primary transition-colors">Contact</button>
             </div>
           </div>
         </div>

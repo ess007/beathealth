@@ -32,6 +32,10 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Shop = lazy(() => import("./pages/Shop"));
 const Challenges = lazy(() => import("./pages/Challenges"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const About = lazy(() => import("./pages/About"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -100,6 +104,10 @@ const AppContent = () => {
         <PageTransition key={location.pathname}>
           <Routes location={location}>
             <Route path="/" element={<Landing />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
