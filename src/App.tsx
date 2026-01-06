@@ -145,7 +145,17 @@ const App = () => (
       <ThemeProvider>
         <LanguageProvider>
           <AccessibilityProvider>
-            <SonnerToaster position="top-center" toastOptions={{ className: "glass-panel border-0 shadow-lg" }} />
+            <SonnerToaster 
+              position="top-center" 
+              toastOptions={{ 
+                className: "glass-panel border-0 shadow-lg !text-foreground",
+                style: {
+                  background: 'hsl(var(--card))',
+                  color: 'hsl(var(--foreground))',
+                  border: '1px solid hsl(var(--border))',
+                }
+              }} 
+            />
             <PWAInstallPrompt />
             <BrowserRouter>
               <AuthProvider>
