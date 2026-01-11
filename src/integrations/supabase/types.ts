@@ -41,6 +41,144 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_action_log: {
+        Row: {
+          action_payload: Json
+          action_type: string
+          created_at: string
+          id: string
+          revert_reason: string | null
+          reverted_at: string | null
+          status: string
+          trigger_reason: string
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          action_payload?: Json
+          action_type: string
+          created_at?: string
+          id?: string
+          revert_reason?: string | null
+          reverted_at?: string | null
+          status?: string
+          trigger_reason: string
+          trigger_type?: string
+          user_id: string
+        }
+        Update: {
+          action_payload?: Json
+          action_type?: string
+          created_at?: string
+          id?: string
+          revert_reason?: string | null
+          reverted_at?: string | null
+          status?: string
+          trigger_reason?: string
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_preferences: {
+        Row: {
+          auto_celebrate_enabled: boolean
+          auto_escalate_enabled: boolean
+          auto_goal_adjust_enabled: boolean
+          auto_nudge_enabled: boolean
+          autonomy_level: string
+          created_at: string
+          id: string
+          max_goal_adjustments_per_week: number
+          max_nudges_per_day: number
+          preferred_nudge_times: Json | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_celebrate_enabled?: boolean
+          auto_escalate_enabled?: boolean
+          auto_goal_adjust_enabled?: boolean
+          auto_nudge_enabled?: boolean
+          autonomy_level?: string
+          created_at?: string
+          id?: string
+          max_goal_adjustments_per_week?: number
+          max_nudges_per_day?: number
+          preferred_nudge_times?: Json | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_celebrate_enabled?: boolean
+          auto_escalate_enabled?: boolean
+          auto_goal_adjust_enabled?: boolean
+          auto_nudge_enabled?: boolean
+          autonomy_level?: string
+          created_at?: string
+          id?: string
+          max_goal_adjustments_per_week?: number
+          max_nudges_per_day?: number
+          preferred_nudge_times?: Json | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      agent_scheduled_tasks: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          max_attempts: number
+          payload: Json
+          priority: number
+          result: Json | null
+          scheduled_for: string
+          status: string
+          task_type: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_attempts?: number
+          payload?: Json
+          priority?: number
+          result?: Json | null
+          scheduled_for: string
+          status?: string
+          task_type: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_attempts?: number
+          payload?: Json
+          priority?: number
+          result?: Json | null
+          scheduled_for?: string
+          status?: string
+          task_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_nudges: {
         Row: {
           category: string | null
@@ -918,6 +1056,14 @@ export type Database = {
           target_user_id: string
         }
         Returns: undefined
+      }
+      get_agent_goal_adjustments_this_week: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_agent_nudge_count_today: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       has_role: {
         Args: {
