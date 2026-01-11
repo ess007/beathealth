@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.send-family-nudge]
 verify_jwt = true
+
+[functions.agent-functions]
+verify_jwt = true

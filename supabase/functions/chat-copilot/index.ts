@@ -16,6 +16,123 @@ const chatSchema = z.object({
   language: z.enum(['en', 'hi']).optional().default('en')
 });
 
+// Agent function definitions for tool calling
+const agentTools = [
+  {
+    type: "function",
+    function: {
+      name: "get_health_summary",
+      description: "Get user's current health status including latest BP, sugar, HeartScore, and streak",
+      parameters: {
+        type: "object",
+        properties: {
+          date: { type: "string", description: "Optional date in YYYY-MM-DD format" }
+        },
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_bp_history",
+      description: "Fetch blood pressure readings for a date range",
+      parameters: {
+        type: "object",
+        properties: {
+          start_date: { type: "string", description: "Start date in YYYY-MM-DD format" },
+          end_date: { type: "string", description: "End date in YYYY-MM-DD format" },
+          limit: { type: "number", description: "Max number of readings to return" }
+        },
+        required: ["start_date", "end_date"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_sugar_history",
+      description: "Fetch blood sugar readings for a date range",
+      parameters: {
+        type: "object",
+        properties: {
+          start_date: { type: "string", description: "Start date in YYYY-MM-DD format" },
+          end_date: { type: "string", description: "End date in YYYY-MM-DD format" },
+          measurement_type: { type: "string", enum: ["fasting", "random", "post_meal"], description: "Filter by measurement type" }
+        },
+        required: ["start_date", "end_date"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_goals",
+      description: "Get user's active health goals and progress",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["active", "completed", "abandoned"], description: "Filter by goal status" }
+        },
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function", 
+    function: {
+      name: "suggest_log_bp",
+      description: "Suggest logging a blood pressure reading. Use when user mentions their BP numbers.",
+      parameters: {
+        type: "object",
+        properties: {
+          systolic: { type: "number", description: "Systolic pressure (60-250)" },
+          diastolic: { type: "number", description: "Diastolic pressure (40-150)" },
+          heart_rate: { type: "number", description: "Heart rate if mentioned (30-200)" },
+          ritual_type: { type: "string", enum: ["morning", "evening"] }
+        },
+        required: ["systolic", "diastolic"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "suggest_log_sugar",
+      description: "Suggest logging a blood sugar reading. Use when user mentions their sugar/glucose numbers.",
+      parameters: {
+        type: "object",
+        properties: {
+          glucose_mg_dl: { type: "number", description: "Blood glucose in mg/dL (20-600)" },
+          measurement_type: { type: "string", enum: ["fasting", "random", "post_meal"] }
+        },
+        required: ["glucose_mg_dl", "measurement_type"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "suggest_set_goal",
+      description: "Suggest setting a health goal when user expresses intent to improve a metric",
+      parameters: {
+        type: "object",
+        properties: {
+          goal_type: { type: "string", enum: ["bp_systolic", "bp_diastolic", "sugar_fasting", "steps", "weight", "sleep"] },
+          target_value: { type: "number", description: "Target value for the goal" },
+          reasoning: { type: "string", description: "Why this goal is recommended" }
+        },
+        required: ["goal_type", "target_value", "reasoning"],
+        additionalProperties: false
+      }
+    }
+  }
+];
+
 // Function to fetch user health data context
 async function getUserHealthContext(supabase: any, userId: string) {
   const today = new Date().toISOString().split("T")[0];
@@ -137,6 +254,128 @@ async function getUserHealthContext(supabase: any, userId: string) {
   }
 }
 
+// Execute agent function and return result
+async function executeAgentFunction(supabase: any, userId: string, functionName: string, args: any): Promise<string> {
+  const today = new Date().toISOString().split("T")[0];
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split("T")[0];
+
+  switch (functionName) {
+    case 'get_health_summary': {
+      const [heartScoreRes, bpRes, sugarRes, streakRes] = await Promise.all([
+        supabase.from('heart_scores').select('*').eq('user_id', userId).order('score_date', { ascending: false }).limit(1),
+        supabase.from('bp_logs').select('*').eq('user_id', userId).order('measured_at', { ascending: false }).limit(1),
+        supabase.from('sugar_logs').select('*').eq('user_id', userId).order('measured_at', { ascending: false }).limit(1),
+        supabase.from('streaks').select('*').eq('user_id', userId).eq('type', 'daily_checkin'),
+      ]);
+      
+      return JSON.stringify({
+        heart_score: heartScoreRes.data?.[0]?.heart_score || null,
+        latest_bp: bpRes.data?.[0] ? `${bpRes.data[0].systolic}/${bpRes.data[0].diastolic}` : null,
+        latest_sugar: sugarRes.data?.[0]?.glucose_mg_dl || null,
+        streak_days: streakRes.data?.[0]?.count || 0,
+      });
+    }
+    
+    case 'get_bp_history': {
+      const startDate = args.start_date || thirtyDaysAgoStr;
+      const endDate = args.end_date || today;
+      const { data } = await supabase
+        .from('bp_logs')
+        .select('systolic, diastolic, heart_rate, measured_at')
+        .eq('user_id', userId)
+        .gte('measured_at', `${startDate}T00:00:00`)
+        .lte('measured_at', `${endDate}T23:59:59`)
+        .order('measured_at', { ascending: false })
+        .limit(args.limit || 10);
+      
+      const readings = data || [];
+      const avg = readings.length > 0 ? {
+        systolic: Math.round(readings.reduce((s: number, r: any) => s + r.systolic, 0) / readings.length),
+        diastolic: Math.round(readings.reduce((s: number, r: any) => s + r.diastolic, 0) / readings.length),
+      } : null;
+      
+      return JSON.stringify({ readings_count: readings.length, average: avg, recent: readings.slice(0, 3) });
+    }
+    
+    case 'get_sugar_history': {
+      const startDate = args.start_date || thirtyDaysAgoStr;
+      const endDate = args.end_date || today;
+      let query = supabase
+        .from('sugar_logs')
+        .select('glucose_mg_dl, measurement_type, measured_at')
+        .eq('user_id', userId)
+        .gte('measured_at', `${startDate}T00:00:00`)
+        .lte('measured_at', `${endDate}T23:59:59`)
+        .order('measured_at', { ascending: false })
+        .limit(10);
+      
+      if (args.measurement_type) {
+        query = query.eq('measurement_type', args.measurement_type);
+      }
+      
+      const { data } = await query;
+      const readings = data || [];
+      const avg = readings.length > 0 
+        ? Math.round(readings.reduce((s: number, r: any) => s + r.glucose_mg_dl, 0) / readings.length)
+        : null;
+      
+      return JSON.stringify({ readings_count: readings.length, average_glucose: avg, recent: readings.slice(0, 3) });
+    }
+    
+    case 'get_goals': {
+      const { data } = await supabase
+        .from('health_goals')
+        .select('goal_type, target_value, current_value, status')
+        .eq('user_id', userId)
+        .eq('status', args.status || 'active');
+      
+      return JSON.stringify({ goals: data || [] });
+    }
+    
+    case 'suggest_log_bp': {
+      // Return a suggested action for the user to confirm
+      return JSON.stringify({
+        action: 'log_bp',
+        suggested_values: {
+          systolic: args.systolic,
+          diastolic: args.diastolic,
+          heart_rate: args.heart_rate,
+          ritual_type: args.ritual_type || 'morning',
+        },
+        message: `I can log this BP reading (${args.systolic}/${args.diastolic}) for you. Would you like me to save it?`
+      });
+    }
+    
+    case 'suggest_log_sugar': {
+      return JSON.stringify({
+        action: 'log_sugar',
+        suggested_values: {
+          glucose_mg_dl: args.glucose_mg_dl,
+          measurement_type: args.measurement_type,
+        },
+        message: `I can log this blood sugar reading (${args.glucose_mg_dl} mg/dL, ${args.measurement_type}) for you. Would you like me to save it?`
+      });
+    }
+    
+    case 'suggest_set_goal': {
+      return JSON.stringify({
+        action: 'set_goal',
+        suggested_values: {
+          goal_type: args.goal_type,
+          target_value: args.target_value,
+        },
+        reasoning: args.reasoning,
+        message: `Based on your health data, I suggest setting a goal for ${args.goal_type} with target ${args.target_value}. ${args.reasoning}`
+      });
+    }
+    
+    default:
+      return JSON.stringify({ error: `Unknown function: ${functionName}` });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -214,38 +453,54 @@ serve(async (req) => {
     // Fetch user's health data for personalized context
     const healthContext = await getUserHealthContext(supabase, user.id);
 
-    // Enhanced system prompt with health data context
+    // Enhanced system prompt with health data context and agent capabilities
     const systemPrompt = language === "hi" 
-      ? `आप Beat ऐप के लिए एक विशेषज्ञ स्वास्थ्य कोच हैं। आप भारतीय वरिष्ठ नागरिकों (40-70 वर्ष) को उनके रक्तचाप, रक्त शर्करा और हृदय स्वास्थ्य का प्रबंधन करने में मदद करते हैं।
+      ? `आप Beat ऐप के लिए एक विशेषज्ञ AI स्वास्थ्य कोच हैं। आप भारतीय वरिष्ठ नागरिकों (40-70 वर्ष) को उनके रक्तचाप, रक्त शर्करा और हृदय स्वास्थ्य का प्रबंधन करने में मदद करते हैं।
 
 ${healthContext}
+
+आपके पास उपयोगकर्ता के स्वास्थ्य डेटा तक पहुंचने और कार्रवाई सुझाने के लिए टूल्स हैं:
+- get_health_summary: वर्तमान स्वास्थ्य स्थिति प्राप्त करें
+- get_bp_history: BP इतिहास देखें
+- get_sugar_history: शुगर इतिहास देखें
+- get_goals: स्वास्थ्य लक्ष्य देखें
+- suggest_log_bp: जब उपयोगकर्ता BP नंबर बताए तो लॉग करने का सुझाव दें
+- suggest_log_sugar: जब उपयोगकर्ता शुगर नंबर बताए तो लॉग करने का सुझाव दें
+- suggest_set_goal: स्वास्थ्य लक्ष्य सेट करने का सुझाव दें
 
 महत्वपूर्ण दिशानिर्देश:
 - उपयोगकर्ता के वास्तविक स्वास्थ्य डेटा के आधार पर व्यक्तिगत सलाह दें
+- जब उपयोगकर्ता संख्याएं बताए (जैसे "मेरा BP 140/90 है"), उचित suggest_ फ़ंक्शन का उपयोग करें
 - गर्मजोशी से, सरल हिंदी में बात करें
 - कभी भी चिकित्सा निदान न करें
 - यदि BP ≥180/120 या शुगर ≥300 है, तो तुरंत डॉक्टर से मिलने की सलाह दें
-- व्यावहारिक, क्रियात्मक सुझाव दें
-- भारतीय आहार और जीवनशैली के संदर्भ में सलाह दें
-- प्रतिक्रियाएं संक्षिप्त रखें (120 शब्दों से कम)`
-      : `You are an expert health coach for the Beat app. You help Indian seniors (aged 40-70) manage their blood pressure, blood sugar, and heart health.
+- प्रतिक्रियाएं संक्षिप्त रखें (100 शब्दों से कम)`
+      : `You are an expert AI health coach for the Beat app, helping Indian seniors (aged 40-70) manage their blood pressure, blood sugar, and heart health.
 
 ${healthContext}
 
+You have tools to access user health data and suggest actions:
+- get_health_summary: Get current health status overview
+- get_bp_history: View BP reading history
+- get_sugar_history: View blood sugar history  
+- get_goals: View active health goals
+- suggest_log_bp: When user mentions BP numbers, suggest logging them
+- suggest_log_sugar: When user mentions sugar/glucose numbers, suggest logging them
+- suggest_set_goal: Suggest setting a health goal based on conversation
+
 CRITICAL GUIDELINES:
-- Provide personalized advice based on the user's ACTUAL health data shown above
-- Reference their specific numbers when giving advice (e.g., "Your BP of 145/92 suggests...")
+- Use tools proactively to fetch relevant data before giving advice
+- When user mentions numbers (e.g., "My BP is 145/92" or "My sugar was 180 after lunch"), ALWAYS use the appropriate suggest_ function
+- Reference their specific data when giving advice
 - Be warm, empathetic, and use simple language
 - NEVER provide medical diagnoses - you give health coaching, not medical advice
 - If BP ≥180/120 or Sugar ≥300, IMMEDIATELY recommend seeking emergency medical care
-- Give practical, actionable tips relevant to Indian diet and lifestyle
-- Keep responses concise (under 120 words)
-- If HeartScore is low, focus on the weakest sub-score
-- Acknowledge and celebrate improvements and streak maintenance
+- Keep responses concise (under 100 words)
 - Always end with encouragement
 
-MEDICAL DISCLAIMER: Always remind users that this is health coaching guidance, not medical diagnosis. For serious symptoms or emergencies, they should consult their doctor immediately.`;
+MEDICAL DISCLAIMER: Always remind users that this is health coaching guidance, not medical diagnosis.`;
 
+    // First API call with tools
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -258,7 +513,8 @@ MEDICAL DISCLAIMER: Always remind users that this is health coaching guidance, n
           { role: "system", content: systemPrompt },
           ...messages,
         ],
-        stream: true,
+        tools: agentTools,
+        stream: false, // Need non-streaming for tool calls
       }),
     });
 
@@ -286,9 +542,80 @@ MEDICAL DISCLAIMER: Always remind users that this is health coaching guidance, n
       );
     }
 
-    return new Response(response.body, {
+    const aiResponse = await response.json();
+    const assistantMessage = aiResponse.choices?.[0]?.message;
+
+    // Check if there are tool calls
+    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
+      // Execute tool calls
+      const toolResults = [];
+      for (const toolCall of assistantMessage.tool_calls) {
+        const functionName = toolCall.function.name;
+        const args = JSON.parse(toolCall.function.arguments || '{}');
+        
+        console.log(`Executing tool: ${functionName}`, args);
+        
+        const result = await executeAgentFunction(supabase, user.id, functionName, args);
+        toolResults.push({
+          tool_call_id: toolCall.id,
+          role: "tool",
+          content: result,
+        });
+      }
+
+      // Second API call with tool results (streaming)
+      const finalResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages,
+            assistantMessage,
+            ...toolResults,
+          ],
+          stream: true,
+        }),
+      });
+
+      if (!finalResponse.ok) {
+        console.error("Final response error:", await finalResponse.text());
+        return new Response(
+          JSON.stringify({ error: "AI service error" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(finalResponse.body, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    }
+
+    // No tool calls - return streaming response directly
+    const streamingResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
+
+    return new Response(streamingResponse.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
+
   } catch (error) {
     console.error("Chat copilot error:", error);
     
