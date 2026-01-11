@@ -393,6 +393,45 @@ export type Database = {
         }
         Relationships: []
       }
+      fitness_imports: {
+        Row: {
+          created_at: string
+          data_types: string[]
+          error_message: string | null
+          file_name: string | null
+          id: string
+          import_status: string
+          raw_data: Json | null
+          records_imported: number
+          source_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_types?: string[]
+          error_message?: string | null
+          file_name?: string | null
+          id?: string
+          import_status?: string
+          raw_data?: Json | null
+          records_imported?: number
+          source_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_types?: string[]
+          error_message?: string | null
+          file_name?: string | null
+          id?: string
+          import_status?: string
+          raw_data?: Json | null
+          records_imported?: number
+          source_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_goals: {
         Row: {
           created_at: string | null

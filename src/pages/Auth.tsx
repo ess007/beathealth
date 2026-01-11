@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
-import { ArrowRight, Loader2, Phone, Mail, ArrowLeft } from "lucide-react";
+import { ArrowRight, Loader2, Mail, ArrowLeft, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { z } from "zod";
 
@@ -21,13 +21,7 @@ const passwordSchema = z.string()
   .min(8, "Password must be at least 8 characters")
   .max(100, "Password must be less than 100 characters");
 
-const phoneSchema = z.string()
-  .regex(/^\d{10}$/, "Please enter a valid 10-digit phone number");
-
-const otpSchema = z.string()
-  .regex(/^\d{6}$/, "Please enter a valid 6-digit OTP");
-
-type AuthMode = "select" | "phone" | "email" | "otp";
+type AuthMode = "select" | "email" | "magic-link" | "reset-password";
 
 const Auth = () => {
   const { language } = useLanguage();
@@ -35,11 +29,11 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +74,8 @@ const Auth = () => {
           options: { emailRedirectTo: `${window.location.origin}/app/home` },
         });
         if (error) throw error;
-        toast.success(language === "hi" ? "खाता बन गया! कृपया अपना ईमेल जांचें।" : "Account created! Please check your email.");
+        toast.success(language === "hi" ? "खाता बन गया!" : "Account created! Logging you in...");
+        window.location.href = "/app/home";
       }
     } catch (error: any) {
       toast.error(error.message || (language === "hi" ? "प्रमाणीकरण विफल" : "Authentication failed"));
@@ -89,57 +84,56 @@ const Auth = () => {
     }
   };
 
-  const handlePhoneAuth = async (e: React.FormEvent) => {
+  const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate phone number
-    const phoneValidation = phoneSchema.safeParse(phone);
-    if (!phoneValidation.success) {
-      toast.error(language === "hi" ? "कृपया 10 अंकों का फ़ोन नंबर दर्ज करें" : phoneValidation.error.errors[0].message);
+    const emailValidation = emailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      setEmailError(emailValidation.error.errors[0].message);
       return;
     }
     
     setLoading(true);
+    setEmailError(null);
 
     try {
-      const formattedPhone = `+91${phoneValidation.data}`;
       const { error } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
+        email: emailValidation.data,
+        options: {
+          emailRedirectTo: `${window.location.origin}/app/home`,
+        },
       });
       if (error) throw error;
-      toast.success(language === "hi" ? "OTP भेजा गया!" : "OTP sent!");
-      setAuthMode("otp");
+      setMagicLinkSent(true);
+      toast.success(language === "hi" ? "मैजिक लिंक भेजा गया!" : "Magic link sent! Check your email.");
     } catch (error: any) {
-      toast.error(error.message || (language === "hi" ? "OTP भेजने में विफल" : "Failed to send OTP"));
+      toast.error(error.message || (language === "hi" ? "लिंक भेजने में विफल" : "Failed to send magic link"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate OTP
-    const otpValidation = otpSchema.safeParse(otp);
-    if (!otpValidation.success) {
-      toast.error(language === "hi" ? "कृपया 6 अंकों का OTP दर्ज करें" : otpValidation.error.errors[0].message);
+    const emailValidation = emailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      setEmailError(emailValidation.error.errors[0].message);
       return;
     }
     
     setLoading(true);
+    setEmailError(null);
 
     try {
-      const formattedPhone = `+91${phone}`;
-      const { error } = await supabase.auth.verifyOtp({
-        phone: formattedPhone,
-        token: otpValidation.data,
-        type: "sms",
+      const { error } = await supabase.auth.resetPasswordForEmail(emailValidation.data, {
+        redirectTo: `${window.location.origin}/auth?mode=update-password`,
       });
       if (error) throw error;
-      toast.success(language === "hi" ? "सत्यापित! स्वागत है!" : "Verified! Welcome!");
-      window.location.href = "/app/home";
+      setResetSent(true);
+      toast.success(language === "hi" ? "रीसेट लिंक भेजा गया!" : "Reset link sent! Check your email.");
     } catch (error: any) {
-      toast.error(error.message || (language === "hi" ? "अमान्य OTP" : "Invalid OTP"));
+      toast.error(error.message || (language === "hi" ? "रीसेट लिंक भेजने में विफल" : "Failed to send reset link"));
     } finally {
       setLoading(false);
     }
@@ -148,12 +142,12 @@ const Auth = () => {
   const renderSelectMode = () => (
     <div className="space-y-4">
       <Button
-        onClick={() => setAuthMode("phone")}
+        onClick={() => setAuthMode("magic-link")}
         variant="outline"
         className="w-full h-14 text-lg gap-3 border-2"
       >
-        <Phone className="w-5 h-5" />
-        {language === "hi" ? "फ़ोन नंबर से लॉगिन" : "Continue with Phone"}
+        <Sparkles className="w-5 h-5" />
+        {language === "hi" ? "मैजिक लिंक से लॉगिन" : "Sign in with Magic Link"}
       </Button>
 
       <Button
@@ -162,7 +156,7 @@ const Auth = () => {
         className="w-full h-14 text-lg gap-3 border-2"
       >
         <Mail className="w-5 h-5" />
-        {language === "hi" ? "ईमेल से लॉगिन" : "Continue with Email"}
+        {language === "hi" ? "ईमेल और पासवर्ड" : "Email & Password"}
       </Button>
 
       <p className="text-xs text-center text-muted-foreground pt-4">
@@ -173,125 +167,174 @@ const Auth = () => {
     </div>
   );
 
-  const renderPhoneMode = () => (
-    <form onSubmit={handlePhoneAuth} className="space-y-6">
+  const renderMagicLinkMode = () => (
+    <form onSubmit={handleMagicLink} className="space-y-6">
       <Button
         type="button"
         variant="ghost"
         size="sm"
         className="mb-2"
-        onClick={() => setAuthMode("select")}
+        onClick={() => {
+          setAuthMode("select");
+          setMagicLinkSent(false);
+        }}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         {language === "hi" ? "वापस" : "Back"}
       </Button>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">
-          {language === "hi" ? "फ़ोन नंबर" : "Phone Number"}
-        </Label>
-        <div className="flex">
-          <div className="flex items-center px-3 bg-muted border border-r-0 rounded-l-md text-sm font-medium">
-            +91
+      {magicLinkSent ? (
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+            <Mail className="w-8 h-8 text-primary" />
           </div>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="9876543210"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            required
-            className="h-14 text-lg rounded-l-none"
-          />
+          <h3 className="text-xl font-semibold">
+            {language === "hi" ? "अपना ईमेल जांचें" : "Check your email"}
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {language === "hi" 
+              ? `हमने ${email} पर एक मैजिक लिंक भेजा है। लॉगिन करने के लिए लिंक पर क्लिक करें।`
+              : `We've sent a magic link to ${email}. Click the link to sign in.`}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setMagicLinkSent(false);
+              handleMagicLink({ preventDefault: () => {} } as React.FormEvent);
+            }}
+            disabled={loading}
+          >
+            {language === "hi" ? "लिंक दोबारा भेजें" : "Resend link"}
+          </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {language === "hi" 
-            ? "हम आपको 6 अंकों का OTP भेजेंगे"
-            : "We'll send you a 6-digit OTP"}
-        </p>
-      </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="email">
+              {language === "hi" ? "ईमेल पता" : "Email Address"}
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError(null);
+              }}
+              required
+              className={`h-14 text-lg ${emailError ? 'border-destructive' : ''}`}
+            />
+            {emailError && (
+              <p className="text-sm text-destructive">{emailError}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {language === "hi" 
+                ? "हम आपको एक मैजिक लिंक भेजेंगे - कोई पासवर्ड नहीं चाहिए!"
+                : "We'll send you a magic link - no password needed!"}
+            </p>
+          </div>
 
-      <Button
-        type="submit"
-        className="w-full h-14 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
-        disabled={loading || phone.length < 10}
-      >
-        {loading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          <span className="flex items-center gap-2">
-            {language === "hi" ? "OTP भेजें" : "Send OTP"}
-            <ArrowRight className="w-4 h-4" />
-          </span>
-        )}
-      </Button>
+          <Button
+            type="submit"
+            className="w-full h-14 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
+            disabled={loading || !email}
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <span className="flex items-center gap-2">
+                {language === "hi" ? "मैजिक लिंक भेजें" : "Send Magic Link"}
+                <Sparkles className="w-4 h-4" />
+              </span>
+            )}
+          </Button>
+        </>
+      )}
     </form>
   );
 
-  const renderOtpMode = () => (
-    <form onSubmit={handleVerifyOtp} className="space-y-6">
+  const renderResetPasswordMode = () => (
+    <form onSubmit={handlePasswordReset} className="space-y-6">
       <Button
         type="button"
         variant="ghost"
         size="sm"
         className="mb-2"
-        onClick={() => setAuthMode("phone")}
+        onClick={() => {
+          setAuthMode("email");
+          setResetSent(false);
+        }}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         {language === "hi" ? "वापस" : "Back"}
       </Button>
 
-      <div className="text-center mb-4">
-        <p className="text-sm text-muted-foreground">
-          {language === "hi" 
-            ? `OTP भेजा गया: +91 ${phone}`
-            : `OTP sent to: +91 ${phone}`}
-        </p>
-      </div>
+      {resetSent ? (
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+            <Mail className="w-8 h-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold">
+            {language === "hi" ? "अपना ईमेल जांचें" : "Check your email"}
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {language === "hi" 
+              ? `हमने ${email} पर पासवर्ड रीसेट लिंक भेजा है।`
+              : `We've sent a password reset link to ${email}.`}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="text-center mb-4">
+            <h3 className="text-lg font-semibold">
+              {language === "hi" ? "पासवर्ड रीसेट करें" : "Reset Password"}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {language === "hi" 
+                ? "अपना ईमेल दर्ज करें और हम आपको एक रीसेट लिंक भेजेंगे।"
+                : "Enter your email and we'll send you a reset link."}
+            </p>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="otp">
-          {language === "hi" ? "OTP दर्ज करें" : "Enter OTP"}
-        </Label>
-        <Input
-          id="otp"
-          type="text"
-          placeholder="000000"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-          required
-          className="h-14 text-2xl text-center tracking-[0.5em] font-mono"
-          maxLength={6}
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="reset-email">
+              {language === "hi" ? "ईमेल पता" : "Email Address"}
+            </Label>
+            <Input
+              id="reset-email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError(null);
+              }}
+              required
+              className={`h-12 ${emailError ? 'border-destructive' : ''}`}
+            />
+            {emailError && (
+              <p className="text-sm text-destructive">{emailError}</p>
+            )}
+          </div>
 
-      <Button
-        type="submit"
-        className="w-full h-14 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
-        disabled={loading || otp.length < 6}
-      >
-        {loading ? (
-          <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
-          <span className="flex items-center gap-2">
-            {language === "hi" ? "सत्यापित करें" : "Verify OTP"}
-            <ArrowRight className="w-4 h-4" />
-          </span>
-        )}
-      </Button>
-
-      <Button
-        type="button"
-        variant="link"
-        className="w-full text-sm"
-        onClick={() => {
-          setOtp("");
-          handlePhoneAuth({ preventDefault: () => {} } as React.FormEvent);
-        }}
-        disabled={loading}
-      >
-        {language === "hi" ? "OTP दोबारा भेजें" : "Resend OTP"}
-      </Button>
+          <Button
+            type="submit"
+            className="w-full h-12 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
+            disabled={loading || !email}
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <span className="flex items-center gap-2">
+                {language === "hi" ? "रीसेट लिंक भेजें" : "Send Reset Link"}
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            )}
+          </Button>
+        </>
+      )}
     </form>
   );
 
@@ -350,6 +393,18 @@ const Auth = () => {
         )}
       </div>
 
+      {isLogin && (
+        <div className="text-right">
+          <button
+            type="button"
+            onClick={() => setAuthMode("reset-password")}
+            className="text-sm text-primary hover:underline"
+          >
+            {language === "hi" ? "पासवर्ड भूल गए?" : "Forgot password?"}
+          </button>
+        </div>
+      )}
+
       <Button
         className="w-full h-12 text-lg font-medium bg-gradient-to-r from-primary to-primary/90"
         disabled={loading}
@@ -393,8 +448,10 @@ const Auth = () => {
           <h1 className="text-4xl font-serif font-bold tracking-tight">
             {authMode === "select" 
               ? (language === "hi" ? "बीट में आपका स्वागत है" : "Welcome to Beat")
-              : authMode === "otp"
-              ? (language === "hi" ? "OTP सत्यापित करें" : "Verify OTP")
+              : authMode === "magic-link"
+              ? (language === "hi" ? "मैजिक लिंक से लॉगिन" : "Magic Link Sign In")
+              : authMode === "reset-password"
+              ? (language === "hi" ? "पासवर्ड रीसेट" : "Reset Password")
               : (isLogin 
                 ? (language === "hi" ? "वापस स्वागत है" : "Welcome Back")
                 : (language === "hi" ? "बीट से जुड़ें" : "Join Beat"))}
@@ -408,8 +465,8 @@ const Auth = () => {
 
         <Card className="p-8 glass-panel border-white/20 shadow-2xl animate-in slide-in-from-bottom-8 fade-in duration-700 delay-100">
           {authMode === "select" && renderSelectMode()}
-          {authMode === "phone" && renderPhoneMode()}
-          {authMode === "otp" && renderOtpMode()}
+          {authMode === "magic-link" && renderMagicLinkMode()}
+          {authMode === "reset-password" && renderResetPasswordMode()}
           {authMode === "email" && renderEmailMode()}
         </Card>
       </div>
