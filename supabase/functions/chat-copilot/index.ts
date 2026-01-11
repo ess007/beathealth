@@ -130,6 +130,49 @@ const agentTools = [
         additionalProperties: false
       }
     }
+  },
+  // L2 Agent Control Tools
+  {
+    type: "function",
+    function: {
+      name: "get_agent_status",
+      description: "Get the current status of the user's AI agent including autonomy level and recent actions",
+      parameters: {
+        type: "object",
+        properties: {},
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_agent_autonomy",
+      description: "Update the agent's autonomy level based on user request. Use when user says things like 'be more proactive' or 'stop auto actions'",
+      parameters: {
+        type: "object",
+        properties: {
+          autonomy_level: { type: "string", enum: ["minimal", "balanced", "full"], description: "New autonomy level" },
+          reason: { type: "string", description: "Why the change was requested" }
+        },
+        required: ["autonomy_level"],
+        additionalProperties: false
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_agent_actions",
+      description: "Get recent agent actions to answer questions like 'what have you done?' or 'show me your activity'",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: { type: "number", description: "Max actions to return (default 10)" }
+        },
+        additionalProperties: false
+      }
+    }
   }
 ];
 
@@ -369,6 +412,74 @@ async function executeAgentFunction(supabase: any, userId: string, functionName:
         reasoning: args.reasoning,
         message: `Based on your health data, I suggest setting a goal for ${args.goal_type} with target ${args.target_value}. ${args.reasoning}`
       });
+    }
+
+    // L2 Agent Control Functions
+    case 'get_agent_status': {
+      const [prefsRes, actionsRes] = await Promise.all([
+        supabase.from('agent_preferences').select('*').eq('user_id', userId).single(),
+        supabase.from('agent_action_log').select('action_type, created_at, status').eq('user_id', userId).eq('status', 'completed').order('created_at', { ascending: false }).limit(5)
+      ]);
+      
+      const prefs = prefsRes.data || { autonomy_level: 'balanced', auto_nudge_enabled: true };
+      const recentActions = actionsRes.data || [];
+      
+      return JSON.stringify({
+        autonomy_level: prefs.autonomy_level,
+        auto_nudge_enabled: prefs.auto_nudge_enabled,
+        auto_celebrate_enabled: prefs.auto_celebrate_enabled,
+        auto_goal_adjust_enabled: prefs.auto_goal_adjust_enabled,
+        recent_actions_count: recentActions.length,
+        last_action: recentActions[0] ? `${recentActions[0].action_type} at ${recentActions[0].created_at}` : 'None'
+      });
+    }
+
+    case 'update_agent_autonomy': {
+      const { error } = await supabase.from('agent_preferences').upsert({
+        user_id: userId,
+        autonomy_level: args.autonomy_level,
+        auto_goal_adjust_enabled: args.autonomy_level === 'full'
+      });
+      
+      if (error) {
+        return JSON.stringify({ success: false, error: error.message });
+      }
+      
+      const descriptions: Record<string, string> = {
+        minimal: 'I will only observe and provide insights, no automatic actions.',
+        balanced: 'I will send helpful nudges and celebrate your achievements, but won\'t change your goals.',
+        full: 'I will proactively help you by adjusting goals and taking actions to support your health journey.'
+      };
+      
+      return JSON.stringify({
+        success: true,
+        new_level: args.autonomy_level,
+        message: descriptions[args.autonomy_level] || 'Autonomy updated.'
+      });
+    }
+
+    case 'get_agent_actions': {
+      const limit = args.limit || 10;
+      const { data } = await supabase
+        .from('agent_action_log')
+        .select('action_type, action_payload, trigger_reason, status, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      
+      const actions = data || [];
+      if (actions.length === 0) {
+        return JSON.stringify({ message: "I haven't taken any autonomous actions yet." });
+      }
+      
+      const summary = actions.map((a: any) => ({
+        action: a.action_type.replace(/_/g, ' '),
+        reason: a.trigger_reason,
+        when: a.created_at,
+        status: a.status
+      }));
+      
+      return JSON.stringify({ recent_actions: summary, total_shown: actions.length });
     }
     
     default:

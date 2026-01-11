@@ -19,9 +19,11 @@ import {
   Camera,
   Save,
   ArrowLeft,
-  Crown
+  Crown,
+  Bot
 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { AgentPreferences } from "@/components/AgentPreferences";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -465,6 +467,11 @@ const Profile = () => {
             </div>
           </div>
         </Card>
+
+        {/* Agent Settings */}
+        <div className="mb-6">
+          <AgentPreferences />
+        </div>
 
         {/* Subscription */}
         {!isPremium && (

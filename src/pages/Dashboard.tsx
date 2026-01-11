@@ -14,6 +14,7 @@ import { AchievementBadge } from "@/components/AchievementBadge";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { haptic } from "@/lib/haptics";
 import { QuickLogActions } from "@/components/QuickLogActions";
+import { AgentActivityFeed } from "@/components/AgentActivityFeed";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
@@ -169,6 +170,11 @@ const Dashboard = () => {
         {/* Quick Log Actions */}
         <section className="mb-6">
           <QuickLogActions />
+        </section>
+
+        {/* Agent Activity Feed */}
+        <section className="mb-6">
+          <AgentActivityFeed />
         </section>
 
         {/* HeartScore Card */}
