@@ -1,0 +1,90 @@
+# Beat Health - Heart & Metabolic Health App
+
+> Beat is a health tracking platform built for Indian families to monitor blood pressure, sugar levels, and lifestyle habits. Get your daily HeartScore.
+
+## What is Beat?
+
+Beat is a Progressive Web App (PWA) that helps adults aged 40-70 manage chronic conditions like hypertension, diabetes, and heart disease. It provides a single daily score called HeartScore that combines multiple health factors into one easy-to-understand number.
+
+## Key Features
+
+### HeartScore™
+A daily 0-100 score combining:
+- Blood pressure readings (25%)
+- Blood sugar levels (25%)
+- Tracking consistency (20%)
+- Social wellness (15%)
+- Environmental factors (10%)
+- Cognitive health (5%)
+
+### Family Dashboard
+Remote monitoring for caregivers:
+- View family members' health data
+- Receive alerts when something's off
+- Send gentle reminders (nudges)
+- Granular permission controls
+
+### Safety Features
+- Automatic fall detection using device sensors
+- Emergency contact alerts
+- SOS functionality
+- Location sharing in emergencies
+
+### Drug Safety
+- Checks for dangerous drug interactions (500+ medications)
+- Medication reminders
+- Tracks medication adherence
+- Alerts for missed doses
+
+### Cognitive Monitoring
+- Weekly brain games and assessments
+- Early detection of memory changes
+- Pattern analysis over time
+- Family notifications for concerns
+
+### Social Wellness
+- Tracks social isolation indicators
+- Monitors loneliness scores
+- Encourages social connections
+- Links social health to HeartScore
+
+## Target Audience
+
+- **Primary Users**: Indian adults aged 40-70 managing BP, diabetes, or heart conditions
+- **Secondary Users**: Adult children (25-45) monitoring their parents' health remotely
+- **Tertiary Users**: Caregivers and healthcare providers
+
+## Technical Details
+
+- **Platform**: Progressive Web App (works on iOS, Android, Desktop)
+- **Offline Support**: Yes, caches 7 days of data locally
+- **Languages**: English, Hindi (more coming)
+- **Data Security**: Bank-grade encryption, user-controlled data access
+- **Integrations**: Apple Health, Google Fit, Omron BP monitors, AccuChek
+
+## Pricing
+
+- **Beat Free**: ₹0/month - Basic tracking, HeartScore, medication reminders
+- **Beat Coach**: ₹199/month - AI coaching, family dashboard, drug alerts, fall detection
+- **Beat Family**: ₹349/month - Up to 5 family members, shared dashboard, priority support
+
+## Contact
+
+- Website: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com
+- Built by: BWE Studio (https://bwestudios.com)
+
+## API Access
+
+Beat does not currently offer public API access.
+
+## Data Usage
+
+Beat collects health data including:
+- Blood pressure readings
+- Blood sugar levels
+- Medication information
+- Activity and sleep data
+- Cognitive assessment responses
+- Social interaction logs
+
+All data is encrypted and stored securely. Users maintain full control over their data and can export or delete it at any time. Data is never sold to third parties.

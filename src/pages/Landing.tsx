@@ -144,7 +144,7 @@ const Landing = () => {
                   <span className="animate-ping absolute h-full w-full rounded-full bg-primary opacity-75" />
                   <span className="relative rounded-full h-2 w-2 bg-primary" />
                 </span>
-                Trusted by 50,000+ Indian families
+                Built for Indian families
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6">
@@ -171,11 +171,11 @@ const Landing = () => {
               <div className="flex items-center justify-center lg:justify-start gap-6 mt-8 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-emerald-500" />
-                  <span>HIPAA Compliant</span>
+                  <span>Bank-grade Security</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span>4.8 on App Store</span>
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span>Works Offline</span>
                 </div>
               </div>
             </div>
@@ -361,15 +361,15 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Value Props */}
       <section className="py-16 bg-card border-y border-border">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { number: "50,000+", label: "Families" },
-              { number: "92%", label: "Improved in 30 days" },
-              { number: "4.8★", label: "App Store Rating" },
-              { number: "2M+", label: "Health readings" },
+              { number: "2 min", label: "Daily check-in" },
+              { number: "6", label: "Health factors tracked" },
+              { number: "500+", label: "Drug interactions" },
+              { number: "100%", label: "Offline capable" },
             ].map((stat, i) => (
               <div key={i}>
                 <p className="text-3xl sm:text-4xl font-bold text-primary">{stat.number}</p>
@@ -489,7 +489,7 @@ const Landing = () => {
             Stop worrying. Start knowing.
           </h2>
           <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-            Join 50,000+ families who've taken control of their health. Free to start, no credit card needed.
+            Take control of your family's health today. Free to start, no credit card needed.
           </p>
           <Button size="lg" variant="secondary" className="h-12 rounded-full px-8" onClick={() => navigate("/auth")}>
             Get Beat Free <ArrowRight className="ml-2 w-4 h-4" />
@@ -533,7 +533,11 @@ const Landing = () => {
           </div>
           <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <span>© 2024 Beat Health. All rights reserved.</span>
-            <span>Made with ❤️ in India</span>
+            <div className="flex items-center gap-4">
+              <span>Made with ❤️ in India</span>
+              <span>•</span>
+              <span>Built by <a href="https://bwestudios.com" target="_blank" rel="noopener noreferrer" className="font-bold text-foreground hover:text-primary transition-colors">BWE Studio</a></span>
+            </div>
           </div>
         </div>
       </footer>
