@@ -35,3 +35,15 @@ verify_jwt = false
 
 [functions.agent-scheduler]
 verify_jwt = false
+
+[functions.analyze-meal-image]
+verify_jwt = true
+
+[functions.reasoning-engine]
+verify_jwt = false
+
+[functions.forecast-complication-risk]
+verify_jwt = false
+
+[functions.check-drug-interactions]
+verify_jwt = true

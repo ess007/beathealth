@@ -41,6 +41,54 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_sessions: {
+        Row: {
+          activity_type: string
+          avg_heart_rate: number | null
+          created_at: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          estimated_calories_burned: number | null
+          id: string
+          intensity: string | null
+          metadata: Json | null
+          source: string
+          started_at: string
+          steps_count: number | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          avg_heart_rate?: number | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          estimated_calories_burned?: number | null
+          id?: string
+          intensity?: string | null
+          metadata?: Json | null
+          source: string
+          started_at: string
+          steps_count?: number | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          avg_heart_rate?: number | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          estimated_calories_burned?: number | null
+          id?: string
+          intensity?: string | null
+          metadata?: Json | null
+          source?: string
+          started_at?: string
+          steps_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       agent_action_log: {
         Row: {
           action_payload: Json
@@ -323,6 +371,42 @@ export type Database = {
         }
         Relationships: []
       }
+      cgm_readings: {
+        Row: {
+          created_at: string | null
+          glucose_mg_dl: number
+          id: string
+          measured_at: string
+          metadata: Json | null
+          source: string
+          time_in_range: boolean | null
+          trend_arrow: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          glucose_mg_dl: number
+          id?: string
+          measured_at: string
+          metadata?: Json | null
+          source: string
+          time_in_range?: boolean | null
+          trend_arrow?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          glucose_mg_dl?: number
+          id?: string
+          measured_at?: string
+          metadata?: Json | null
+          source?: string
+          time_in_range?: boolean | null
+          trend_arrow?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_members: {
         Row: {
           challenge_id: string
@@ -455,6 +539,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      condition_analysis: {
+        Row: {
+          analysis_date: string
+          conditions: Json
+          created_at: string | null
+          cross_impacts: Json | null
+          id: string
+          recommendations: Json | null
+          risk_scores: Json
+          user_id: string
+        }
+        Insert: {
+          analysis_date: string
+          conditions: Json
+          created_at?: string | null
+          cross_impacts?: Json | null
+          id?: string
+          recommendations?: Json | null
+          risk_scores: Json
+          user_id: string
+        }
+        Update: {
+          analysis_date?: string
+          conditions?: Json
+          created_at?: string | null
+          cross_impacts?: Json | null
+          id?: string
+          recommendations?: Json | null
+          risk_scores?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      drug_interactions: {
+        Row: {
+          created_at: string | null
+          description: string
+          drug_a: string
+          drug_b: string
+          id: string
+          recommendation: string | null
+          severity: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          drug_a: string
+          drug_b: string
+          id?: string
+          recommendation?: string | null
+          severity: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          drug_a?: string
+          drug_b?: string
+          id?: string
+          recommendation?: string | null
+          severity?: string
+          source?: string | null
+        }
+        Relationships: []
       }
       events: {
         Row: {
@@ -648,6 +798,81 @@ export type Database = {
         }
         Relationships: []
       }
+      lifestyle_correlations: {
+        Row: {
+          accuracy_score: number | null
+          actual_outcome: Json | null
+          analyzed_at: string | null
+          correlation_type: string
+          id: string
+          input_factors: Json
+          predicted_outcome: Json
+          user_id: string
+        }
+        Insert: {
+          accuracy_score?: number | null
+          actual_outcome?: Json | null
+          analyzed_at?: string | null
+          correlation_type: string
+          id?: string
+          input_factors: Json
+          predicted_outcome: Json
+          user_id: string
+        }
+        Update: {
+          accuracy_score?: number | null
+          actual_outcome?: Json | null
+          analyzed_at?: string | null
+          correlation_type?: string
+          id?: string
+          input_factors?: Json
+          predicted_outcome?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meal_logs: {
+        Row: {
+          ai_detected_items: Json | null
+          created_at: string | null
+          description: string | null
+          estimated_calories: number | null
+          estimated_carbs: number | null
+          estimated_glycemic_load: number | null
+          id: string
+          image_url: string | null
+          logged_at: string
+          meal_type: string
+          user_id: string
+        }
+        Insert: {
+          ai_detected_items?: Json | null
+          created_at?: string | null
+          description?: string | null
+          estimated_calories?: number | null
+          estimated_carbs?: number | null
+          estimated_glycemic_load?: number | null
+          id?: string
+          image_url?: string | null
+          logged_at: string
+          meal_type: string
+          user_id: string
+        }
+        Update: {
+          ai_detected_items?: Json | null
+          created_at?: string | null
+          description?: string | null
+          estimated_calories?: number | null
+          estimated_carbs?: number | null
+          estimated_glycemic_load?: number | null
+          id?: string
+          image_url?: string | null
+          logged_at?: string
+          meal_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       medication_logs: {
         Row: {
           created_at: string | null
@@ -695,8 +920,11 @@ export type Database = {
           created_at: string | null
           custom_times: string[] | null
           dosage: string | null
+          drug_class: string | null
+          drug_code: string | null
           frequency: string
           id: string
+          interactions_checked: boolean | null
           name: string
           notes: string | null
           updated_at: string | null
@@ -707,8 +935,11 @@ export type Database = {
           created_at?: string | null
           custom_times?: string[] | null
           dosage?: string | null
+          drug_class?: string | null
+          drug_code?: string | null
           frequency: string
           id?: string
+          interactions_checked?: boolean | null
           name: string
           notes?: string | null
           updated_at?: string | null
@@ -719,8 +950,11 @@ export type Database = {
           created_at?: string | null
           custom_times?: string[] | null
           dosage?: string | null
+          drug_class?: string | null
+          drug_code?: string | null
           frequency?: string
           id?: string
+          interactions_checked?: boolean | null
           name?: string
           notes?: string | null
           updated_at?: string | null
@@ -908,6 +1142,48 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_forecasts: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          current_risk_percent: number
+          forecast_date: string
+          forecast_horizon_months: number
+          id: string
+          key_risk_factors: Json | null
+          mitigation_actions: Json | null
+          projected_risk_percent: number
+          risk_type: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          current_risk_percent: number
+          forecast_date: string
+          forecast_horizon_months: number
+          id?: string
+          key_risk_factors?: Json | null
+          mitigation_actions?: Json | null
+          projected_risk_percent: number
+          risk_type: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          current_risk_percent?: number
+          forecast_date?: string
+          forecast_horizon_months?: number
+          id?: string
+          key_risk_factors?: Json | null
+          mitigation_actions?: Json | null
+          projected_risk_percent?: number
+          risk_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       streaks: {
         Row: {
           count: number
@@ -1031,6 +1307,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vitals_continuous: {
+        Row: {
+          created_at: string | null
+          id: string
+          measured_at: string
+          metadata: Json | null
+          source: string
+          user_id: string
+          value: number
+          vital_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          measured_at: string
+          metadata?: Json | null
+          source: string
+          user_id: string
+          value: number
+          vital_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          measured_at?: string
+          metadata?: Json | null
+          source?: string
+          user_id?: string
+          value?: number
+          vital_type?: string
         }
         Relationships: []
       }
