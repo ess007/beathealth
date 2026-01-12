@@ -27,6 +27,13 @@ const MOOD_OPTIONS = [
   { value: 5, emoji: "😊", label: "Great" },
 ];
 
+const LONELINESS_OPTIONS = [
+  { value: 1, label: "Not at all", emoji: "😊" },
+  { value: 2, label: "A little", emoji: "😐" },
+  { value: 3, label: "Somewhat", emoji: "😕" },
+  { value: 4, label: "Very", emoji: "😢" },
+];
+
 export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedCheckinProps) => {
   const queryClient = useQueryClient();
   
@@ -50,9 +57,13 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
   const [moodScore, setMoodScore] = useState<number>(3);
   const [socialInteractions, setSocialInteractions] = useState<number>(0);
   const [leftHome, setLeftHome] = useState<boolean | null>(null);
+  const [lonelinessScore, setLonelinessScore] = useState<number>(1);
+  const [talkedToFamily, setTalkedToFamily] = useState<boolean | null>(null);
   const [notes, setNotes] = useState("");
 
-  const totalSteps = isMorning ? 4 : 5;
+  // Morning: 5 steps (Vitals, Sleep, Social, Meds, Notes)
+  // Evening: 6 steps (Vitals, Mood, Social, Meds, Activity, Notes)
+  const totalSteps = isMorning ? 5 : 6;
   const progress = (step / totalSteps) * 100;
 
   const submitCheckin = useMutation({
@@ -94,32 +105,34 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
         sleep_quality: (sleepQuality || null) as "excellent" | "good" | "fair" | "poor" | "very_poor" | null,
         meds_taken: medsTaken,
         notes: notes || null,
+        loneliness_score: lonelinessScore,
+        social_interaction_count: socialInteractions,
       }]);
 
-      // Log social wellness for evening
-      if (!isMorning && (socialInteractions > 0 || leftHome !== null)) {
-        const { data: existing } = await supabase
-          .from("social_wellness_logs")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("log_date", today)
-          .single();
+      // Log social wellness for both morning and evening
+      const { data: existing } = await supabase
+        .from("social_wellness_logs")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("log_date", today)
+        .maybeSingle();
 
-        if (existing) {
-          await supabase.from("social_wellness_logs").update({
-            social_interactions: socialInteractions,
-            mood_score: moodScore,
-            left_home: leftHome,
-          }).eq("id", existing.id);
-        } else {
-          await supabase.from("social_wellness_logs").insert({
-            user_id: user.id,
-            log_date: today,
-            social_interactions: socialInteractions,
-            mood_score: moodScore,
-            left_home: leftHome,
-          });
-        }
+      const socialData = {
+        social_interactions: socialInteractions,
+        mood_score: moodScore,
+        left_home: leftHome,
+        loneliness_score: lonelinessScore,
+        interaction_types: talkedToFamily ? ['family'] : [],
+      };
+
+      if (existing) {
+        await supabase.from("social_wellness_logs").update(socialData).eq("id", existing.id);
+      } else {
+        await supabase.from("social_wellness_logs").insert({
+          user_id: user.id,
+          log_date: today,
+          ...socialData,
+        });
       }
 
       // Update streak
@@ -173,24 +186,14 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
     setMoodScore(3);
     setSocialInteractions(0);
     setLeftHome(null);
+    setLonelinessScore(1);
+    setTalkedToFamily(null);
     setNotes("");
   };
 
   const canProceed = () => {
-    switch (step) {
-      case 1: // Vitals
-        return true; // Optional
-      case 2: // Sleep (morning) or Mood (evening)
-        return true; // Optional
-      case 3: // Medications
-        return true; // Optional
-      case 4: // Morning: Submit, Evening: Social
-        return true;
-      case 5: // Evening: Submit
-        return true;
-      default:
-        return true;
-    }
+    // All steps are optional for senior-friendly UX
+    return true;
   };
 
   const handleNext = () => {
@@ -341,8 +344,98 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
             </div>
           )}
 
-          {/* Step 3: Medications */}
+          {/* Step 3: Social Wellness (Both Morning & Evening) */}
           {step === 3 && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-center mb-6">
+                <Users className="h-12 w-12 text-pink-500 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold">Social Connection</h3>
+                <p className="text-sm text-muted-foreground">How connected do you feel?</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Talked to family */}
+                <div className="p-4 rounded-xl border border-border/50 bg-card">
+                  <p className="font-medium mb-3">Did you talk to family or friends?</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setTalkedToFamily(true)}
+                      className={`flex-1 py-4 rounded-xl text-lg font-medium transition-all ${
+                        talkedToFamily === true 
+                          ? "bg-green-500 text-white" 
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      Yes 😊
+                    </button>
+                    <button
+                      onClick={() => setTalkedToFamily(false)}
+                      className={`flex-1 py-4 rounded-xl text-lg font-medium transition-all ${
+                        talkedToFamily === false 
+                          ? "bg-muted-foreground text-white" 
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+
+                {/* Loneliness check */}
+                <div className="p-4 rounded-xl border border-border/50 bg-card">
+                  <p className="font-medium mb-3">Feeling lonely?</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {LONELINESS_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setLonelinessScore(option.value)}
+                        className={`p-3 rounded-xl transition-all text-center ${
+                          lonelinessScore === option.value
+                            ? "bg-primary text-primary-foreground ring-2 ring-primary"
+                            : "bg-muted hover:bg-muted/80"
+                        }`}
+                      >
+                        <span className="text-2xl block mb-1">{option.emoji}</span>
+                        <span className="text-xs">{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Left home (evening only shown here too for consistency) */}
+                {!isMorning && (
+                  <div className="p-4 rounded-xl border border-border/50 bg-card">
+                    <p className="font-medium mb-3">Did you step outside today?</p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setLeftHome(true)}
+                        className={`flex-1 py-4 rounded-xl text-lg font-medium transition-all ${
+                          leftHome === true 
+                            ? "bg-green-500 text-white" 
+                            : "bg-muted hover:bg-muted/80"
+                        }`}
+                      >
+                        Yes ☀️
+                      </button>
+                      <button
+                        onClick={() => setLeftHome(false)}
+                        className={`flex-1 py-4 rounded-xl text-lg font-medium transition-all ${
+                          leftHome === false 
+                            ? "bg-muted-foreground text-white" 
+                            : "bg-muted hover:bg-muted/80"
+                        }`}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Medications */}
+          {step === 4 && (
             <div className="space-y-6 animate-fade-in">
               <div className="text-center mb-6">
                 <Pill className="h-12 w-12 text-green-500 mx-auto mb-2" />
@@ -354,41 +447,41 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={() => setMedsTaken(true)}
-                  className={`flex-1 max-w-[140px] p-6 rounded-xl border-2 transition-all ${
+                  className={`flex-1 max-w-[160px] p-8 rounded-2xl border-2 transition-all ${
                     medsTaken === true
                       ? "border-green-500 bg-green-500/10"
                       : "border-border/50 hover:border-green-500/50"
                   }`}
                 >
-                  <Check className={`h-8 w-8 mx-auto mb-2 ${medsTaken === true ? "text-green-500" : "text-muted-foreground"}`} />
-                  <p className="font-medium">Yes</p>
+                  <Check className={`h-10 w-10 mx-auto mb-2 ${medsTaken === true ? "text-green-500" : "text-muted-foreground"}`} />
+                  <p className="font-medium text-lg">Yes</p>
                 </button>
                 <button
                   onClick={() => setMedsTaken(false)}
-                  className={`flex-1 max-w-[140px] p-6 rounded-xl border-2 transition-all ${
+                  className={`flex-1 max-w-[160px] p-8 rounded-2xl border-2 transition-all ${
                     medsTaken === false
                       ? "border-orange-500 bg-orange-500/10"
                       : "border-border/50 hover:border-orange-500/50"
                   }`}
                 >
-                  <span className={`text-2xl block mb-2 ${medsTaken === false ? "" : "opacity-50"}`}>⏳</span>
-                  <p className="font-medium">Not yet</p>
+                  <span className={`text-3xl block mb-2 ${medsTaken === false ? "" : "opacity-50"}`}>⏳</span>
+                  <p className="font-medium text-lg">Not yet</p>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step 4: Social (Evening only) or Notes (Morning) */}
-          {step === 4 && (
+          {/* Step 5: Notes (Morning) or Activity (Evening) */}
+          {step === 5 && (
             <div className="space-y-6 animate-fade-in">
               {isMorning ? (
                 <>
                   <div className="text-center mb-6">
-                    <h3 className="text-lg font-semibold">Any notes?</h3>
-                    <p className="text-sm text-muted-foreground">Optional</p>
+                    <h3 className="text-lg font-semibold">Any notes for today?</h3>
+                    <p className="text-sm text-muted-foreground">Optional - add any thoughts</p>
                   </div>
                   <textarea
-                    className="w-full h-24 p-3 rounded-lg border border-border/50 bg-background resize-none"
+                    className="w-full h-32 p-4 rounded-xl border border-border/50 bg-background resize-none text-base"
                     placeholder="How are you feeling today?"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
@@ -397,66 +490,42 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
               ) : (
                 <>
                   <div className="text-center mb-6">
-                    <Users className="h-12 w-12 text-pink-500 mx-auto mb-2" />
-                    <h3 className="text-lg font-semibold">Social connections today?</h3>
+                    <Brain className="h-12 w-12 text-purple-500 mx-auto mb-2" />
+                    <h3 className="text-lg font-semibold">How many social interactions today?</h3>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                      <span>Social interactions</span>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => setSocialInteractions(Math.max(0, socialInteractions - 1))}
-                          className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"
-                        >
-                          -
-                        </button>
-                        <span className="w-8 text-center font-bold">{socialInteractions}</span>
-                        <button
-                          onClick={() => setSocialInteractions(socialInteractions + 1)}
-                          className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                      <span>Did you go outside today?</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setLeftHome(true)}
-                          className={`px-4 py-2 rounded-lg transition-all ${
-                            leftHome === true ? "bg-green-500 text-white" : "bg-muted"
-                          }`}
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={() => setLeftHome(false)}
-                          className={`px-4 py-2 rounded-lg transition-all ${
-                            leftHome === false ? "bg-muted-foreground text-white" : "bg-muted"
-                          }`}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-center gap-6 py-4">
+                    <button
+                      onClick={() => setSocialInteractions(Math.max(0, socialInteractions - 1))}
+                      className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-bold active:scale-95 transition-transform"
+                    >
+                      −
+                    </button>
+                    <span className="text-5xl font-bold w-20 text-center">{socialInteractions}</span>
+                    <button
+                      onClick={() => setSocialInteractions(socialInteractions + 1)}
+                      className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold active:scale-95 transition-transform"
+                    >
+                      +
+                    </button>
                   </div>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Calls, visits, or meaningful conversations
+                  </p>
                 </>
               )}
             </div>
           )}
 
-          {/* Step 5: Notes (Evening) */}
-          {step === 5 && !isMorning && (
+          {/* Step 6: Notes (Evening only) */}
+          {step === 6 && !isMorning && (
             <div className="space-y-6 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold">Any notes?</h3>
-                <p className="text-sm text-muted-foreground">Optional</p>
+                <h3 className="text-lg font-semibold">Any notes about your day?</h3>
+                <p className="text-sm text-muted-foreground">Optional - reflect on your day</p>
               </div>
               <textarea
-                className="w-full h-24 p-3 rounded-lg border border-border/50 bg-background resize-none"
+                className="w-full h-32 p-4 rounded-xl border border-border/50 bg-background resize-none text-base"
                 placeholder="How was your day?"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

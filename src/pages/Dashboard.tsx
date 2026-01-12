@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown, AlertTriangle, Wind, Brain, Heart } from "lucide-react";
+import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -16,7 +16,6 @@ import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { haptic } from "@/lib/haptics";
 import { QuickLogActions } from "@/components/QuickLogActions";
 import { AgentActivityFeed } from "@/components/AgentActivityFeed";
-import { EnvironmentalAlert } from "@/components/EnvironmentalAlert";
 import { DrugInteractionWarning } from "@/components/DrugInteractionWarning";
 import { SocialWellnessCard } from "@/components/SocialWellnessCard";
 import { UnifiedCheckin } from "@/components/UnifiedCheckin";
@@ -277,11 +276,6 @@ const Dashboard = () => {
         {/* Social Wellness */}
         <section className="mb-6">
           <SocialWellnessCard />
-        </section>
-
-        {/* Environmental Alert (AQI) */}
-        <section className="mb-6">
-          <EnvironmentalAlert />
         </section>
 
         {/* Quick Access */}

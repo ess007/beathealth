@@ -97,8 +97,8 @@ const AppContent = () => {
 
   useMedicationReminders();
 
-  // Swipe Navigation Logic
-  const appRoutes = ["/app/home", "/app/checkin", "/app/coach", "/app/insights", "/app/family"];
+  // Swipe Navigation Logic - simplified for 3-item nav
+  const appRoutes = ["/app/home", "/app/coach", "/app/profile"];
   const currentIndex = appRoutes.indexOf(location.pathname);
 
   useSwipeNavigation({
