@@ -59,7 +59,7 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center animate-pulse">
+          <div className="w-24 h-24 rounded-2xl bg-black flex items-center justify-center animate-pulse">
             <Logo size="xl" showText={false} />
           </div>
           <p className="text-sm text-muted-foreground">Loading...</p>

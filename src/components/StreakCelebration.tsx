@@ -60,7 +60,7 @@ export const StreakCelebration = ({ show, streakCount, onClose }: StreakCelebrat
       <Card className={`p-8 text-center shadow-elevated transform transition-all duration-500 ${isVisible ? 'scale-100' : 'scale-50'}`}>
         <div className="flex justify-center mb-4">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+            <div className="w-28 h-28 rounded-full bg-black flex items-center justify-center">
               <Logo size="xl" showText={false} />
             </div>
             <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">

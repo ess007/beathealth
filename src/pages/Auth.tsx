@@ -442,7 +442,7 @@ const Auth = () => {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center space-y-2 mb-8 animate-in slide-in-from-bottom-4 fade-in duration-700">
-          <div className="inline-block p-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl mb-4">
+          <div className="inline-block p-5 rounded-full bg-black shadow-2xl mb-4">
             <Logo size="xl" showText={false} />
           </div>
           <h1 className="text-4xl font-serif font-bold tracking-tight">

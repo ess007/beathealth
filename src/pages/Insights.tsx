@@ -209,7 +209,7 @@ const Insights = () => {
           
           <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center">
                 <Logo size="sm" showText={false} />
               </div>
             </div>

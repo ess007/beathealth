@@ -125,8 +125,8 @@ const Onboarding = () => {
         return (
           <div className="space-y-8 text-center animate-fade-in">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl">
-                <Logo size="lg" showText={false} />
+              <div className="w-28 h-28 rounded-3xl bg-black flex items-center justify-center shadow-xl">
+                <Logo size="xl" showText={false} />
               </div>
               <div>
                 <h1 className="text-3xl font-bold mb-2">
