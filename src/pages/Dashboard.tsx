@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown, AlertTriangle, Wind, Brain, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -15,7 +16,12 @@ import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { haptic } from "@/lib/haptics";
 import { QuickLogActions } from "@/components/QuickLogActions";
 import { AgentActivityFeed } from "@/components/AgentActivityFeed";
+import { EnvironmentalAlert } from "@/components/EnvironmentalAlert";
+import { DrugInteractionWarning } from "@/components/DrugInteractionWarning";
+import { SocialWellnessCard } from "@/components/SocialWellnessCard";
+import { UnifiedCheckin } from "@/components/UnifiedCheckin";
 import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -25,6 +31,7 @@ const Dashboard = () => {
   const { mainStreakCount, isLoading: streaksLoading } = useStreaks();
   const { achievements } = useAchievements();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [checkinOpen, setCheckinOpen] = useState(false);
 
   const navigateTo = (path: string) => {
     haptic("light");
@@ -86,6 +93,30 @@ const Dashboard = () => {
     gcTime: 0,
   });
 
+  // Fetch drug interactions count
+  const { data: interactionCount } = useQuery({
+    queryKey: ["drug-interactions-count", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      const { data: meds } = await supabase
+        .from("medications")
+        .select("name")
+        .eq("user_id", user.id)
+        .eq("active", true);
+      
+      if (!meds || meds.length < 2) return 0;
+      
+      const medNames = meds.map(m => m.name.toLowerCase());
+      const { data: interactions } = await supabase
+        .from("drug_interactions")
+        .select("*")
+        .or(medNames.map(n => `drug_a.ilike.%${n}%,drug_b.ilike.%${n}%`).join(","));
+      
+      return interactions?.length || 0;
+    },
+    enabled: !!user?.id,
+  });
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setUser(session.user);
@@ -96,8 +127,6 @@ const Dashboard = () => {
   // Real-time subscription for ritual updates
   useEffect(() => {
     if (!user?.id) return;
-
-    const today = new Date().toISOString().split("T")[0];
 
     const behaviorChannel = supabase
       .channel('dashboard-behavior-logs')
@@ -129,6 +158,7 @@ const Dashboard = () => {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t("dashboard.goodMorning") : hour < 17 ? t("dashboard.goodAfternoon") : t("dashboard.goodEvening");
+  const isMorning = hour < 14;
 
   const quickAccessItems = [
     { title: t("dashboard.viewTrends"), icon: TrendingUp, color: "text-blue-500", bg: "bg-blue-500/10", path: "/app/insights" },
@@ -167,6 +197,36 @@ const Dashboard = () => {
           </div>
         </section>
 
+        {/* Quick Check-in Button */}
+        <section className="mb-4">
+          <Sheet open={checkinOpen} onOpenChange={setCheckinOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                className="w-full h-14 text-base rounded-2xl gap-3"
+                onClick={() => haptic("light")}
+              >
+                {isMorning ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                Start {isMorning ? "Morning" : "Evening"} Check-in
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[90vh] rounded-t-3xl p-0">
+              <UnifiedCheckin isOpen={checkinOpen} onClose={() => setCheckinOpen(false)} />
+            </SheetContent>
+          </Sheet>
+        </section>
+
+        {/* Alerts Row */}
+        {(interactionCount && interactionCount > 0) && (
+          <section className="mb-4">
+            <DrugInteractionWarning />
+          </section>
+        )}
+
+        {/* Environmental Alert */}
+        <section className="mb-4">
+          <EnvironmentalAlert />
+        </section>
+
         {/* Quick Log Actions */}
         <section className="mb-6">
           <QuickLogActions />
@@ -197,7 +257,7 @@ const Dashboard = () => {
                   { label: t("ritual.sleepQuality"), done: ritualData?.morning.hasSleep || false },
                   { label: t("ritual.medsTaken"), done: ritualData?.morning.hasMeds || false },
                 ]}
-                onStart={() => navigateTo("/app/checkin/morning")}
+                onStart={() => setCheckinOpen(true)}
               />
             </Card>
 
@@ -213,10 +273,15 @@ const Dashboard = () => {
                   { label: t("ritual.stepsCount"), done: ritualData?.evening.hasSteps || false },
                   { label: t("ritual.medsTaken"), done: ritualData?.evening.hasMeds || false },
                 ]}
-                onStart={() => navigateTo("/app/checkin/evening")}
+                onStart={() => setCheckinOpen(true)}
               />
             </Card>
           </div>
+        </section>
+
+        {/* Social Wellness */}
+        <section className="mb-6">
+          <SocialWellnessCard />
         </section>
 
         {/* Quick Access */}

@@ -7,7 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Input validation schema
 const scoreSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 });
@@ -28,6 +27,28 @@ interface BehaviorLog {
   log_date: string;
   meds_taken: boolean;
   ritual_type: string;
+  mood_score?: number;
+  sleep_quality?: string;
+  social_interaction_count?: number;
+  loneliness_score?: number;
+}
+
+interface SocialWellnessLog {
+  social_interactions: number;
+  loneliness_score: number;
+  left_home: boolean;
+  mood_score: number;
+}
+
+interface EnvironmentalLog {
+  aqi: number;
+  temperature_celsius: number;
+}
+
+interface CognitiveAssessment {
+  score: number;
+  max_score: number;
+  risk_level: string;
 }
 
 serve(async (req) => {
@@ -42,13 +63,11 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get the authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       throw new Error("No authorization header");
     }
 
-    // Get user from JWT
     const { data: { user }, error: userError } = await supabase.auth.getUser(
       authHeader.replace("Bearer ", "")
     );
@@ -57,7 +76,6 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Validate and parse input
     const body = await req.json();
     const validated = scoreSchema.parse(body);
     const { date } = validated;
@@ -65,7 +83,7 @@ serve(async (req) => {
 
     console.log(`Calculating HeartScore for user ${user.id} on ${targetDate}`);
 
-    // Check rate limit: 10 calculations per hour
+    // Check rate limit
     const { data: rateLimitOk, error: rateLimitError } = await supabase
       .rpc('check_rate_limit', {
         _user_id: user.id,
@@ -83,61 +101,90 @@ serve(async (req) => {
       );
     }
 
-    // Fetch BP logs for the day
-    const { data: bpLogs, error: bpError } = await supabase
-      .from("bp_logs")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("measured_at", `${targetDate}T00:00:00`)
-      .lt("measured_at", `${targetDate}T23:59:59`)
-      .order("measured_at", { ascending: false });
+    // Fetch all health data in parallel
+    const [bpResult, sugarResult, behaviorResult, socialResult, envResult, cognitiveResult] = await Promise.all([
+      // BP logs
+      supabase
+        .from("bp_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("measured_at", `${targetDate}T00:00:00`)
+        .lt("measured_at", `${targetDate}T23:59:59`)
+        .order("measured_at", { ascending: false }),
+      
+      // Sugar logs
+      supabase
+        .from("sugar_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("measured_at", `${targetDate}T00:00:00`)
+        .lt("measured_at", `${targetDate}T23:59:59`)
+        .order("measured_at", { ascending: false }),
+      
+      // Behavior logs
+      supabase
+        .from("behavior_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("log_date", targetDate),
+      
+      // Social wellness logs
+      supabase
+        .from("social_wellness_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("log_date", targetDate)
+        .maybeSingle(),
+      
+      // Environmental logs (most recent)
+      supabase
+        .from("environmental_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("measured_at", `${targetDate}T00:00:00`)
+        .order("measured_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      
+      // Cognitive assessments (last 7 days for trend)
+      supabase
+        .from("cognitive_assessments")
+        .select("*")
+        .eq("user_id", user.id)
+        .gte("assessment_date", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0])
+        .order("assessment_date", { ascending: false })
+        .limit(3),
+    ]);
 
-    if (bpError) throw bpError;
+    const bpLogs = bpResult.data || [];
+    const sugarLogs = sugarResult.data || [];
+    const behaviorLogs = behaviorResult.data || [];
+    const socialLog = socialResult.data as SocialWellnessLog | null;
+    const envLog = envResult.data as EnvironmentalLog | null;
+    const cognitiveAssessments = cognitiveResult.data || [];
 
-    // Fetch sugar logs for the day
-    const { data: sugarLogs, error: sugarError } = await supabase
-      .from("sugar_logs")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("measured_at", `${targetDate}T00:00:00`)
-      .lt("measured_at", `${targetDate}T23:59:59`)
-      .order("measured_at", { ascending: false });
-
-    if (sugarError) throw sugarError;
-
-    // Fetch behavior logs for the day
-    const { data: behaviorLogs, error: behaviorError } = await supabase
-      .from("behavior_logs")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("log_date", targetDate);
-
-    if (behaviorError) throw behaviorError;
-
-    // Calculate BP Score (0-100)
-    let bpScore = 0;
-    if (bpLogs && bpLogs.length > 0) {
+    // Calculate BP Score (0-100) - 25% weight
+    let bpScore = 50;
+    if (bpLogs.length > 0) {
       const avgSystolic = bpLogs.reduce((sum: number, log: BPLog) => sum + log.systolic, 0) / bpLogs.length;
       const avgDiastolic = bpLogs.reduce((sum: number, log: BPLog) => sum + log.diastolic, 0) / bpLogs.length;
 
       if (avgSystolic < 120 && avgDiastolic < 80) {
-        bpScore = 100; // Optimal
+        bpScore = 100;
       } else if (avgSystolic < 130 && avgDiastolic < 80) {
-        bpScore = 90; // Normal
+        bpScore = 90;
       } else if (avgSystolic < 140 || avgDiastolic < 90) {
-        bpScore = 70; // Elevated
+        bpScore = 70;
       } else if (avgSystolic < 160 || avgDiastolic < 100) {
-        bpScore = 50; // Stage 1 Hypertension
+        bpScore = 50;
       } else {
-        bpScore = 30; // Stage 2 Hypertension
+        bpScore = 30;
       }
-    } else {
-      bpScore = 50; // No data - neutral score
     }
 
-    // Calculate Sugar Score (0-100)
-    let sugarScore = 0;
-    if (sugarLogs && sugarLogs.length > 0) {
+    // Calculate Sugar Score (0-100) - 25% weight
+    let sugarScore = 50;
+    if (sugarLogs.length > 0) {
       const fastingLogs = sugarLogs.filter((log: SugarLog) => log.measurement_type === "fasting");
       const randomLogs = sugarLogs.filter((log: SugarLog) => log.measurement_type === "random");
 
@@ -146,67 +193,132 @@ serve(async (req) => {
 
       if (fastingLogs.length > 0) {
         const avgFasting = fastingLogs.reduce((sum: number, log: SugarLog) => sum + log.glucose_mg_dl, 0) / fastingLogs.length;
-        if (avgFasting < 100) {
-          fastingScore = 100; // Normal
-        } else if (avgFasting < 126) {
-          fastingScore = 70; // Pre-diabetic
-        } else {
-          fastingScore = 40; // Diabetic range
-        }
+        if (avgFasting < 100) fastingScore = 100;
+        else if (avgFasting < 126) fastingScore = 70;
+        else fastingScore = 40;
       }
 
       if (randomLogs.length > 0) {
         const avgRandom = randomLogs.reduce((sum: number, log: SugarLog) => sum + log.glucose_mg_dl, 0) / randomLogs.length;
-        if (avgRandom < 140) {
-          randomScore = 100; // Normal
-        } else if (avgRandom < 200) {
-          randomScore = 70; // Elevated
-        } else {
-          randomScore = 40; // High
-        }
+        if (avgRandom < 140) randomScore = 100;
+        else if (avgRandom < 200) randomScore = 70;
+        else randomScore = 40;
       }
 
       sugarScore = Math.round((fastingScore + randomScore) / 2);
-    } else {
-      sugarScore = 50; // No data - neutral score
     }
 
-    // Calculate Consistency Score (0-100)
+    // Calculate Consistency/Behavior Score (0-100) - 20% weight
     let consistencyScore = 0;
-    if (behaviorLogs && behaviorLogs.length > 0) {
+    if (behaviorLogs.length > 0) {
       const morningRitual = behaviorLogs.find((log: BehaviorLog) => log.ritual_type === "morning");
       const eveningRitual = behaviorLogs.find((log: BehaviorLog) => log.ritual_type === "evening");
 
-      if (morningRitual) consistencyScore += 50;
-      if (eveningRitual) consistencyScore += 50;
+      if (morningRitual) consistencyScore += 40;
+      if (eveningRitual) consistencyScore += 40;
 
-      // Bonus for medication adherence
+      // Medication adherence bonus
       const medsTaken = behaviorLogs.filter((log: BehaviorLog) => log.meds_taken).length;
-      if (medsTaken === behaviorLogs.length) {
+      if (medsTaken === behaviorLogs.length && behaviorLogs.length > 0) {
+        consistencyScore = Math.min(100, consistencyScore + 20);
+      }
+
+      // Sleep quality bonus
+      const goodSleep = behaviorLogs.some((log: BehaviorLog) => 
+        log.sleep_quality === "excellent" || log.sleep_quality === "good"
+      );
+      if (goodSleep) {
         consistencyScore = Math.min(100, consistencyScore + 10);
       }
-    } else {
-      consistencyScore = 0; // No rituals completed
     }
 
-    // Calculate final HeartScore (weighted average)
+    // Calculate Social Wellness Score (0-100) - 15% weight
+    let socialScore = 50;
+    if (socialLog) {
+      let score = 0;
+      
+      // Social interactions (0-3+ = 0-40 points)
+      score += Math.min(40, (socialLog.social_interactions || 0) * 15);
+      
+      // Left home (20 points)
+      if (socialLog.left_home) score += 20;
+      
+      // Mood score (1-5 = 20-40 points)
+      if (socialLog.mood_score) {
+        score += Math.min(40, socialLog.mood_score * 8);
+      }
+      
+      // Loneliness penalty (high loneliness reduces score)
+      if (socialLog.loneliness_score && socialLog.loneliness_score > 3) {
+        score = Math.max(0, score - (socialLog.loneliness_score - 3) * 15);
+      }
+      
+      socialScore = Math.min(100, score);
+    } else if (behaviorLogs.some((log: BehaviorLog) => log.social_interaction_count)) {
+      // Fallback to behavior log social data
+      const socialInteractions = behaviorLogs.reduce((sum, log: BehaviorLog) => 
+        sum + (log.social_interaction_count || 0), 0
+      );
+      socialScore = Math.min(100, 50 + socialInteractions * 15);
+    }
+
+    // Calculate Environmental Factor (0-100) - 10% weight
+    let envScore = 70; // Default neutral
+    if (envLog) {
+      // AQI impact (lower is better)
+      if (envLog.aqi <= 50) envScore = 100;
+      else if (envLog.aqi <= 100) envScore = 80;
+      else if (envLog.aqi <= 150) envScore = 60;
+      else if (envLog.aqi <= 200) envScore = 40;
+      else envScore = 20;
+      
+      // Temperature comfort bonus/penalty
+      if (envLog.temperature_celsius) {
+        const temp = envLog.temperature_celsius;
+        if (temp >= 20 && temp <= 28) envScore = Math.min(100, envScore + 10);
+        else if (temp < 15 || temp > 35) envScore = Math.max(0, envScore - 10);
+      }
+    }
+
+    // Calculate Cognitive Score (0-100) - 5% weight
+    let cognitiveScore = 80; // Default healthy
+    if (cognitiveAssessments.length > 0) {
+      const latestAssessment = cognitiveAssessments[0] as CognitiveAssessment;
+      const percentScore = (latestAssessment.score / latestAssessment.max_score) * 100;
+      
+      if (latestAssessment.risk_level === "normal") cognitiveScore = 100;
+      else if (latestAssessment.risk_level === "mild_concern") cognitiveScore = 70;
+      else if (latestAssessment.risk_level === "moderate_concern") cognitiveScore = 50;
+      else cognitiveScore = Math.max(30, percentScore);
+    }
+
+    // Calculate final HeartScore with new weights
+    // BP: 25%, Sugar: 25%, Consistency: 20%, Social: 15%, Environment: 10%, Cognitive: 5%
     const heartScore = Math.round(
-      (bpScore * 0.30) + (sugarScore * 0.30) + (consistencyScore * 0.40)
+      (bpScore * 0.25) + 
+      (sugarScore * 0.25) + 
+      (consistencyScore * 0.20) + 
+      (socialScore * 0.15) + 
+      (envScore * 0.10) + 
+      (cognitiveScore * 0.05)
     );
 
-    console.log(`Scores: BP=${bpScore}, Sugar=${sugarScore}, Consistency=${consistencyScore}, Heart=${heartScore}`);
+    console.log(`Scores: BP=${bpScore}, Sugar=${sugarScore}, Consistency=${consistencyScore}, Social=${socialScore}, Env=${envScore}, Cognitive=${cognitiveScore}, Heart=${heartScore}`);
 
-    // Generate AI explanation using Lovable AI
+    // Generate comprehensive AI explanation
     const aiPrompt = `You are a health coach explaining a HeartScore to an Indian adult. The HeartScore is ${heartScore}/100.
 
-Sub-scores:
-- Blood Pressure Score: ${bpScore}/100 ${bpLogs && bpLogs.length > 0 ? `(Average: ${Math.round(bpLogs.reduce((s: number, l: BPLog) => s + l.systolic, 0) / bpLogs.length)}/${Math.round(bpLogs.reduce((s: number, l: BPLog) => s + l.diastolic, 0) / bpLogs.length)} mmHg)` : '(No data)'}
-- Sugar Score: ${sugarScore}/100 ${sugarLogs && sugarLogs.length > 0 ? `(Average: ${Math.round(sugarLogs.reduce((s: number, l: SugarLog) => s + l.glucose_mg_dl, 0) / sugarLogs.length)} mg/dL)` : '(No data)'}
-- Consistency Score: ${consistencyScore}/100 (${behaviorLogs?.length || 0} rituals completed)
+Component scores:
+- Blood Pressure: ${bpScore}/100 ${bpLogs.length > 0 ? `(Avg: ${Math.round(bpLogs.reduce((s: number, l: BPLog) => s + l.systolic, 0) / bpLogs.length)}/${Math.round(bpLogs.reduce((s: number, l: BPLog) => s + l.diastolic, 0) / bpLogs.length)} mmHg)` : '(No readings today)'}
+- Blood Sugar: ${sugarScore}/100 ${sugarLogs.length > 0 ? `(Avg: ${Math.round(sugarLogs.reduce((s: number, l: SugarLog) => s + l.glucose_mg_dl, 0) / sugarLogs.length)} mg/dL)` : '(No readings today)'}
+- Daily Rituals: ${consistencyScore}/100 (${behaviorLogs.length} check-ins done)
+- Social Wellness: ${socialScore}/100 ${socialLog ? `(${socialLog.social_interactions || 0} interactions${socialLog.left_home ? ', went outside' : ''})` : ''}
+- Environment: ${envScore}/100 ${envLog ? `(AQI: ${envLog.aqi})` : ''}
+- Cognitive Health: ${cognitiveScore}/100
 
-Write a warm, encouraging 2-3 sentence explanation in simple English about what influenced their score today and one actionable tip for tomorrow. Be specific about the numbers. Keep it conversational and supportive.`;
+Write a warm, encouraging 2-3 sentence summary in simple English. Highlight the biggest positive and one area to improve. Be specific and actionable. Keep it conversational.`;
 
-    let aiExplanation = "Your HeartScore reflects your daily health habits. Keep logging your rituals!";
+    let aiExplanation = "Your HeartScore reflects your overall health today. Keep logging your daily rituals!";
 
     try {
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -218,7 +330,7 @@ Write a warm, encouraging 2-3 sentence explanation in simple English about what 
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
           messages: [
-            { role: "system", content: "You are a supportive health coach for Indian adults." },
+            { role: "system", content: "You are a supportive health coach for Indian adults managing BP, diabetes, and heart health." },
             { role: "user", content: aiPrompt }
           ],
           temperature: 0.7,
@@ -235,7 +347,7 @@ Write a warm, encouraging 2-3 sentence explanation in simple English about what 
       console.error("Error generating AI explanation:", aiError);
     }
 
-    // Store the HeartScore in the database
+    // Store the HeartScore
     const { data: heartScoreData, error: insertError } = await supabase
       .from("heart_scores")
       .upsert({
@@ -260,6 +372,14 @@ Write a warm, encouraging 2-3 sentence explanation in simple English about what 
       JSON.stringify({
         success: true,
         heartScore: heartScoreData,
+        breakdown: {
+          bp: bpScore,
+          sugar: sugarScore,
+          consistency: consistencyScore,
+          social: socialScore,
+          environment: envScore,
+          cognitive: cognitiveScore,
+        },
         message: "HeartScore calculated successfully",
       }),
       {
@@ -270,7 +390,6 @@ Write a warm, encouraging 2-3 sentence explanation in simple English about what 
   } catch (error) {
     console.error("Error calculating HeartScore:", error);
     
-    // Handle validation errors
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({
