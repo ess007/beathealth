@@ -4,13 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { 
   Send, User, Trash2, MessageSquare, Sparkles, AlertTriangle, 
-  Sun, Moon, Heart, Pill, Users, TrendingUp, Flame, Settings
+  Sun, Moon, Heart, Pill, Users, TrendingUp, Flame, Settings, Mic, MicOff
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { VoiceInput } from "@/components/VoiceInput";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +25,10 @@ import { InsightsSheet } from "@/components/InsightsSheet";
 import { DeviceConnectionSheet } from "@/components/DeviceConnectionSheet";
 import { ProfileSheet } from "@/components/ProfileSheet";
 import { Progress } from "@/components/ui/progress";
+import { useVoiceConversation } from "@/hooks/useVoiceConversation";
+import { VoiceStateIndicator, VoiceStateBadge } from "@/components/VoiceStateIndicator";
+import { SpeakButton } from "@/components/VoiceOutput";
+import { cn } from "@/lib/utils";
 
 interface Message {
   role: "user" | "assistant";
@@ -44,6 +47,7 @@ const AICoach = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastSpokenIndexRef = useRef<number>(-1);
 
   // Sheet states
   const [checkinOpen, setCheckinOpen] = useState(false);
@@ -53,6 +57,26 @@ const AICoach = () => {
   const [insightsSheetOpen, setInsightsSheetOpen] = useState(false);
   const [devicesSheetOpen, setDevicesSheetOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+
+  // Voice conversation hook
+  const {
+    voiceMode,
+    voiceState,
+    isSupported: voiceSupported,
+    toggleVoiceMode,
+    speak,
+    interrupt,
+    setVoiceState,
+  } = useVoiceConversation({
+    language: language as "en" | "hi",
+    onTranscript: (text) => {
+      setInput(text);
+      // Auto-send after voice input
+      setTimeout(() => {
+        handleSendWithVoice(text);
+      }, 100);
+    },
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -131,6 +155,7 @@ const AICoach = () => {
 
     setConversationId(convId);
     setMessages(data.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+    lastSpokenIndexRef.current = data.length - 1;
   };
 
   // Create new conversation
@@ -152,6 +177,7 @@ const AICoach = () => {
     onSuccess: (data) => {
       setConversationId(data.id);
       setMessages([]);
+      lastSpokenIndexRef.current = -1;
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
     },
   });
@@ -166,14 +192,16 @@ const AICoach = () => {
       if (conversationId) {
         setConversationId(null);
         setMessages([]);
+        lastSpokenIndexRef.current = -1;
       }
       queryClient.invalidateQueries({ queryKey: ["chat-conversations"] });
       toast.success(language === "hi" ? "बातचीत हटा दी गई" : "Conversation deleted");
     },
   });
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendWithVoice = async (textToSend?: string) => {
+    const messageText = textToSend || input;
+    if (!messageText.trim() || isLoading) return;
 
     let currentConvId = conversationId;
     if (!currentConvId && user?.id) {
@@ -182,7 +210,7 @@ const AICoach = () => {
         .insert({
           user_id: user.id,
           language,
-          title: input.substring(0, 50),
+          title: messageText.substring(0, 50),
         })
         .select()
         .single();
@@ -193,7 +221,7 @@ const AICoach = () => {
       }
     }
 
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = { role: "user", content: messageText };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -202,7 +230,7 @@ const AICoach = () => {
       await supabase.from("chat_messages").insert({
         conversation_id: currentConvId,
         role: "user",
-        content: input,
+        content: messageText,
       });
     }
 
@@ -222,6 +250,7 @@ const AICoach = () => {
         } else {
           throw error;
         }
+        setVoiceState("idle");
         return;
       }
 
@@ -272,14 +301,23 @@ const AICoach = () => {
             content: assistantContent,
           });
         }
+
+        // Auto-speak the response if in voice mode
+        if (voiceMode && assistantContent) {
+          setIsLoading(false);
+          await speak(assistantContent);
+        }
       }
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(language === 'hi' ? 'संदेश भेजने में त्रुटि' : "Failed to send message. Please try again.");
+      setVoiceState("idle");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleSend = () => handleSendWithVoice();
 
   const suggestedQuestions = language === 'hi' 
     ? [
@@ -379,6 +417,20 @@ const AICoach = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Voice Mode Toggle */}
+            {voiceSupported && (
+              <Button 
+                variant={voiceMode ? "default" : "ghost"}
+                size="icon" 
+                className={cn(
+                  "rounded-full transition-all",
+                  voiceMode && "bg-primary shadow-lg shadow-primary/30"
+                )}
+                onClick={toggleVoiceMode}
+              >
+                {voiceMode ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 
@@ -389,6 +441,23 @@ const AICoach = () => {
             </Button>
           </div>
         </div>
+
+        {/* Voice State Indicator (when in voice mode) */}
+        {voiceMode && voiceState !== "idle" && (
+          <div className="mb-4 flex justify-center">
+            <div 
+              className="flex flex-col items-center gap-2 cursor-pointer"
+              onClick={voiceState === "speaking" ? interrupt : undefined}
+            >
+              <VoiceStateIndicator state={voiceState} size="lg" />
+              <span className="text-xs text-muted-foreground">
+                {voiceState === "listening" && (language === "hi" ? "बोलें..." : "Speak now...")}
+                {voiceState === "processing" && (language === "hi" ? "सोच रहा हूं..." : "Thinking...")}
+                {voiceState === "speaking" && (language === "hi" ? "टैप करें रोकने के लिए" : "Tap to interrupt")}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Check-in Prompt (if not done) */}
         {!ritualStatus?.completed && (
@@ -497,23 +566,32 @@ const AICoach = () => {
                   {language === "hi" ? "नमस्ते! मैं Beat हूं 👋" : "Hello! I'm Beat 👋"}
                 </p>
                 <p className="text-xs text-muted-foreground max-w-xs mb-4">
-                  {language === "hi"
-                    ? "अपने स्वास्थ्य के बारे में कुछ भी पूछें।"
-                    : "Ask me anything about your health."}
+                  {voiceMode 
+                    ? (language === "hi" ? "बोलकर मुझसे बात करें।" : "Speak to chat with me.")
+                    : (language === "hi" ? "अपने स्वास्थ्य के बारे में कुछ भी पूछें।" : "Ask me anything about your health.")}
                 </p>
                 
-                {/* Suggested Questions */}
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {suggestedQuestions.map((q, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInput(q)}
-                      className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
+                {/* Suggested Questions (hide in active voice mode) */}
+                {!voiceMode && (
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {suggestedQuestions.map((q, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setInput(q)}
+                        className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Voice mode hint */}
+                {voiceMode && voiceState === "idle" && (
+                  <p className="text-xs text-primary animate-pulse">
+                    {language === "hi" ? "माइक बटन दबाकर बोलें" : "Tap mic or just speak..."}
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-3">
@@ -532,6 +610,17 @@ const AICoach = () => {
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      {/* Speak button for assistant messages */}
+                      {msg.role === "assistant" && (
+                        <div className="flex justify-end mt-1">
+                          <SpeakButton 
+                            text={msg.content} 
+                            language={language as "en" | "hi"} 
+                            size="sm"
+                            className="opacity-50 hover:opacity-100"
+                          />
+                        </div>
+                      )}
                     </div>
                     {msg.role === "user" && (
                       <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
@@ -560,26 +649,70 @@ const AICoach = () => {
           </Card>
         </FeatureGate>
 
-        {/* Input */}
-        <div className="flex gap-2">
+        {/* Input Area */}
+        <div className="flex gap-2 items-center">
+          {/* Voice state badge when active */}
+          {voiceMode && voiceState !== "idle" && (
+            <VoiceStateBadge 
+              state={voiceState} 
+              language={language as "en" | "hi"}
+              onTap={voiceState === "speaking" ? interrupt : undefined}
+            />
+          )}
+          
+          {/* Text input (shrinks when voice state is showing) */}
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            placeholder={language === "hi" ? "अपना सवाल पूछें..." : "Ask your question..."}
-            disabled={isLoading}
-            className="h-12 text-base flex-1 rounded-xl"
+            placeholder={
+              voiceMode 
+                ? (language === "hi" ? "या टाइप करें..." : "Or type here...")
+                : (language === "hi" ? "अपना सवाल पूछें..." : "Ask your question...")
+            }
+            disabled={isLoading || voiceState === "listening"}
+            className={cn(
+              "h-12 text-base flex-1 rounded-xl transition-all",
+              voiceMode && voiceState !== "idle" && "w-24"
+            )}
           />
-          <VoiceInput
-            onTranscript={(text) => {
-              setInput(text);
-              setTimeout(() => handleSend(), 100);
-            }}
-            disabled={isLoading}
-          />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-12 w-12 rounded-xl">
-            <Send className="h-5 w-5" />
-          </Button>
+          
+          {/* Voice toggle / Send button */}
+          {voiceMode ? (
+            <Button 
+              onClick={toggleVoiceMode}
+              variant={voiceState === "listening" ? "default" : "outline"}
+              size="icon" 
+              className={cn(
+                "h-12 w-12 rounded-xl transition-all",
+                voiceState === "listening" && "bg-primary animate-pulse"
+              )}
+            >
+              <Mic className="h-5 w-5" />
+            </Button>
+          ) : (
+            <>
+              {voiceSupported && (
+                <Button 
+                  onClick={toggleVoiceMode}
+                  variant="outline"
+                  size="icon" 
+                  className="h-12 w-12 rounded-xl"
+                  title={language === "hi" ? "आवाज़ मोड चालू करें" : "Start voice mode"}
+                >
+                  <Mic className="h-5 w-5" />
+                </Button>
+              )}
+              <Button 
+                onClick={handleSend} 
+                disabled={!input.trim() || isLoading} 
+                size="icon" 
+                className="h-12 w-12 rounded-xl"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </>
+          )}
         </div>
       </main>
     </div>
