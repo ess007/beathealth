@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { Flame } from "lucide-react";
 import { Card } from "./ui/card";
+import { Logo } from "./Logo";
 
 interface StreakCelebrationProps {
   show: boolean;
@@ -59,15 +60,18 @@ export const StreakCelebration = ({ show, streakCount, onClose }: StreakCelebrat
       <Card className={`p-8 text-center shadow-elevated transform transition-all duration-500 ${isVisible ? 'scale-100' : 'scale-50'}`}>
         <div className="flex justify-center mb-4">
           <div className="relative">
-            <Flame className="w-24 h-24 text-primary animate-pulse" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-3xl font-bold text-background">{streakCount}</span>
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <Logo size="xl" showText={false} />
+            </div>
+            <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+              <Flame className="w-6 h-6 text-white" />
             </div>
           </div>
         </div>
         <h2 className="text-3xl font-bold mb-2 text-primary">🎉 Streak Updated!</h2>
+        <p className="text-4xl font-bold text-orange-500 mb-2">{streakCount}</p>
         <p className="text-lg text-muted-foreground">
-          {streakCount} {streakCount === 1 ? 'day' : 'days'} strong! Keep going!
+          {streakCount === 1 ? 'day' : 'days'} strong! Keep going!
         </p>
       </Card>
     </div>
