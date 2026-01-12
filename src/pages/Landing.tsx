@@ -351,7 +351,9 @@ const Landing = () => {
               { step: "3", title: "Family Stays Updated", desc: "Your children can see your health status anytime, anywhere.", icon: "👨‍👩‍👧" },
             ].map((item, i) => (
               <div key={i} className="bg-card rounded-2xl border border-border p-8 text-center">
-                <p className="text-4xl mb-4">{item.icon}</p>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 mb-4">
+                  <span className="text-3xl">{item.icon}</span>
+                </div>
                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold mb-4">{item.step}</div>
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                 <p className="text-muted-foreground">{item.desc}</p>

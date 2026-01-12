@@ -27,7 +27,7 @@ const RitualProgress = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 flex items-center justify-center shadow-sm">
             {icon}
           </div>
           <div>
@@ -36,8 +36,8 @@ const RitualProgress = ({
           </div>
         </div>
         {completed && (
-          <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
-            <Check className="w-4 h-4 text-secondary" strokeWidth={3} />
+          <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shadow-sm">
+            <Check className="w-5 h-5 text-secondary" strokeWidth={3} />
           </div>
         )}
       </div>

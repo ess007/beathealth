@@ -247,6 +247,133 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
   }
+
+  /* Themed Icon Containers */
+  .icon-container {
+    @apply flex items-center justify-center rounded-xl transition-all duration-300;
+  }
+
+  .icon-container-sm {
+    @apply w-8 h-8 rounded-lg;
+  }
+
+  .icon-container-md {
+    @apply w-10 h-10 rounded-xl;
+  }
+
+  .icon-container-lg {
+    @apply w-12 h-12 rounded-xl;
+  }
+
+  .icon-container-xl {
+    @apply w-14 h-14 rounded-2xl;
+  }
+
+  /* Themed Icon Backgrounds */
+  .icon-bg-primary {
+    @apply bg-primary/10 dark:bg-primary/20;
+  }
+
+  .icon-bg-secondary {
+    @apply bg-secondary/10 dark:bg-secondary/20;
+  }
+
+  .icon-bg-accent {
+    @apply bg-accent/10 dark:bg-accent/20;
+  }
+
+  .icon-bg-muted {
+    @apply bg-muted dark:bg-muted/50;
+  }
+
+  .icon-bg-dark {
+    @apply bg-black dark:bg-black/80;
+  }
+
+  /* Themed Emoji Styling */
+  .emoji {
+    @apply inline-flex items-center justify-center;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
+
+  .emoji-sm {
+    @apply text-base;
+  }
+
+  .emoji-md {
+    @apply text-xl;
+  }
+
+  .emoji-lg {
+    @apply text-2xl;
+  }
+
+  .emoji-xl {
+    @apply text-3xl;
+  }
+
+  /* Emoji Badge - with background container */
+  .emoji-badge {
+    @apply inline-flex items-center justify-center rounded-xl;
+    @apply bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20;
+    @apply shadow-sm;
+  }
+
+  .emoji-badge-sm {
+    @apply w-8 h-8 text-base;
+  }
+
+  .emoji-badge-md {
+    @apply w-10 h-10 text-xl;
+  }
+
+  .emoji-badge-lg {
+    @apply w-12 h-12 text-2xl;
+  }
+
+  .emoji-badge-xl {
+    @apply w-14 h-14 text-3xl;
+  }
+
+  /* Icon with glow effect */
+  .icon-glow {
+    @apply relative;
+  }
+
+  .icon-glow::after {
+    content: '';
+    @apply absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%);
+  }
+
+  .icon-glow:hover::after {
+    @apply opacity-100;
+  }
+
+  /* Themed icon colors */
+  .icon-primary {
+    @apply text-primary;
+  }
+
+  .icon-secondary {
+    @apply text-secondary;
+  }
+
+  .icon-accent {
+    @apply text-accent;
+  }
+
+  .icon-success {
+    @apply text-emerald-500 dark:text-emerald-400;
+  }
+
+  .icon-warning {
+    @apply text-amber-500 dark:text-amber-400;
+  }
+
+  .icon-danger {
+    @apply text-red-500 dark:text-red-400;
+  }
 }
 
 /* Spotlight Effect Overlay */

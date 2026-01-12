@@ -6,15 +6,16 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useHealthGoals } from "@/hooks/useHealthGoals";
-import { Target, TrendingUp, Calendar, Plus, Trash2, CheckCircle } from "lucide-react";
+import { Target, TrendingUp, Calendar, Plus, Trash2, CheckCircle, Heart, Activity, Footprints, Droplet, Flame } from "lucide-react";
 import { Progress } from "./ui/progress";
+import { ThemedIcon, ThemedEmoji } from "./ThemedIcon";
 
 const GOAL_TYPES = {
-  bp_control: { label: "BP Control", unit: "mmHg", icon: "🫀" },
-  weight_loss: { label: "Weight Loss", unit: "kg", icon: "⚖️" },
-  step_count: { label: "Daily Steps", unit: "steps", icon: "👟" },
-  sugar_control: { label: "Sugar Control", unit: "mg/dL", icon: "🩸" },
-  consistency: { label: "Check-in Streak", unit: "days", icon: "🔥" },
+  bp_control: { label: "BP Control", unit: "mmHg", emoji: "🫀", icon: Heart, variant: "primary" as const },
+  weight_loss: { label: "Weight Loss", unit: "kg", emoji: "⚖️", icon: Activity, variant: "secondary" as const },
+  step_count: { label: "Daily Steps", unit: "steps", emoji: "👟", icon: Footprints, variant: "success" as const },
+  sugar_control: { label: "Sugar Control", unit: "mg/dL", emoji: "🩸", icon: Droplet, variant: "warning" as const },
+  consistency: { label: "Check-in Streak", unit: "days", emoji: "🔥", icon: Flame, variant: "danger" as const },
 };
 
 export const HealthGoalsTracker = () => {
@@ -48,8 +49,8 @@ export const HealthGoalsTracker = () => {
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-3">
+          <ThemedIcon icon={Target} size="md" variant="primary" withGlow />
           <h2 className="text-xl font-semibold">Health Goals</h2>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -74,9 +75,12 @@ export const HealthGoalsTracker = () => {
                     <SelectValue placeholder="Select goal type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(GOAL_TYPES).map(([key, { label, icon }]) => (
+                    {Object.entries(GOAL_TYPES).map(([key, { label, emoji }]) => (
                       <SelectItem key={key} value={key}>
-                        {icon} {label}
+                        <span className="flex items-center gap-2">
+                          <ThemedEmoji emoji={emoji} size="sm" />
+                          {label}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -143,8 +147,12 @@ export const HealthGoalsTracker = () => {
                 className="p-4 border border-border rounded-lg bg-gradient-to-r from-background to-muted/20"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{goalInfo?.icon}</span>
+                  <div className="flex items-center gap-3">
+                    <ThemedIcon 
+                      icon={goalInfo?.icon || Target} 
+                      size="lg" 
+                      variant={goalInfo?.variant || "primary"} 
+                    />
                     <div>
                       <h3 className="font-semibold">{goalInfo?.label}</h3>
                       {goal.notes && (
