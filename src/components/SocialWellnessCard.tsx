@@ -108,7 +108,7 @@ export const SocialWellnessCard = () => {
         .select("id")
         .eq("user_id", user.id)
         .eq("log_date", today)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Update existing

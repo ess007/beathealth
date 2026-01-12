@@ -322,11 +322,11 @@ serve(async (req) => {
       avgSystolicBP: avgSystolic,
       avgDiastolicBP: avgDiastolic,
       avgFastingGlucose,
-      estimatedHbA1c,
+      estimatedHbA1c: profile.last_hba1c || estimatedHbA1c,
       medicationAdherence,
       dailySteps,
-      smokingStatus: 'unknown',
-      cholesterolRatio: 4.0, // Default, could be tracked in future
+      smokingStatus: profile.smoking_status || 'unknown',
+      cholesterolRatio: profile.cholesterol_ratio || 4.0,
     };
 
     // Calculate risks

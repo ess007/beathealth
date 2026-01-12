@@ -1490,6 +1490,7 @@ export type Database = {
         Row: {
           aqi_sensitivity_score: number | null
           avatar_url: string | null
+          cholesterol_ratio: number | null
           cognitive_monitoring_enabled: boolean | null
           created_at: string | null
           date_of_birth: string | null
@@ -1506,11 +1507,14 @@ export type Database = {
           high_contrast_mode: boolean | null
           id: string
           language: string | null
+          last_hba1c: number | null
+          last_hba1c_date: string | null
           last_location_lat: number | null
           last_location_lon: number | null
           morning_ritual_time: string | null
           onboarding_completed: boolean | null
           phone: string | null
+          smoking_status: string | null
           text_size_preference: string | null
           tutorial_completed: boolean | null
           tutorial_step: number | null
@@ -1520,6 +1524,7 @@ export type Database = {
         Insert: {
           aqi_sensitivity_score?: number | null
           avatar_url?: string | null
+          cholesterol_ratio?: number | null
           cognitive_monitoring_enabled?: boolean | null
           created_at?: string | null
           date_of_birth?: string | null
@@ -1536,11 +1541,14 @@ export type Database = {
           high_contrast_mode?: boolean | null
           id: string
           language?: string | null
+          last_hba1c?: number | null
+          last_hba1c_date?: string | null
           last_location_lat?: number | null
           last_location_lon?: number | null
           morning_ritual_time?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
+          smoking_status?: string | null
           text_size_preference?: string | null
           tutorial_completed?: boolean | null
           tutorial_step?: number | null
@@ -1550,6 +1558,7 @@ export type Database = {
         Update: {
           aqi_sensitivity_score?: number | null
           avatar_url?: string | null
+          cholesterol_ratio?: number | null
           cognitive_monitoring_enabled?: boolean | null
           created_at?: string | null
           date_of_birth?: string | null
@@ -1566,11 +1575,14 @@ export type Database = {
           high_contrast_mode?: boolean | null
           id?: string
           language?: string | null
+          last_hba1c?: number | null
+          last_hba1c_date?: string | null
           last_location_lat?: number | null
           last_location_lon?: number | null
           morning_ritual_time?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
+          smoking_status?: string | null
           text_size_preference?: string | null
           tutorial_completed?: boolean | null
           tutorial_step?: number | null
