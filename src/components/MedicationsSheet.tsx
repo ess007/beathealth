@@ -46,7 +46,12 @@ export const MedicationsSheet = ({ isOpen, onClose }: MedicationsSheetProps) => 
     }
 
     haptic('light');
-    addMedication(newMed);
+    addMedication({
+      ...newMed,
+      custom_times: [],
+      notes: "",
+      active: true,
+    });
     toast.success(language === 'hi' ? 'दवा जोड़ी गई' : 'Medication added');
     setNewMed({ name: "", dosage: "", frequency: "daily" });
     setAddDialogOpen(false);
@@ -212,9 +217,9 @@ export const MedicationsSheet = ({ isOpen, onClose }: MedicationsSheetProps) => 
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleToggleMedication(med.id, med.active || false)}
+                          onClick={() => handleDeleteMedication(med.id)}
                         >
-                          {language === 'hi' ? 'सक्रिय करें' : 'Activate'}
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </Card>
