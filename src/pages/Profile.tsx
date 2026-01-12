@@ -25,6 +25,7 @@ import {
 import { useSubscription } from "@/hooks/useSubscription";
 import { AgentPreferences } from "@/components/AgentPreferences";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
+import { DataSourcesManager } from "@/components/DataSourcesManager";
 import {
   AlertDialog,
   AlertDialogAction,

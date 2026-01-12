@@ -743,6 +743,42 @@ export type Database = {
         }
         Relationships: []
       }
+      data_sources: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string | null
+          last_sync_at: string | null
+          metadata: Json | null
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label?: string | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string | null
+          last_sync_at?: string | null
+          metadata?: Json | null
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       drug_interactions: {
         Row: {
           created_at: string | null
@@ -1027,6 +1063,42 @@ export type Database = {
           raw_data?: Json | null
           records_imported?: number
           source_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      health_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          id: string
+          message: string
+          related_date: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          message: string
+          related_date?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          message?: string
+          related_date?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
           user_id?: string
         }
         Relationships: []
