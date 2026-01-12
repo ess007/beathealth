@@ -277,21 +277,70 @@ serve(async (req) => {
   }
 
   try {
+    // ========== AUTHENTICATION ==========
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('[reasoning-engine] Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's auth context to verify identity
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
+      console.error('[reasoning-engine] Invalid authentication:', userError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse and validate input
     const body = await req.json();
     const validated = requestSchema.parse(body);
     const { userId, analysisType } = validated;
 
-    console.log(`Running ${analysisType} analysis for user:`, userId);
+    // ========== AUTHORIZATION ==========
+    // Allow if: user is analyzing themselves OR is authorized caregiver
+    if (user.id !== userId) {
+      const { data: familyLink, error: familyError } = await supabaseAuth
+        .from('family_links')
+        .select('can_view')
+        .eq('member_id', userId)
+        .eq('caregiver_id', user.id)
+        .eq('can_view', true)
+        .single();
+
+      if (familyError || !familyLink) {
+        console.error(`[reasoning-engine] User ${user.id} unauthorized to analyze ${userId}`);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Not authorized for this user' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log(`[reasoning-engine] Caregiver ${user.id} authorized to analyze ${userId}`);
+    }
+
+    console.log(`[reasoning-engine] Running ${analysisType} analysis for user: ${userId}`);
+
+    // Now safe to use service role for operations
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get comprehensive health context
     const context = await getHealthContext(supabase, userId);

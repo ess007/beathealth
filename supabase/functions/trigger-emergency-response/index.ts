@@ -12,9 +12,59 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, fallEventId, type, customMessage } = await req.json();
-    console.log(`Triggering emergency response for user: ${userId}, type: ${type}`);
+    // ========== AUTHENTICATION ==========
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('[trigger-emergency-response] Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
+    // Create client with user's auth context to verify identity
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
+      console.error('[trigger-emergency-response] Invalid authentication:', userError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { userId, fallEventId, type, customMessage } = await req.json();
+    console.log(`[trigger-emergency-response] User ${user.id} triggering emergency for ${userId}, type: ${type}`);
+
+    // ========== AUTHORIZATION ==========
+    // Allow if: user is triggering for themselves OR is authorized caregiver
+    if (user.id !== userId) {
+      // Check if authenticated user is authorized caregiver with view permissions
+      const { data: familyLink, error: familyError } = await supabaseAuth
+        .from('family_links')
+        .select('can_view')
+        .eq('member_id', userId)
+        .eq('caregiver_id', user.id)
+        .eq('can_view', true)
+        .single();
+
+      if (familyError || !familyLink) {
+        console.error(`[trigger-emergency-response] User ${user.id} unauthorized to trigger emergency for ${userId}`);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Not authorized for this user' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log(`[trigger-emergency-response] Caregiver ${user.id} authorized to trigger for ${userId}`);
+    }
+
+    // Now safe to use service role for operations
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -101,12 +151,13 @@ serve(async (req) => {
           user_id: userId,
           action_type: "emergency_alert",
           trigger_type: "system",
-          trigger_reason: `${type} emergency detected`,
+          trigger_reason: `${type} emergency detected (triggered by ${user.id === userId ? 'self' : 'caregiver ' + user.id})`,
           action_payload: {
             contact_id: contact.id,
             contact_name: contact.name,
             alert_type: type,
             message: alertMessage,
+            triggered_by: user.id,
           },
           status: "completed",
         });

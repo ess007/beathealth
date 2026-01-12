@@ -231,16 +231,65 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // ========== AUTHENTICATION ==========
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      console.error('[forecast-complication-risk] Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's auth context to verify identity
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Get authenticated user
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
+      console.error('[forecast-complication-risk] Invalid authentication:', userError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Parse and validate input
     const body = await req.json();
     const validated = requestSchema.parse(body);
     const { userId, horizonMonths } = validated;
 
-    console.log(`Forecasting ${horizonMonths}-month risk for user:`, userId);
+    // ========== AUTHORIZATION ==========
+    // Allow if: user is forecasting for themselves OR is authorized caregiver
+    if (user.id !== userId) {
+      const { data: familyLink, error: familyError } = await supabaseAuth
+        .from('family_links')
+        .select('can_view')
+        .eq('member_id', userId)
+        .eq('caregiver_id', user.id)
+        .eq('can_view', true)
+        .single();
+
+      if (familyError || !familyLink) {
+        console.error(`[forecast-complication-risk] User ${user.id} unauthorized to forecast for ${userId}`);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Not authorized for this user' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      console.log(`[forecast-complication-risk] Caregiver ${user.id} authorized to forecast for ${userId}`);
+    }
+
+    console.log(`[forecast-complication-risk] Forecasting ${horizonMonths}-month risk for user: ${userId}`);
+
+    // Now safe to use service role for operations
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get user profile
     const { data: profile } = await supabase

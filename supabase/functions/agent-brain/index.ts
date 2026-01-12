@@ -5,8 +5,11 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 };
+
+// Internal secret for cron/scheduler calls
+const INTERNAL_SECRET = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 // Input validation schema
 const requestSchema = z.object({
@@ -432,50 +435,52 @@ Analyze the situation and decide what actions (if any) to take.`;
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[Agent Brain] AI API error: ${response.status} - ${errorText}`);
-      return { success: false, error: `AI API error: ${response.status}` };
+      throw new Error(`AI API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    const message = data.choices?.[0]?.message;
+    const aiResponse = await response.json();
+    const choice = aiResponse.choices?.[0];
+    const toolCalls = choice?.message?.tool_calls;
+    const textResponse = choice?.message?.content;
 
-    if (!message) {
-      return { success: false, error: 'No response from AI' };
-    }
+    console.log(`[Agent Brain] AI response: ${textResponse || 'Tool calls only'}`);
 
-    const actionResults: any[] = [];
+    const executedActions: any[] = [];
 
-    // Handle tool calls
-    if (message.tool_calls && message.tool_calls.length > 0) {
-      console.log(`[Agent Brain] Processing ${message.tool_calls.length} tool calls`);
-      
-      for (const toolCall of message.tool_calls) {
+    if (toolCalls && toolCalls.length > 0) {
+      for (const toolCall of toolCalls) {
         const toolName = toolCall.function.name;
-        const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
+        const args = JSON.parse(toolCall.function.arguments || '{}');
         
-        console.log(`[Agent Brain] Executing tool: ${toolName}`, toolArgs);
+        console.log(`[Agent Brain] Executing tool: ${toolName}`, args);
         
-        const toolResult = await executeAgentTool(supabase, userId, toolName, toolArgs, preferences, triggerType);
-        actionResults.push({ tool: toolName, ...toolResult });
+        const result = await executeAgentTool(supabase, userId, toolName, args, preferences, triggerType);
+        executedActions.push({
+          tool: toolName,
+          args,
+          ...result
+        });
       }
     }
 
     return {
       success: true,
-      reasoning: message.content,
-      actions: actionResults,
+      analysis: textResponse,
+      actions: executedActions,
       context: {
-        healthScore: health.heartScore,
         streak: health.mainStreak,
-        bpStatus: health.bpTrend.status,
-        sugarStatus: health.sugarTrend.status
+        heartScore: health.heartScore,
+        bpTrend: health.bpTrend?.trend,
+        sugarTrend: health.sugarTrend?.trend
       }
     };
-
   } catch (error: any) {
-    console.error(`[Agent Brain] Error:`, error);
-    return { success: false, error: error.message };
+    console.error('[Agent Brain] Error:', error);
+    return {
+      success: false,
+      error: error.message,
+      context: null
+    };
   }
 }
 
@@ -485,39 +490,84 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // ========== AUTHENTICATION ==========
+    // Check for internal secret (used by agent-scheduler cron job)
+    const internalSecret = req.headers.get('x-internal-secret');
+    const authHeader = req.headers.get('authorization');
+    
+    let isInternalCall = false;
+    let authenticatedUserId: string | null = null;
+
+    // Internal calls use x-internal-secret header with service role key
+    if (internalSecret && INTERNAL_SECRET && internalSecret === INTERNAL_SECRET) {
+      isInternalCall = true;
+      console.log('[agent-brain] Internal call authenticated via service key');
+    } else if (authHeader) {
+      // External calls require JWT authentication
+      const supabaseAuth = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+      if (userError || !user) {
+        console.error('[agent-brain] Invalid authentication:', userError?.message);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Invalid authentication' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      authenticatedUserId = user.id;
+      console.log(`[agent-brain] User authenticated: ${user.id}`);
+    } else {
+      console.error('[agent-brain] No authentication provided');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing authorization' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Parse and validate input
     const body = await req.json();
     const validated = requestSchema.parse(body);
     const { userId, triggerType, triggerPayload } = validated;
 
-    console.log(`[Agent Brain] Request for user ${userId}, trigger: ${triggerType}`);
+    // ========== AUTHORIZATION ==========
+    // For external calls, ensure user can only trigger for themselves
+    if (!isInternalCall && authenticatedUserId !== userId) {
+      console.error(`[agent-brain] User ${authenticatedUserId} unauthorized to trigger agent for ${userId}`);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Can only trigger agent for yourself' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Use service role for operations
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
 
     const result = await analyzeAndAct(supabase, userId, triggerType, triggerPayload);
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify(result),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error: any) {
-    console.error('[Agent Brain] Request error:', error);
-    
+    console.error('[Agent Brain] Error:', error);
+
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid input',
-          details: error.errors 
-        }),
+        JSON.stringify({ error: 'Invalid input', details: error.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
+
     return new Response(
-      JSON.stringify({ success: false, error: error.message || 'Unknown error' }),
+      JSON.stringify({ error: error.message || 'Agent brain error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
