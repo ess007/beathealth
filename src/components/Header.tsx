@@ -33,6 +33,7 @@ import {
   Camera
 } from "lucide-react";
 import { FitnessTrackerConnection } from "@/components/FitnessTrackerConnection";
+import { AlertsDrawer } from "@/components/AlertsDrawer";
 import {
   Dialog,
   DialogContent,
@@ -187,6 +188,9 @@ export const Header = () => {
     <header className="border-b bg-card/95 backdrop-blur-md shadow-sm sticky top-0 z-10 transition-all">
       <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
         <Logo size="md" />
+        
+        <div className="flex items-center gap-2">
+          <AlertsDrawer />
         
         <Dialog open={isDeviceDialogOpen} onOpenChange={setIsDeviceDialogOpen}>
           <DropdownMenu>
@@ -456,6 +460,7 @@ export const Header = () => {
             <FitnessTrackerConnection />
           </DialogContent>
         </Dialog>
+        </div>
       </div>
     </header>
   );
