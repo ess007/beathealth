@@ -14,7 +14,13 @@ interface AssessmentResult {
   score: number;
   max_score: number;
   time_taken_seconds: number;
-  responses: Record<string, unknown>;
+  responses: {
+    words_shown: string[];
+    words_recalled: string[];
+    pattern_shown: number[];
+    pattern_answer: string;
+    pattern_correct: boolean;
+  };
 }
 
 const WORD_LISTS = [
@@ -72,18 +78,20 @@ export const CognitiveCheckIn = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      const insertData = {
+        user_id: user.id,
+        assessment_date: new Date().toISOString().split("T")[0],
+        assessment_type: result.assessment_type,
+        score: result.score,
+        max_score: result.max_score,
+        time_taken_seconds: result.time_taken_seconds,
+        responses: result.responses as unknown as Record<string, unknown>,
+        risk_level: getRiskLevel(result.score, result.max_score),
+      };
+
       const { data, error } = await supabase
         .from("cognitive_assessments")
-        .insert({
-          user_id: user.id,
-          assessment_date: new Date().toISOString().split("T")[0],
-          assessment_type: result.assessment_type,
-          score: result.score,
-          max_score: result.max_score,
-          time_taken_seconds: result.time_taken_seconds,
-          responses: result.responses,
-          risk_level: getRiskLevel(result.score, result.max_score),
-        })
+        .insert(insertData as never)
         .select()
         .single();
 
@@ -183,7 +191,7 @@ export const CognitiveCheckIn = () => {
     });
 
     setStage("complete");
-    haptic.success();
+    haptic("success");
   };
 
   const closeAndReset = () => {

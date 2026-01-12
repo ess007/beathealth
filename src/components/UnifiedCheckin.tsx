@@ -87,16 +87,14 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
       }
 
       // Log behavior
-      await supabase.from("behavior_logs").insert({
+      await supabase.from("behavior_logs").insert([{
         user_id: user.id,
         log_date: today,
         ritual_type: ritualType,
-        sleep_quality: sleepQuality || null,
+        sleep_quality: (sleepQuality || null) as "excellent" | "good" | "fair" | "poor" | "very_poor" | null,
         meds_taken: medsTaken,
-        mood_score: moodScore,
-        social_interaction_count: socialInteractions > 0 ? socialInteractions : null,
         notes: notes || null,
-      });
+      }]);
 
       // Log social wellness for evening
       if (!isMorning && (socialInteractions > 0 || leftHome !== null)) {
@@ -151,7 +149,7 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
         origin: { y: 0.6 },
       });
 
-      haptic.success();
+      haptic("success");
       toast.success(`${isMorning ? "Morning" : "Evening"} check-in complete! 🎉`);
       
       // Reset and close
@@ -197,7 +195,7 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
 
   const handleNext = () => {
     if (step < totalSteps) {
-      haptic.light();
+      haptic("light");
       setStep(step + 1);
     } else {
       submitCheckin.mutate();
@@ -206,7 +204,7 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
 
   const handleBack = () => {
     if (step > 1) {
-      haptic.light();
+      haptic("light");
       setStep(step - 1);
     }
   };
