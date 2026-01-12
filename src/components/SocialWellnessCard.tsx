@@ -10,6 +10,7 @@ import { Users, Phone, Home, Smile, Frown, Meh, Heart, Plus } from "lucide-react
 import { toast } from "sonner";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { haptic } from "@/lib/haptics";
+import { ThemedIcon, ThemedEmoji } from "./ThemedIcon";
 
 interface SocialLog {
   id: string;
@@ -200,7 +201,7 @@ export const SocialWellnessCard = () => {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-lg">
-            <Users className="h-5 w-5 text-pink-500" />
+            <ThemedIcon icon={Users} size="sm" variant="primary" />
             Social Wellness
           </span>
           <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
@@ -223,14 +224,14 @@ export const SocialWellnessCard = () => {
                       <button
                         key={type.value}
                         onClick={() => toggleInteraction(type.value)}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2 ${
                           selectedInteractions.includes(type.value)
                             ? "border-primary bg-primary/10"
-                            : "border-border/50 bg-background/50"
+                            : "border-border/50 bg-background/50 hover:border-primary/50"
                         }`}
                       >
-                        <span className="text-xl mr-2">{type.emoji}</span>
-                        <span className="text-sm">{type.label}</span>
+                        <ThemedEmoji emoji={type.emoji} size="md" />
+                        <span className="text-sm font-medium">{type.label}</span>
                       </button>
                     ))}
                   </div>

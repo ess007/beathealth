@@ -2,6 +2,7 @@ import { Award, Flame, Heart, Activity, Target } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { ThemedEmoji, ThemedIcon } from "./ThemedIcon";
 
 interface AchievementBadgeProps {
   type: string;
@@ -16,40 +17,40 @@ const badgeConfig = {
     icon: Flame,
     title: "7-Day Warrior",
     description: "Completed daily rituals for 7 days straight",
-    color: "text-orange-500",
-    bgColor: "bg-orange-50 dark:bg-orange-950",
+    variant: "warning" as const,
+    bgColor: "bg-amber-50 dark:bg-amber-950/50",
     emoji: "🔥",
   },
   "30_day_streak": {
     icon: Flame,
     title: "30-Day Champion",
     description: "Completed daily rituals for 30 days straight",
-    color: "text-red-500",
-    bgColor: "bg-red-50 dark:bg-red-950",
+    variant: "danger" as const,
+    bgColor: "bg-red-50 dark:bg-red-950/50",
     emoji: "🏆",
   },
   bp_control_month: {
     icon: Heart,
     title: "BP Master",
     description: "Maintained healthy blood pressure for a month",
-    color: "text-pink-500",
-    bgColor: "bg-pink-50 dark:bg-pink-950",
+    variant: "primary" as const,
+    bgColor: "bg-primary/5 dark:bg-primary/10",
     emoji: "❤️",
   },
   sugar_control_month: {
     icon: Activity,
     title: "Sugar Champion",
     description: "Maintained healthy blood sugar for a month",
-    color: "text-blue-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950",
+    variant: "secondary" as const,
+    bgColor: "bg-secondary/5 dark:bg-secondary/10",
     emoji: "⭐",
   },
   first_ritual: {
     icon: Target,
     title: "Getting Started",
     description: "Completed your first ritual",
-    color: "text-green-500",
-    bgColor: "bg-green-50 dark:bg-green-950",
+    variant: "success" as const,
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
     emoji: "🎯",
   },
 };
@@ -74,7 +75,7 @@ export const AchievementBadge = ({
         )}
         title={config.description}
       >
-        <Icon className={cn("h-5 w-5", config.color)} />
+        <ThemedIcon icon={Icon} size="sm" variant={config.variant} />
         <span className="text-sm font-medium">{config.title}</span>
       </div>
     );
@@ -85,17 +86,18 @@ export const AchievementBadge = ({
       "p-6 text-center relative overflow-hidden shadow-elevated",
       config.bgColor
     )}>
-      <div className="absolute top-2 right-2 text-3xl opacity-20">
-        {config.emoji}
+      <div className="absolute top-3 right-3">
+        <ThemedEmoji emoji={config.emoji} size="lg" />
       </div>
       
       <div className="flex justify-center mb-4">
-        <div className={cn(
-          "w-20 h-20 rounded-full flex items-center justify-center",
-          "bg-background shadow-lg"
-        )}>
-          <Icon className={cn("h-10 w-10", config.color)} />
-        </div>
+        <ThemedIcon 
+          icon={Icon} 
+          size="xl" 
+          variant={config.variant} 
+          withGlow 
+          className="w-20 h-20 rounded-full shadow-lg bg-background"
+        />
       </div>
 
       <h3 className="text-xl font-bold mb-2">{config.title}</h3>

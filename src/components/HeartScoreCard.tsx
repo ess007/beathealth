@@ -1,9 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { RefreshCw, Heart, Activity, Droplets, Calendar } from "lucide-react";
+import { RefreshCw, Heart, Activity, Droplets, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHeartScore } from "@/hooks/useHeartScore";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { haptic } from "@/lib/haptics";
+import { ThemedIcon, ThemedEmoji } from "./ThemedIcon";
 
 const HeartScoreCard = () => {
   const { todayScore, isLoading, calculateScore, isCalculating } = useHeartScore();
@@ -84,7 +85,7 @@ const HeartScoreCard = () => {
 
         {/* Main Score */}
         <div className="flex items-center gap-4 mb-4">
-          <div className={`w-20 h-20 rounded-2xl ${getScoreBg(score)} flex items-center justify-center`}>
+          <div className={`w-20 h-20 rounded-2xl ${getScoreBg(score)} flex items-center justify-center shadow-sm`}>
             <Heart className={`w-10 h-10 ${getScoreColor(score)}`} fill="currentColor" />
           </div>
           <div>
@@ -109,22 +110,22 @@ const HeartScoreCard = () => {
         {/* Sub-Scores */}
         {todayScore && (
           <div className="grid grid-cols-3 gap-2 mb-4">
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
-              <Activity className="w-4 h-4 text-primary" />
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-primary/5 dark:bg-primary/10 border border-primary/10">
+              <ThemedIcon icon={Activity} size="sm" variant="primary" />
               <div>
                 <p className="text-[10px] text-muted-foreground uppercase">BP</p>
                 <p className={`text-lg font-bold leading-none ${getScoreColor(bpScore)}`}>{bpScore}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
-              <Droplets className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-secondary/5 dark:bg-secondary/10 border border-secondary/10">
+              <ThemedIcon icon={Droplets} size="sm" variant="secondary" />
               <div>
                 <p className="text-[10px] text-muted-foreground uppercase">Sugar</p>
                 <p className={`text-lg font-bold leading-none ${getScoreColor(sugarScore)}`}>{sugarScore}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50">
-              <Calendar className="w-4 h-4 text-violet-500" />
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-accent/5 dark:bg-accent/10 border border-accent/10">
+              <ThemedIcon icon={Calendar} size="sm" variant="accent" />
               <div>
                 <p className="text-[10px] text-muted-foreground uppercase">Ritual</p>
                 <p className={`text-lg font-bold leading-none ${getScoreColor(consistencyScore)}`}>{consistencyScore}</p>
@@ -135,9 +136,9 @@ const HeartScoreCard = () => {
 
         {/* AI Insight or CTA */}
         {aiExplanation ? (
-          <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
+          <div className="bg-gradient-to-r from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 border border-primary/10 rounded-xl p-3">
             <p className="text-xs leading-relaxed">
-              <span className="font-semibold text-primary">💡</span>{" "}
+              <ThemedEmoji emoji="💡" size="sm" className="mr-1" />
               {aiExplanation}
             </p>
           </div>
