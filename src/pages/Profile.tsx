@@ -59,6 +59,9 @@ const Profile = () => {
     has_diabetes: false,
     has_hypertension: false,
     has_heart_disease: false,
+    smoking_status: "unknown",
+    cholesterol_ratio: "",
+    last_hba1c: "",
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -95,6 +98,9 @@ const Profile = () => {
           has_diabetes: profileRes.data.has_diabetes || false,
           has_hypertension: profileRes.data.has_hypertension || false,
           has_heart_disease: profileRes.data.has_heart_disease || false,
+          smoking_status: profileRes.data.smoking_status || "unknown",
+          cholesterol_ratio: profileRes.data.cholesterol_ratio?.toString() || "",
+          last_hba1c: profileRes.data.last_hba1c?.toString() || "",
         });
       }
 
@@ -175,6 +181,10 @@ const Profile = () => {
           has_diabetes: formData.has_diabetes,
           has_hypertension: formData.has_hypertension,
           has_heart_disease: formData.has_heart_disease,
+          smoking_status: formData.smoking_status,
+          cholesterol_ratio: formData.cholesterol_ratio ? parseFloat(formData.cholesterol_ratio) : null,
+          last_hba1c: formData.last_hba1c ? parseFloat(formData.last_hba1c) : null,
+          last_hba1c_date: formData.last_hba1c ? new Date().toISOString().split('T')[0] : null,
         }).eq("id", user.id),
         
         supabase.from("notification_preferences").upsert({
@@ -415,6 +425,54 @@ const Profile = () => {
                   <span className="text-sm">Heart Disease</span>
                 </label>
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Advanced Health Metrics */}
+            <div className="space-y-4">
+              <Label>Advanced Health Metrics (Optional)</Label>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="smoking_status" className="text-xs text-muted-foreground">Smoking Status</Label>
+                  <select
+                    id="smoking_status"
+                    value={formData.smoking_status}
+                    onChange={(e) => setFormData({ ...formData, smoking_status: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  >
+                    <option value="unknown">Unknown</option>
+                    <option value="never">Never Smoked</option>
+                    <option value="former">Former Smoker</option>
+                    <option value="current">Current Smoker</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="cholesterol_ratio" className="text-xs text-muted-foreground">Cholesterol Ratio</Label>
+                  <Input
+                    id="cholesterol_ratio"
+                    type="number"
+                    step="0.1"
+                    value={formData.cholesterol_ratio}
+                    onChange={(e) => setFormData({ ...formData, cholesterol_ratio: e.target.value })}
+                    placeholder="e.g. 4.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="last_hba1c" className="text-xs text-muted-foreground">Last HbA1c (%)</Label>
+                  <Input
+                    id="last_hba1c"
+                    type="number"
+                    step="0.1"
+                    value={formData.last_hba1c}
+                    onChange={(e) => setFormData({ ...formData, last_hba1c: e.target.value })}
+                    placeholder="e.g. 6.5"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                These metrics improve AI risk predictions. Ask your doctor for these values.
+              </p>
             </div>
           </div>
         </Card>

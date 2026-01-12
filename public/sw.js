@@ -129,9 +129,62 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncPendingLogs() {
-  // Get pending logs from IndexedDB and sync them
-  // This is a placeholder for future implementation
+  // Sync pending health logs from IndexedDB to Supabase
   console.log('Syncing pending health logs...');
+  
+  try {
+    // Open IndexedDB
+    const dbRequest = indexedDB.open('beat-offline-db', 1);
+    
+    dbRequest.onerror = () => {
+      console.log('IndexedDB not available for sync');
+    };
+    
+    dbRequest.onsuccess = async (event) => {
+      const db = event.target.result;
+      
+      if (!db.objectStoreNames.contains('pending-logs')) {
+        console.log('No pending logs store found');
+        return;
+      }
+      
+      const transaction = db.transaction(['pending-logs'], 'readwrite');
+      const store = transaction.objectStore('pending-logs');
+      const getAllRequest = store.getAll();
+      
+      getAllRequest.onsuccess = async () => {
+        const pendingLogs = getAllRequest.result;
+        
+        if (pendingLogs.length === 0) {
+          console.log('No pending logs to sync');
+          return;
+        }
+        
+        console.log(`Found ${pendingLogs.length} pending logs to sync`);
+        
+        // Try to sync each log
+        for (const log of pendingLogs) {
+          try {
+            const response = await fetch('/api/sync-log', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(log.data)
+            });
+            
+            if (response.ok) {
+              // Remove synced log from IndexedDB
+              store.delete(log.id);
+              console.log(`Synced log ${log.id}`);
+            }
+          } catch (error) {
+            console.log(`Failed to sync log ${log.id}:`, error);
+          }
+        }
+      };
+    };
+  } catch (error) {
+    console.log('Sync error:', error);
+  }
 }
 
 // Push notification handler
