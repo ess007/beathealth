@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Logo } from "@/components/Logo";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -57,11 +57,12 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-24 w-full" />
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center animate-pulse">
+            <Logo size="xl" showText={false} />
+          </div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     );

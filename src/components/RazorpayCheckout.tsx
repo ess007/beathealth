@@ -165,8 +165,13 @@ export const RazorpayCheckout = ({ open, onClose, planType, onSuccess }: Razorpa
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+        <DialogHeader className="text-center pb-2">
+          <div className="flex justify-center mb-3">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <Logo size="lg" showText={false} />
+            </div>
+          </div>
+          <DialogTitle className="flex items-center justify-center gap-2 text-xl">
             <Crown className="w-5 h-5 text-primary" />
             Upgrade to {plan.name}
           </DialogTitle>
