@@ -2,7 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Send, User, Trash2, MessageSquare, Sparkles, AlertTriangle } from "lucide-react";
+import { 
+  Send, User, Trash2, MessageSquare, Sparkles, AlertTriangle, 
+  Sun, Moon, Heart, Pill, Users, TrendingUp, Flame, Settings
+} from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +15,17 @@ import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FeatureGate } from "@/components/FeatureGate";
+import { useStreaks } from "@/hooks/useStreaks";
+import { useHeartScore } from "@/hooks/useHeartScore";
+import { haptic } from "@/lib/haptics";
+import { UnifiedCheckin } from "@/components/UnifiedCheckin";
+import { HealthSummarySheet } from "@/components/HealthSummarySheet";
+import { MedicationsSheet } from "@/components/MedicationsSheet";
+import { FamilySheet } from "@/components/FamilySheet";
+import { InsightsSheet } from "@/components/InsightsSheet";
+import { DeviceConnectionSheet } from "@/components/DeviceConnectionSheet";
+import { ProfileSheet } from "@/components/ProfileSheet";
+import { Progress } from "@/components/ui/progress";
 
 interface Message {
   role: "user" | "assistant";
@@ -22,11 +36,23 @@ const AICoach = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { mainStreakCount } = useStreaks();
+  const { todayScore } = useHeartScore();
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Sheet states
+  const [checkinOpen, setCheckinOpen] = useState(false);
+  const [healthSheetOpen, setHealthSheetOpen] = useState(false);
+  const [medsSheetOpen, setMedsSheetOpen] = useState(false);
+  const [familySheetOpen, setFamilySheetOpen] = useState(false);
+  const [insightsSheetOpen, setInsightsSheetOpen] = useState(false);
+  const [devicesSheetOpen, setDevicesSheetOpen] = useState(false);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,6 +61,43 @@ const AICoach = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Check if ritual is pending
+  const { data: ritualStatus } = useQuery({
+    queryKey: ["ritual-status", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const today = new Date().toISOString().split("T")[0];
+      const hour = new Date().getHours();
+      const ritualType = hour < 14 ? "morning" : "evening";
+      
+      const { data: behavior } = await supabase
+        .from("behavior_logs")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("log_date", today)
+        .eq("ritual_type", ritualType)
+        .maybeSingle();
+      
+      return { 
+        ritualType, 
+        completed: !!behavior,
+        isMorning: hour < 14,
+      };
+    },
+    enabled: !!user?.id,
+  });
 
   // Fetch existing conversations
   const { data: conversations } = useQuery({
@@ -46,7 +109,7 @@ const AICoach = () => {
         .select("*")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
-        .limit(10);
+        .limit(5);
       if (error) throw error;
       return data;
     },
@@ -220,73 +283,194 @@ const AICoach = () => {
 
   const suggestedQuestions = language === 'hi' 
     ? [
-        "मेरा BP 140/90 है, क्या यह खतरनाक है?",
-        "शुगर कम करने के लिए क्या खाएं?",
-        "रात को अच्छी नींद के लिए टिप्स",
-        "क्या चाय पीना BP बढ़ाता है?"
+        "मेरा BP 140/90 है, क्या यह ठीक है?",
+        "शुगर कम करने के लिए क्या करूं?",
+        "अच्छी नींद के लिए सुझाव दें",
       ]
     : [
-        "Is 140/90 BP dangerous for me?",
-        "What foods help lower blood sugar?",
-        "Tips for better sleep at night",
-        "Does drinking tea raise BP?"
+        "Is my 140/90 BP okay?",
+        "How to lower blood sugar?",
+        "Tips for better sleep",
       ];
+
+  const quickActions = [
+    { 
+      icon: ritualStatus?.isMorning ? Sun : Moon, 
+      label: ritualStatus?.isMorning ? "Morning" : "Evening",
+      sublabel: ritualStatus?.completed ? "Done ✓" : "Check-in",
+      color: "text-orange-500",
+      bg: "bg-orange-500/10",
+      action: () => { haptic('light'); setCheckinOpen(true); },
+      highlight: !ritualStatus?.completed,
+    },
+    { 
+      icon: Heart, 
+      label: "HeartScore",
+      sublabel: todayScore && typeof todayScore === 'object' ? `${todayScore.heart_score}` : "--",
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+      action: () => { haptic('light'); setHealthSheetOpen(true); },
+    },
+    { 
+      icon: Pill, 
+      label: "Meds",
+      color: "text-green-500",
+      bg: "bg-green-500/10",
+      action: () => { haptic('light'); setMedsSheetOpen(true); },
+    },
+    { 
+      icon: Users, 
+      label: "Family",
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
+      action: () => { haptic('light'); setFamilySheetOpen(true); },
+    },
+    { 
+      icon: TrendingUp, 
+      label: "Trends",
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+      action: () => { haptic('light'); setInsightsSheetOpen(true); },
+    },
+  ];
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 
+    ? (language === 'hi' ? 'सुप्रभात' : 'Good morning')
+    : hour < 17 
+    ? (language === 'hi' ? 'नमस्ते' : 'Good afternoon')
+    : (language === 'hi' ? 'शुभ संध्या' : 'Good evening');
 
   return (
     <div className="min-h-screen bg-background flex flex-col pb-24 md:pb-0">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-5 max-w-4xl flex flex-col">
-        {/* Header */}
+      {/* All Sheets */}
+      <UnifiedCheckin isOpen={checkinOpen} onClose={() => setCheckinOpen(false)} />
+      <HealthSummarySheet isOpen={healthSheetOpen} onClose={() => setHealthSheetOpen(false)} />
+      <MedicationsSheet isOpen={medsSheetOpen} onClose={() => setMedsSheetOpen(false)} />
+      <FamilySheet isOpen={familySheetOpen} onClose={() => setFamilySheetOpen(false)} />
+      <InsightsSheet isOpen={insightsSheetOpen} onClose={() => setInsightsSheetOpen(false)} />
+      <DeviceConnectionSheet isOpen={devicesSheetOpen} onClose={() => setDevicesSheetOpen(false)} />
+      <ProfileSheet isOpen={profileSheetOpen} onClose={() => setProfileSheetOpen(false)} />
+
+      <main className="flex-1 container mx-auto px-4 py-4 max-w-2xl flex flex-col">
+        {/* Compact Header with Greeting & Stats */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
               <Logo size="sm" showText={false} />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-                Beat AI Coach
-                <Sparkles className="w-5 h-5 text-primary" />
+              <h1 className="text-lg font-bold">
+                {greeting}{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ''}
               </h1>
-              <p className="text-xs text-muted-foreground">
-                {language === "hi" ? "आपका व्यक्तिगत स्वास्थ्य सलाहकार" : "Your personal health advisor"}
+              <p className="text-xs text-muted-foreground flex items-center gap-2">
+                <span className="flex items-center gap-1">
+                  <Flame className="w-3 h-3 text-orange-500" />
+                  {mainStreakCount} days
+                </span>
+                <span>•</span>
+                <span className="flex items-center gap-1">
+                  <Heart className="w-3 h-3 text-red-500" />
+                  {todayScore && typeof todayScore === 'object' ? todayScore.heart_score : '--'}
+                </span>
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => createConversation.mutate()}
-            disabled={createConversation.isPending}
-            className="gap-2"
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full"
+              onClick={() => { haptic('light'); setProfileSheetOpen(true); }}
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Check-in Prompt (if not done) */}
+        {!ritualStatus?.completed && (
+          <button
+            onClick={() => { haptic('medium'); setCheckinOpen(true); }}
+            className="mb-4 w-full p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center gap-4 active:scale-[0.98] transition-transform"
           >
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">{language === "hi" ? "नई चैट" : "New Chat"}</span>
-          </Button>
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              {ritualStatus?.isMorning ? <Sun className="w-6 h-6 text-primary" /> : <Moon className="w-6 h-6 text-primary" />}
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-semibold">
+                {ritualStatus?.isMorning 
+                  ? (language === 'hi' ? 'सुबह की जांच' : 'Morning Check-in')
+                  : (language === 'hi' ? 'शाम की जांच' : 'Evening Check-in')}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {language === 'hi' ? 'अपनी दैनिक जांच शुरू करें' : 'Start your daily ritual'}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary-foreground" />
+            </div>
+          </button>
+        )}
+
+        {/* Quick Actions */}
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {quickActions.map((action, i) => (
+            <button
+              key={i}
+              onClick={action.action}
+              className={`shrink-0 flex flex-col items-center p-3 rounded-2xl border transition-all active:scale-95 ${
+                action.highlight 
+                  ? 'border-primary/50 bg-primary/10' 
+                  : 'border-border/50 bg-card hover:bg-muted/50'
+              }`}
+              style={{ minWidth: '72px' }}
+            >
+              <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center mb-1`}>
+                <action.icon className={`w-5 h-5 ${action.color}`} />
+              </div>
+              <span className="text-xs font-medium">{action.label}</span>
+              {action.sublabel && (
+                <span className="text-[10px] text-muted-foreground">{action.sublabel}</span>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Medical Disclaimer */}
-        <div className="flex items-start gap-2 p-3 mb-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs">
+        <div className="flex items-start gap-2 p-3 mb-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs">
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-muted-foreground">
             {language === 'hi' 
-              ? 'यह AI सलाह है, चिकित्सा निदान नहीं। गंभीर लक्षणों के लिए डॉक्टर से मिलें।'
-              : 'This is AI guidance, not medical diagnosis. Consult a doctor for serious symptoms.'}
+              ? 'यह AI सलाह है, चिकित्सा निदान नहीं।'
+              : 'AI guidance only, not medical diagnosis.'}
           </p>
         </div>
 
         {/* Conversation History */}
         {conversations && conversations.length > 0 && (
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <div className="mb-3 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 rounded-full gap-1"
+              onClick={() => createConversation.mutate()}
+              disabled={createConversation.isPending}
+            >
+              <MessageSquare className="w-3 h-3" />
+              New
+            </Button>
             {conversations.map((conv) => (
               <Button
                 key={conv.id}
                 variant={conversationId === conv.id ? "default" : "outline"}
                 size="sm"
-                className="shrink-0 gap-2 rounded-full"
+                className="shrink-0 gap-1 rounded-full text-xs"
                 onClick={() => loadConversation(conv.id)}
               >
-                {conv.title?.substring(0, 20) || "Chat"}
+                {conv.title?.substring(0, 15) || "Chat"}
                 {conversationId === conv.id && (
                   <Trash2
                     className="w-3 h-3 opacity-50 hover:opacity-100"
@@ -303,19 +487,19 @@ const AICoach = () => {
 
         {/* Messages */}
         <FeatureGate feature="ai_coach">
-          <Card className="flex-1 p-4 mb-4 overflow-y-auto border-border/50 min-h-[400px] max-h-[60vh]">
+          <Card className="flex-1 p-4 mb-3 overflow-y-auto border-border/50 min-h-[300px] max-h-[50vh]">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-3">
                   <Logo size="lg" showText={false} className="opacity-50" />
                 </div>
-                <p className="text-lg font-semibold mb-2">
+                <p className="font-semibold mb-1">
                   {language === "hi" ? "नमस्ते! मैं Beat हूं 👋" : "Hello! I'm Beat 👋"}
                 </p>
-                <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                <p className="text-xs text-muted-foreground max-w-xs mb-4">
                   {language === "hi"
-                    ? "अपने स्वास्थ्य के बारे में कोई भी सवाल पूछें।"
-                    : "Ask me anything about your health. I'm here to help."}
+                    ? "अपने स्वास्थ्य के बारे में कुछ भी पूछें।"
+                    : "Ask me anything about your health."}
                 </p>
                 
                 {/* Suggested Questions */}
@@ -332,16 +516,16 @@ const AICoach = () => {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {messages.map((msg, idx) => (
-                  <div key={idx} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div key={idx} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     {msg.role === "assistant" && (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                         <Logo size="sm" showText={false} />
                       </div>
                     )}
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      className={`max-w-[85%] rounded-2xl px-3 py-2 ${
                         msg.role === "user" 
                           ? "bg-primary text-primary-foreground" 
                           : "bg-muted"
@@ -350,18 +534,18 @@ const AICoach = () => {
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                     </div>
                     {msg.role === "user" && (
-                      <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4 text-secondary-foreground" />
+                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                        <User className="w-3.5 h-3.5 text-secondary-foreground" />
                       </div>
                     )}
                   </div>
                 ))}
                 {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
+                  <div className="flex gap-2">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0">
                       <Logo size="sm" showText={false} />
                     </div>
-                    <div className="bg-muted rounded-2xl px-4 py-3">
+                    <div className="bg-muted rounded-2xl px-3 py-2">
                       <div className="flex gap-1">
                         <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
