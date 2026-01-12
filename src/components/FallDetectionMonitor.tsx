@@ -168,7 +168,7 @@ export const FallDetectionMonitor = () => {
   });
 
   const handleFallDetected = useCallback(async (magnitude: number) => {
-    haptic.heavy();
+    haptic("heavy");
     setFallDetected(true);
     
     // Get location if available

@@ -150,7 +150,7 @@ export const SocialWellnessCard = () => {
       setShowLogDialog(false);
       setSelectedInteractions([]);
       setNotes("");
-      haptic.success();
+      haptic("success");
       toast.success("Social wellness logged!");
     },
     onError: (error) => {

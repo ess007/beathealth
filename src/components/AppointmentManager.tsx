@@ -64,7 +64,9 @@ export const AppointmentManager = () => {
       if (error) throw error;
       return (data || []).map(item => ({
         ...item,
-        pre_visit_tasks: Array.isArray(item.pre_visit_tasks) ? item.pre_visit_tasks : []
+        pre_visit_tasks: (Array.isArray(item.pre_visit_tasks) 
+          ? item.pre_visit_tasks as unknown as { task: string; completed: boolean }[]
+          : [])
       })) as Appointment[];
     },
   });
