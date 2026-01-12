@@ -254,6 +254,95 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_reminders: {
+        Row: {
+          appointment_id: string
+          created_at: string | null
+          id: string
+          message: string | null
+          remind_at: string
+          reminder_type: string
+          sent: boolean | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          remind_at: string
+          reminder_type: string
+          sent?: boolean | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          remind_at?: string
+          reminder_type?: string
+          sent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_reminders_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_type: string
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          linked_lab_result_id: string | null
+          location: string | null
+          notes: string | null
+          post_visit_notes: string | null
+          pre_visit_tasks: Json | null
+          provider_name: string | null
+          reminder_sent: boolean | null
+          scheduled_at: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_type: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          linked_lab_result_id?: string | null
+          location?: string | null
+          notes?: string | null
+          post_visit_notes?: string | null
+          pre_visit_tasks?: Json | null
+          provider_name?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_type?: string
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          linked_lab_result_id?: string | null
+          location?: string | null
+          notes?: string | null
+          post_visit_notes?: string | null
+          pre_visit_tasks?: Json | null
+          provider_name?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -292,11 +381,14 @@ export type Database = {
           created_at: string | null
           id: string
           log_date: string
+          loneliness_score: number | null
           meds_taken: boolean | null
+          mood_score: number | null
           notes: string | null
           ritual_type: string
           sleep_hours: number | null
           sleep_quality: Database["public"]["Enums"]["sleep_quality"] | null
+          social_interaction_count: number | null
           steps_count: number | null
           stress_level: Database["public"]["Enums"]["stress_level"] | null
           user_id: string
@@ -305,11 +397,14 @@ export type Database = {
           created_at?: string | null
           id?: string
           log_date: string
+          loneliness_score?: number | null
           meds_taken?: boolean | null
+          mood_score?: number | null
           notes?: string | null
           ritual_type: string
           sleep_hours?: number | null
           sleep_quality?: Database["public"]["Enums"]["sleep_quality"] | null
+          social_interaction_count?: number | null
           steps_count?: number | null
           stress_level?: Database["public"]["Enums"]["stress_level"] | null
           user_id: string
@@ -318,11 +413,14 @@ export type Database = {
           created_at?: string | null
           id?: string
           log_date?: string
+          loneliness_score?: number | null
           meds_taken?: boolean | null
+          mood_score?: number | null
           notes?: string | null
           ritual_type?: string
           sleep_hours?: number | null
           sleep_quality?: Database["public"]["Enums"]["sleep_quality"] | null
+          social_interaction_count?: number | null
           steps_count?: number | null
           stress_level?: Database["public"]["Enums"]["stress_level"] | null
           user_id?: string
@@ -540,6 +638,78 @@ export type Database = {
           },
         ]
       }
+      cognitive_assessments: {
+        Row: {
+          ai_analysis: Json | null
+          assessment_date: string
+          assessment_type: string
+          created_at: string | null
+          id: string
+          max_score: number | null
+          responses: Json | null
+          risk_level: string | null
+          score: number | null
+          time_taken_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          assessment_date: string
+          assessment_type: string
+          created_at?: string | null
+          id?: string
+          max_score?: number | null
+          responses?: Json | null
+          risk_level?: string | null
+          score?: number | null
+          time_taken_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          assessment_date?: string
+          assessment_type?: string
+          created_at?: string | null
+          id?: string
+          max_score?: number | null
+          responses?: Json | null
+          risk_level?: string | null
+          score?: number | null
+          time_taken_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cognitive_patterns: {
+        Row: {
+          analyzed_at: string | null
+          baseline_value: Json | null
+          current_value: Json | null
+          deviation_percent: number | null
+          id: string
+          pattern_type: string
+          user_id: string
+        }
+        Insert: {
+          analyzed_at?: string | null
+          baseline_value?: Json | null
+          current_value?: Json | null
+          deviation_percent?: number | null
+          id?: string
+          pattern_type: string
+          user_id: string
+        }
+        Update: {
+          analyzed_at?: string | null
+          baseline_value?: Json | null
+          current_value?: Json | null
+          deviation_percent?: number | null
+          id?: string
+          pattern_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       condition_analysis: {
         Row: {
           analysis_date: string
@@ -606,6 +776,102 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_contacts: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          notify_on_fall: boolean | null
+          notify_on_health_emergency: boolean | null
+          notify_on_missed_checkin: boolean | null
+          phone: string
+          relationship: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          notify_on_fall?: boolean | null
+          notify_on_health_emergency?: boolean | null
+          notify_on_missed_checkin?: boolean | null
+          phone: string
+          relationship: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          notify_on_fall?: boolean | null
+          notify_on_health_emergency?: boolean | null
+          notify_on_missed_checkin?: boolean | null
+          phone?: string
+          relationship?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      environmental_logs: {
+        Row: {
+          aqi: number
+          city: string | null
+          created_at: string | null
+          humidity_percent: number | null
+          id: string
+          location_lat: number | null
+          location_lon: number | null
+          measured_at: string
+          pm10: number | null
+          pm25: number | null
+          pollen_index: number | null
+          source: string
+          temperature_celsius: number | null
+          user_id: string
+          uv_index: number | null
+        }
+        Insert: {
+          aqi: number
+          city?: string | null
+          created_at?: string | null
+          humidity_percent?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lon?: number | null
+          measured_at: string
+          pm10?: number | null
+          pm25?: number | null
+          pollen_index?: number | null
+          source?: string
+          temperature_celsius?: number | null
+          user_id: string
+          uv_index?: number | null
+        }
+        Update: {
+          aqi?: number
+          city?: string | null
+          created_at?: string | null
+          humidity_percent?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lon?: number | null
+          measured_at?: string
+          pm10?: number | null
+          pm25?: number | null
+          pollen_index?: number | null
+          source?: string
+          temperature_celsius?: number | null
+          user_id?: string
+          uv_index?: number | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string | null
@@ -627,6 +893,51 @@ export type Database = {
           payload_json?: Json | null
           type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      fall_events: {
+        Row: {
+          acceleration_magnitude: number | null
+          created_at: string | null
+          detected_at: string
+          emergency_contacts_notified: Json | null
+          id: string
+          location_lat: number | null
+          location_lon: number | null
+          notes: string | null
+          response_status: string | null
+          severity: string
+          user_id: string
+          user_response_at: string | null
+        }
+        Insert: {
+          acceleration_magnitude?: number | null
+          created_at?: string | null
+          detected_at?: string
+          emergency_contacts_notified?: Json | null
+          id?: string
+          location_lat?: number | null
+          location_lon?: number | null
+          notes?: string | null
+          response_status?: string | null
+          severity: string
+          user_id: string
+          user_response_at?: string | null
+        }
+        Update: {
+          acceleration_magnitude?: number | null
+          created_at?: string | null
+          detected_at?: string
+          emergency_contacts_notified?: Json | null
+          id?: string
+          location_lat?: number | null
+          location_lon?: number | null
+          notes?: string | null
+          response_status?: string | null
+          severity?: string
+          user_id?: string
+          user_response_at?: string | null
         }
         Relationships: []
       }
@@ -798,6 +1109,75 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_reminders: {
+        Row: {
+          created_at: string | null
+          frequency_months: number
+          id: string
+          last_test_date: string | null
+          next_due_date: string | null
+          reminder_sent: boolean | null
+          test_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          frequency_months?: number
+          id?: string
+          last_test_date?: string | null
+          next_due_date?: string | null
+          reminder_sent?: boolean | null
+          test_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          frequency_months?: number
+          id?: string
+          last_test_date?: string | null
+          next_due_date?: string | null
+          reminder_sent?: boolean | null
+          test_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lab_results: {
+        Row: {
+          created_at: string | null
+          id: string
+          lab_name: string | null
+          next_test_due: string | null
+          notes: string | null
+          results: Json
+          test_date: string
+          test_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lab_name?: string | null
+          next_test_due?: string | null
+          notes?: string | null
+          results: Json
+          test_date: string
+          test_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lab_name?: string | null
+          next_test_due?: string | null
+          notes?: string | null
+          results?: Json
+          test_date?: string
+          test_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lifestyle_correlations: {
         Row: {
           accuracy_score: number | null
@@ -914,6 +1294,36 @@ export type Database = {
           },
         ]
       }
+      medication_protocols: {
+        Row: {
+          adjustment_rules: Json
+          condition: string
+          contraindications: string[] | null
+          created_at: string | null
+          id: string
+          medication_class: string
+          target_range: Json
+        }
+        Insert: {
+          adjustment_rules: Json
+          condition: string
+          contraindications?: string[] | null
+          created_at?: string | null
+          id?: string
+          medication_class: string
+          target_range: Json
+        }
+        Update: {
+          adjustment_rules?: Json
+          condition?: string
+          contraindications?: string[] | null
+          created_at?: string | null
+          id?: string
+          medication_class?: string
+          target_range?: Json
+        }
+        Relationships: []
+      }
       medications: {
         Row: {
           active: boolean | null
@@ -1006,11 +1416,14 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aqi_sensitivity_score: number | null
           avatar_url: string | null
+          cognitive_monitoring_enabled: boolean | null
           created_at: string | null
           date_of_birth: string | null
           email: string | null
           evening_ritual_time: string | null
+          fall_detection_enabled: boolean | null
           full_name: string | null
           gender: string | null
           goals: Json | null
@@ -1021,6 +1434,8 @@ export type Database = {
           high_contrast_mode: boolean | null
           id: string
           language: string | null
+          last_location_lat: number | null
+          last_location_lon: number | null
           morning_ritual_time: string | null
           onboarding_completed: boolean | null
           phone: string | null
@@ -1031,11 +1446,14 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          aqi_sensitivity_score?: number | null
           avatar_url?: string | null
+          cognitive_monitoring_enabled?: boolean | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
           evening_ritual_time?: string | null
+          fall_detection_enabled?: boolean | null
           full_name?: string | null
           gender?: string | null
           goals?: Json | null
@@ -1046,6 +1464,8 @@ export type Database = {
           high_contrast_mode?: boolean | null
           id: string
           language?: string | null
+          last_location_lat?: number | null
+          last_location_lon?: number | null
           morning_ritual_time?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
@@ -1056,11 +1476,14 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          aqi_sensitivity_score?: number | null
           avatar_url?: string | null
+          cognitive_monitoring_enabled?: boolean | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
           evening_ritual_time?: string | null
+          fall_detection_enabled?: boolean | null
           full_name?: string | null
           gender?: string | null
           goals?: Json | null
@@ -1071,6 +1494,8 @@ export type Database = {
           high_contrast_mode?: boolean | null
           id?: string
           language?: string | null
+          last_location_lat?: number | null
+          last_location_lon?: number | null
           morning_ritual_time?: string | null
           onboarding_completed?: boolean | null
           phone?: string | null
@@ -1180,6 +1605,45 @@ export type Database = {
           mitigation_actions?: Json | null
           projected_risk_percent?: number
           risk_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_wellness_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          interaction_types: string[] | null
+          left_home: boolean | null
+          log_date: string
+          loneliness_score: number | null
+          mood_score: number | null
+          notes: string | null
+          social_interactions: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interaction_types?: string[] | null
+          left_home?: boolean | null
+          log_date: string
+          loneliness_score?: number | null
+          mood_score?: number | null
+          notes?: string | null
+          social_interactions?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interaction_types?: string[] | null
+          left_home?: boolean | null
+          log_date?: string
+          loneliness_score?: number | null
+          mood_score?: number | null
+          notes?: string | null
+          social_interactions?: number | null
           user_id?: string
         }
         Relationships: []
@@ -1340,6 +1804,39 @@ export type Database = {
           user_id?: string
           value?: number
           vital_type?: string
+        }
+        Relationships: []
+      }
+      wellness_activities: {
+        Row: {
+          category: string
+          description: string | null
+          difficulty: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          suitable_for: string[] | null
+          title: string
+        }
+        Insert: {
+          category: string
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          suitable_for?: string[] | null
+          title: string
+        }
+        Update: {
+          category?: string
+          description?: string | null
+          difficulty?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          suitable_for?: string[] | null
+          title?: string
         }
         Relationships: []
       }
