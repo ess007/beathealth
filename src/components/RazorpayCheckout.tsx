@@ -167,7 +167,7 @@ export const RazorpayCheckout = ({ open, onClose, planType, onSuccess }: Razorpa
       <DialogContent className="max-w-md">
         <DialogHeader className="text-center pb-2">
           <div className="flex justify-center mb-3">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 rounded-2xl bg-black flex items-center justify-center shadow-lg">
               <Logo size="lg" showText={false} />
             </div>
           </div>
@@ -183,8 +183,8 @@ export const RazorpayCheckout = ({ open, onClose, planType, onSuccess }: Razorpa
         <Card className={`p-6 bg-gradient-to-br ${plan.color}/10 border-primary/20`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center`}>
-                <Logo size="sm" showText={false} />
+              <div className="w-14 h-14 rounded-xl bg-black flex items-center justify-center">
+                <Logo size="md" showText={false} />
               </div>
               <div>
                 <h3 className="font-bold text-lg">{plan.name}</h3>

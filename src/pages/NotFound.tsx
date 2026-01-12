@@ -15,7 +15,7 @@ const NotFound = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="text-center max-w-md">
         <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-4">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-black mb-4">
             <Logo size="xl" showText={false} />
           </div>
         </div>

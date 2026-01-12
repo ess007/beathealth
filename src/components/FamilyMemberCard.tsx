@@ -139,9 +139,8 @@ const FamilyMemberCard = ({
         </div>
       </div>
 
-      {/* HeartScore */}
       <div className="flex items-center gap-4 mb-4 p-4 bg-muted/50 rounded-lg">
-        <div className={getScoreColor(score)}>
+        <div className="w-12 h-12 rounded-lg bg-black flex items-center justify-center">
           <Logo size="md" showText={false} />
         </div>
         <div>
