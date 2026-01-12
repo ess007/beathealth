@@ -3,20 +3,57 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 };
+
+// Internal secret for cron job validation
+const INTERNAL_SECRET = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  );
-
   try {
+    // ========== AUTHENTICATION ==========
+    // This function should only be called by:
+    // 1. Internal cron jobs with x-internal-secret header
+    // 2. Supabase service role (via pg_cron)
+    
+    const internalSecret = req.headers.get('x-internal-secret');
+    const authHeader = req.headers.get('authorization');
+    
+    let isAuthorized = false;
+
+    // Check for internal secret
+    if (internalSecret && INTERNAL_SECRET && internalSecret === INTERNAL_SECRET) {
+      isAuthorized = true;
+      console.log('[Agent Scheduler] Authenticated via internal secret');
+    }
+    
+    // Check for service role key in Authorization header
+    if (authHeader && INTERNAL_SECRET) {
+      const token = authHeader.replace('Bearer ', '');
+      // Accept both anon key (from pg_cron with net.http_post) and service role
+      if (token === INTERNAL_SECRET || token === Deno.env.get('SUPABASE_ANON_KEY')) {
+        isAuthorized = true;
+        console.log('[Agent Scheduler] Authenticated via Authorization header');
+      }
+    }
+
+    if (!isAuthorized) {
+      console.error('[Agent Scheduler] Unauthorized access attempt');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - This endpoint is for internal use only' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
     const now = new Date().toISOString();
     
     // Fetch pending tasks that are due
@@ -49,12 +86,15 @@ serve(async (req) => {
           .update({ status: 'processing', attempts: task.attempts + 1 })
           .eq('id', task.id);
 
-        // Call agent-brain
+        // Call agent-brain with internal secret for authentication
         const brainResponse = await supabase.functions.invoke('agent-brain', {
           body: {
             userId: task.user_id,
             triggerType: task.task_type,
             triggerPayload: task.payload
+          },
+          headers: {
+            'x-internal-secret': INTERNAL_SECRET!
           }
         });
 
