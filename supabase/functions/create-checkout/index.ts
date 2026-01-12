@@ -110,7 +110,7 @@ serve(async (req) => {
       body: JSON.stringify({
         amount,
         currency: "INR",
-        receipt: `beat_${user.id}_${Date.now()}`,
+        receipt: `beat_${Date.now()}`,
         notes: {
           user_id: user.id, // Use authenticated user's ID
           plan_type: planType,
