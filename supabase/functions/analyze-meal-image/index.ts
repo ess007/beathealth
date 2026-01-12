@@ -1,9 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  imageBase64: z.string().max(10000000).optional(), // Max ~7MB base64
+  description: z.string().max(500).optional(),
+  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional().default('lunch'),
+}).refine(data => data.imageBase64 || data.description, {
+  message: 'Either image or description is required',
+});
 
 serve(async (req) => {
   // Handle CORS
@@ -17,11 +27,10 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const { imageBase64, description, mealType } = await req.json();
-
-    if (!imageBase64 && !description) {
-      throw new Error('Either image or description is required');
-    }
+    // Parse and validate input
+    const body = await req.json();
+    const validated = requestSchema.parse(body);
+    const { imageBase64, description, mealType } = validated;
 
     // Build the prompt
     const systemPrompt = `You are an expert Indian nutritionist AI. Analyze the meal and provide detailed nutritional information.
@@ -160,6 +169,17 @@ Respond ONLY with valid JSON in this exact format:
 
   } catch (error: any) {
     console.error('Error in analyze-meal-image:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input',
+          details: error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message || 'Failed to analyze meal' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
