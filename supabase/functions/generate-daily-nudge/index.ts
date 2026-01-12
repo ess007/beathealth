@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  userId: z.string().uuid(),
+  nudgeType: z.enum(['morning', 'evening']).optional().default('morning'),
+});
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -38,7 +45,10 @@ serve(async (req) => {
       );
     }
 
-    const { userId, nudgeType = "morning" } = await req.json();
+    // Parse and validate input
+    const body = await req.json();
+    const validated = requestSchema.parse(body);
+    const { userId, nudgeType } = validated;
 
     // SECURITY: Validate that the authenticated user can only generate nudges for themselves
     if (user.id !== userId) {
@@ -150,9 +160,20 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating nudge:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input',
+          details: error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    const message = error.message || "Unknown error";
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

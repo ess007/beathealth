@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+  userId: z.string().uuid().optional(),
+});
 
 // Free OpenWeather API - uses IQAir as backup
 const OPENWEATHER_API_KEY = Deno.env.get("OPENWEATHER_API_KEY") || "";
@@ -15,12 +23,12 @@ serve(async (req) => {
   }
 
   try {
-    const { lat, lon, userId } = await req.json();
-    console.log(`Fetching air quality for lat: ${lat}, lon: ${lon}, user: ${userId}`);
-
-    if (!lat || !lon) {
-      throw new Error("Latitude and longitude are required");
-    }
+    // Parse and validate input
+    const body = await req.json();
+    const validated = requestSchema.parse(body);
+    const { lat, lon, userId } = validated;
+    
+    console.log(`Fetching air quality for lat: ${lat}, lon: ${lon}, user: ${userId || 'anonymous'}`);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -115,10 +123,21 @@ serve(async (req) => {
     return new Response(JSON.stringify(airQualityData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in fetch-air-quality:", error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input - latitude and longitude must be valid numbers',
+          details: error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: error.message || "Unknown error" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

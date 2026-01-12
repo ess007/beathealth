@@ -1,11 +1,19 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  userId: z.string().uuid(),
+  triggerType: z.enum(['scheduled', 'bp_logged', 'sugar_logged', 'morning_analysis', 'evening_analysis', 'streak_check', 'manual']),
+  triggerPayload: z.record(z.any()).optional().default({}),
+});
 
 // L2 Agent Tool Definitions
 const agentTools = [
@@ -431,28 +439,43 @@ Analyze the situation and decide what actions (if any) to take.`;
 
     const data = await response.json();
     const message = data.choices?.[0]?.message;
-    
-    const results: any[] = [];
-    
-    if (message?.tool_calls && message.tool_calls.length > 0) {
+
+    if (!message) {
+      return { success: false, error: 'No response from AI' };
+    }
+
+    const actionResults: any[] = [];
+
+    // Handle tool calls
+    if (message.tool_calls && message.tool_calls.length > 0) {
+      console.log(`[Agent Brain] Processing ${message.tool_calls.length} tool calls`);
+      
       for (const toolCall of message.tool_calls) {
         const toolName = toolCall.function.name;
-        const args = JSON.parse(toolCall.function.arguments || '{}');
+        const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
         
-        console.log(`[Agent Brain] Executing tool: ${toolName}`, args);
-        const result = await executeAgentTool(supabase, userId, toolName, args, preferences, triggerType);
-        results.push({ tool: toolName, ...result });
+        console.log(`[Agent Brain] Executing tool: ${toolName}`, toolArgs);
+        
+        const toolResult = await executeAgentTool(supabase, userId, toolName, toolArgs, preferences, triggerType);
+        actionResults.push({ tool: toolName, ...toolResult });
       }
     }
-    
-    return { 
-      success: true, 
-      actions: results,
-      reasoning: message?.content || 'No reasoning provided'
+
+    return {
+      success: true,
+      reasoning: message.content,
+      actions: actionResults,
+      context: {
+        healthScore: health.heartScore,
+        streak: health.mainStreak,
+        bpStatus: health.bpTrend.status,
+        sugarStatus: health.sugarTrend.status
+      }
     };
+
   } catch (error: any) {
     console.error(`[Agent Brain] Error:`, error);
-    return { success: false, error: error?.message || 'Unknown error' };
+    return { success: false, error: error.message };
   }
 }
 
@@ -462,30 +485,40 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { userId, triggerType, triggerPayload } = await req.json();
+    // Parse and validate input
+    const body = await req.json();
+    const validated = requestSchema.parse(body);
+    const { userId, triggerType, triggerPayload } = validated;
 
-    if (!userId || !triggerType) {
-      return new Response(JSON.stringify({ error: 'userId and triggerType are required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
+    console.log(`[Agent Brain] Request for user ${userId}, trigger: ${triggerType}`);
 
     const result = await analyzeAndAct(supabase, userId, triggerType, triggerPayload);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+
   } catch (error: any) {
-    console.error('[Agent Brain] Handler error:', error);
-    return new Response(JSON.stringify({ error: error?.message || 'Unknown error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    console.error('[Agent Brain] Request error:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid input',
+          details: error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    return new Response(
+      JSON.stringify({ success: false, error: error.message || 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });

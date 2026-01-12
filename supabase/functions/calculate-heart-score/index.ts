@@ -368,6 +368,66 @@ Write a warm, encouraging 2-3 sentence summary in simple English. Highlight the 
 
     console.log("HeartScore saved successfully:", heartScoreData);
 
+    // Generate health alerts based on readings
+    const alertsToCreate: any[] = [];
+
+    // BP Alerts
+    if (bpLogs.length > 0) {
+      const latestBP = bpLogs[0];
+      if (latestBP.systolic >= 160 || latestBP.diastolic >= 100) {
+        alertsToCreate.push({
+          user_id: user.id,
+          alert_type: "high_bp",
+          message: `Your BP reading of ${latestBP.systolic}/${latestBP.diastolic} mmHg is high. Consider resting and rechecking. Consult your doctor if this persists.`,
+          severity: "high",
+          related_date: targetDate,
+        });
+      } else if (latestBP.systolic < 90 || latestBP.diastolic < 60) {
+        alertsToCreate.push({
+          user_id: user.id,
+          alert_type: "low_bp",
+          message: `Your BP reading of ${latestBP.systolic}/${latestBP.diastolic} mmHg is lower than normal. Stay hydrated and consult your doctor if you feel dizzy.`,
+          severity: "high",
+          related_date: targetDate,
+        });
+      }
+    }
+
+    // Sugar Alerts
+    if (sugarLogs.length > 0) {
+      const latestSugar = sugarLogs[0];
+      if (latestSugar.glucose_mg_dl >= 180) {
+        alertsToCreate.push({
+          user_id: user.id,
+          alert_type: "high_sugar",
+          message: `Your blood sugar of ${latestSugar.glucose_mg_dl} mg/dL is elevated. Review your recent meals and medication timing.`,
+          severity: "high",
+          related_date: targetDate,
+        });
+      } else if (latestSugar.glucose_mg_dl < 70) {
+        alertsToCreate.push({
+          user_id: user.id,
+          alert_type: "low_sugar",
+          message: `Your blood sugar of ${latestSugar.glucose_mg_dl} mg/dL is low. Have a snack with fast-acting carbs immediately.`,
+          severity: "high",
+          related_date: targetDate,
+        });
+      }
+    }
+
+    // Insert alerts if any
+    if (alertsToCreate.length > 0) {
+      const { error: alertError } = await supabase
+        .from("health_alerts")
+        .insert(alertsToCreate);
+      
+      if (alertError) {
+        console.error("Error creating alerts:", alertError);
+      } else {
+        console.log(`Created ${alertsToCreate.length} health alert(s)`);
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

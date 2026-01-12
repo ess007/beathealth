@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  userId: z.string().uuid(),
+  horizonMonths: z.number().int().min(1).max(24).optional().default(6),
+});
 
 interface RiskFactors {
   age: number;
@@ -228,11 +235,10 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { userId, horizonMonths = 6 } = await req.json();
-
-    if (!userId) {
-      throw new Error('userId is required');
-    }
+    // Parse and validate input
+    const body = await req.json();
+    const validated = requestSchema.parse(body);
+    const { userId, horizonMonths } = validated;
 
     console.log(`Forecasting ${horizonMonths}-month risk for user:`, userId);
 
@@ -392,6 +398,17 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in forecast-complication-risk:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input',
+          details: error.errors 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message || 'Forecast failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
