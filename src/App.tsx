@@ -39,6 +39,14 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Feature pages
+const HeartScoreFeature = lazy(() => import("./pages/features/HeartScoreFeature"));
+const FamilyFeature = lazy(() => import("./pages/features/FamilyFeature"));
+const SafetyFeature = lazy(() => import("./pages/features/SafetyFeature"));
+const MedicationsFeature = lazy(() => import("./pages/features/MedicationsFeature"));
+const CognitiveFeature = lazy(() => import("./pages/features/CognitiveFeature"));
+const SocialFeature = lazy(() => import("./pages/features/SocialFeature"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -114,6 +122,12 @@ const AppContent = () => {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/features/heartscore" element={<HeartScoreFeature />} />
+            <Route path="/features/family" element={<FamilyFeature />} />
+            <Route path="/features/safety" element={<SafetyFeature />} />
+            <Route path="/features/medications" element={<MedicationsFeature />} />
+            <Route path="/features/cognitive" element={<CognitiveFeature />} />
+            <Route path="/features/social" element={<SocialFeature />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/app/home" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
