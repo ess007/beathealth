@@ -8,7 +8,6 @@ import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { BottomNav } from "@/components/BottomNav";
 import { PageTransition } from "@/components/PageTransition";
-import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useMedicationReminders } from "@/hooks/useMedicationReminders";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -96,20 +95,6 @@ const AppContent = () => {
   }, [location.pathname]);
 
   useMedicationReminders();
-
-  // Swipe Navigation Logic - simplified for 3-item nav
-  const appRoutes = ["/app/home", "/app/coach", "/app/profile"];
-  const currentIndex = appRoutes.indexOf(location.pathname);
-
-  useSwipeNavigation({
-    onSwipeLeft: () => {
-      if (currentIndex >= 0 && currentIndex < appRoutes.length - 1) navigate(appRoutes[currentIndex + 1]);
-    },
-    onSwipeRight: () => {
-      if (currentIndex > 0) navigate(appRoutes[currentIndex - 1]);
-    },
-    threshold: 100,
-  });
 
   return (
     <>
