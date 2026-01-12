@@ -87,12 +87,29 @@ Allow: /
 Disallow: /app/
 Disallow: /onboarding
 Disallow: /auth
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /medications
+Disallow: /insights
+Disallow: /family
+Disallow: /rituals
+Disallow: /achievements
+Disallow: /challenges
+Disallow: /subscription
+Disallow: /shop
+Disallow: /ai-coach
+Disallow: /morning-checkin
+Disallow: /evening-checkin
+Disallow: /admin
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
 
 # Sitemap location
 Sitemap: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/sitemap.xml
+
+# LLMs.txt for AI discovery
+# https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com/llms.txt
 
 # Host
 Host: https://f3186243-a14e-4249-ba1b-f80f08fff4e2.lovableproject.com
