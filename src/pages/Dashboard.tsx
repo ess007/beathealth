@@ -216,16 +216,11 @@ const Dashboard = () => {
         </section>
 
         {/* Alerts Row */}
-        {(interactionCount && interactionCount > 0) && (
+        {interactionCount != null && interactionCount > 0 && (
           <section className="mb-4">
             <DrugInteractionWarning />
           </section>
         )}
-
-        {/* Environmental Alert */}
-        <section className="mb-4">
-          <EnvironmentalAlert />
-        </section>
 
         {/* Quick Log Actions */}
         <section className="mb-6">
@@ -282,6 +277,11 @@ const Dashboard = () => {
         {/* Social Wellness */}
         <section className="mb-6">
           <SocialWellnessCard />
+        </section>
+
+        {/* Environmental Alert (AQI) */}
+        <section className="mb-6">
+          <EnvironmentalAlert />
         </section>
 
         {/* Quick Access */}
