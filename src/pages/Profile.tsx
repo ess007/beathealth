@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { AgentPreferences } from "@/components/AgentPreferences";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -417,24 +418,19 @@ const Profile = () => {
           </div>
         </Card>
 
+        {/* Push Notifications */}
+        <div className="mb-6">
+          <PushNotificationToggle />
+        </div>
+
         {/* Notifications */}
         <Card className="p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Notifications</h2>
+            <h2 className="text-lg font-semibold">Notification Preferences</h2>
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Push Notifications</p>
-                <p className="text-sm text-muted-foreground">Receive app notifications</p>
-              </div>
-              <Switch
-                checked={notificationSettings.push_enabled}
-                onCheckedChange={(checked) => setNotificationSettings({ ...notificationSettings, push_enabled: checked })}
-              />
-            </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">WhatsApp Messages</p>

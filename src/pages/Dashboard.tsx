@@ -172,11 +172,6 @@ const Dashboard = () => {
           <QuickLogActions />
         </section>
 
-        {/* Agent Activity Feed */}
-        <section className="mb-6">
-          <AgentActivityFeed />
-        </section>
-
         {/* HeartScore Card */}
         <section className="mb-6">
           <HeartScoreCard />
@@ -275,7 +270,7 @@ const Dashboard = () => {
 
         {/* Achievements */}
         {achievements && achievements.length > 0 && (
-          <section>
+          <section className="mb-6">
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <span className="w-1 h-5 bg-amber-500 rounded-full" />
               Achievements
@@ -289,6 +284,11 @@ const Dashboard = () => {
             </div>
           </section>
         )}
+
+        {/* Agent Activity Feed - at bottom for non-intrusive monitoring */}
+        <section className="mb-6">
+          <AgentActivityFeed />
+        </section>
       </main>
     </div>
   );
