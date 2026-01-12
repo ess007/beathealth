@@ -1,0 +1,334 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface HealthContext {
+  profile: any;
+  conditions: string[];
+  recentBP: any[];
+  recentSugar: any[];
+  recentMeals: any[];
+  recentActivity: any[];
+  medications: any[];
+  cgmData: any[];
+  heartScores: any[];
+}
+
+async function getHealthContext(supabase: any, userId: string): Promise<HealthContext> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [
+    profileResult,
+    bpResult,
+    sugarResult,
+    mealsResult,
+    activityResult,
+    medsResult,
+    cgmResult,
+    scoresResult,
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).single(),
+    supabase.from('bp_logs').select('*').eq('user_id', userId)
+      .gte('measured_at', thirtyDaysAgo.toISOString()).order('measured_at', { ascending: false }).limit(60),
+    supabase.from('sugar_logs').select('*').eq('user_id', userId)
+      .gte('measured_at', thirtyDaysAgo.toISOString()).order('measured_at', { ascending: false }).limit(100),
+    supabase.from('meal_logs').select('*').eq('user_id', userId)
+      .gte('logged_at', thirtyDaysAgo.toISOString()).order('logged_at', { ascending: false }).limit(30),
+    supabase.from('activity_sessions').select('*').eq('user_id', userId)
+      .gte('started_at', thirtyDaysAgo.toISOString()).order('started_at', { ascending: false }).limit(30),
+    supabase.from('medications').select('*').eq('user_id', userId).eq('active', true),
+    supabase.from('cgm_readings').select('*').eq('user_id', userId)
+      .gte('measured_at', thirtyDaysAgo.toISOString()).order('measured_at', { ascending: false }).limit(500),
+    supabase.from('heart_scores').select('*').eq('user_id', userId)
+      .gte('score_date', thirtyDaysAgo.toISOString().split('T')[0]).order('score_date', { ascending: false }).limit(30),
+  ]);
+
+  const profile = profileResult.data;
+  
+  // Determine conditions from profile
+  const conditions: string[] = [];
+  if (profile?.has_diabetes) conditions.push('diabetes');
+  if (profile?.has_hypertension) conditions.push('hypertension');
+  if (profile?.has_heart_disease) conditions.push('heart_disease');
+  
+  // Check for obesity from weight/height if available
+  if (profile?.weight_kg && profile?.height_cm) {
+    const heightM = profile.height_cm / 100;
+    const bmi = profile.weight_kg / (heightM * heightM);
+    if (bmi >= 30) conditions.push('obesity');
+    else if (bmi >= 25) conditions.push('overweight');
+  }
+
+  return {
+    profile,
+    conditions,
+    recentBP: bpResult.data || [],
+    recentSugar: sugarResult.data || [],
+    recentMeals: mealsResult.data || [],
+    recentActivity: activityResult.data || [],
+    medications: medsResult.data || [],
+    cgmData: cgmResult.data || [],
+    heartScores: scoresResult.data || [],
+  };
+}
+
+function analyzeVitalTrends(context: HealthContext) {
+  const trends: any = {
+    bp: { status: 'unknown', trend: 'stable', avgSystolic: 0, avgDiastolic: 0 },
+    sugar: { status: 'unknown', trend: 'stable', avgFasting: 0, timeInRange: 0 },
+    activity: { avgSteps: 0, avgCalories: 0, activeMinutes: 0 },
+    meals: { avgCalories: 0, avgCarbs: 0, avgGL: 0 },
+  };
+
+  // BP Analysis
+  if (context.recentBP.length > 0) {
+    const avgSys = context.recentBP.reduce((s, b) => s + b.systolic, 0) / context.recentBP.length;
+    const avgDia = context.recentBP.reduce((s, b) => s + b.diastolic, 0) / context.recentBP.length;
+    trends.bp.avgSystolic = Math.round(avgSys);
+    trends.bp.avgDiastolic = Math.round(avgDia);
+    
+    if (avgSys < 120 && avgDia < 80) trends.bp.status = 'optimal';
+    else if (avgSys < 130 && avgDia < 85) trends.bp.status = 'normal';
+    else if (avgSys < 140 && avgDia < 90) trends.bp.status = 'elevated';
+    else trends.bp.status = 'high';
+
+    // Check trend (last 7 vs previous 7)
+    if (context.recentBP.length >= 14) {
+      const recent7 = context.recentBP.slice(0, 7);
+      const prev7 = context.recentBP.slice(7, 14);
+      const recentAvg = recent7.reduce((s, b) => s + b.systolic, 0) / 7;
+      const prevAvg = prev7.reduce((s, b) => s + b.systolic, 0) / 7;
+      if (recentAvg > prevAvg + 5) trends.bp.trend = 'worsening';
+      else if (recentAvg < prevAvg - 5) trends.bp.trend = 'improving';
+    }
+  }
+
+  // Sugar Analysis
+  const fastingSugar = context.recentSugar.filter(s => s.measurement_type === 'fasting');
+  if (fastingSugar.length > 0) {
+    trends.sugar.avgFasting = Math.round(
+      fastingSugar.reduce((s, g) => s + g.glucose_mg_dl, 0) / fastingSugar.length
+    );
+    
+    if (trends.sugar.avgFasting < 100) trends.sugar.status = 'optimal';
+    else if (trends.sugar.avgFasting < 126) trends.sugar.status = 'prediabetic';
+    else trends.sugar.status = 'diabetic_range';
+  }
+
+  // CGM Time in Range
+  if (context.cgmData.length > 0) {
+    const inRange = context.cgmData.filter(r => r.time_in_range).length;
+    trends.sugar.timeInRange = Math.round((inRange / context.cgmData.length) * 100);
+  }
+
+  // Activity Analysis
+  if (context.recentActivity.length > 0) {
+    trends.activity.avgSteps = Math.round(
+      context.recentActivity.reduce((s, a) => s + (a.steps_count || 0), 0) / context.recentActivity.length
+    );
+    trends.activity.avgCalories = Math.round(
+      context.recentActivity.reduce((s, a) => s + (a.estimated_calories_burned || 0), 0) / context.recentActivity.length
+    );
+    trends.activity.activeMinutes = Math.round(
+      context.recentActivity.reduce((s, a) => s + (a.duration_minutes || 0), 0) / context.recentActivity.length
+    );
+  }
+
+  // Meal Analysis
+  if (context.recentMeals.length > 0) {
+    trends.meals.avgCalories = Math.round(
+      context.recentMeals.reduce((s, m) => s + (m.estimated_calories || 0), 0) / context.recentMeals.length
+    );
+    trends.meals.avgCarbs = Math.round(
+      context.recentMeals.reduce((s, m) => s + (m.estimated_carbs || 0), 0) / context.recentMeals.length
+    );
+    trends.meals.avgGL = Math.round(
+      context.recentMeals.reduce((s, m) => s + (m.estimated_glycemic_load || 0), 0) / context.recentMeals.length
+    );
+  }
+
+  return trends;
+}
+
+async function performMultiConditionAnalysis(
+  context: HealthContext,
+  trends: any,
+  LOVABLE_API_KEY: string
+): Promise<any> {
+  const systemPrompt = `You are an advanced health AI analyzing a patient with multiple conditions.
+
+PATIENT CONDITIONS: ${context.conditions.join(', ') || 'No diagnosed conditions'}
+
+CURRENT MEDICATIONS:
+${context.medications.map(m => `- ${m.name} ${m.dosage || ''} (${m.drug_class || 'unknown class'})`).join('\n') || 'None reported'}
+
+VITAL TRENDS (30 days):
+- BP: ${trends.bp.avgSystolic}/${trends.bp.avgDiastolic} mmHg (${trends.bp.status}, ${trends.bp.trend})
+- Fasting Sugar: ${trends.sugar.avgFasting} mg/dL (${trends.sugar.status})
+- CGM Time in Range: ${trends.sugar.timeInRange}%
+- Daily Steps: ${trends.activity.avgSteps}
+- Active Minutes: ${trends.activity.activeMinutes}/day
+
+HEART SCORES (last 7 days):
+${context.heartScores.slice(0, 7).map(s => `- ${s.score_date}: ${s.heart_score}/100`).join('\n') || 'No recent scores'}
+
+CRITICAL MULTI-CONDITION CONSIDERATIONS:
+1. Diabetes + Hypertension: BP target should be <130/80, ACE inhibitors/ARBs preferred
+2. Heart Disease + Diabetes: Cardioprotective medications essential, avoid hypoglycemia
+3. Obesity + Hypertension: Weight loss of 5-10% can reduce BP significantly
+4. Multiple conditions increase cardiovascular risk exponentially
+
+Analyze comprehensively and respond with JSON:
+{
+  "overallRiskLevel": "low|moderate|high|critical",
+  "riskScores": {
+    "cardiovascular": 0-100,
+    "diabeticComplications": 0-100,
+    "kidneyDisease": 0-100,
+    "stroke": 0-100
+  },
+  "crossConditionImpacts": [
+    {"impact": "description of how conditions interact", "severity": "high|moderate|low"}
+  ],
+  "prioritizedRecommendations": [
+    {"priority": 1, "action": "specific recommendation", "expectedImpact": "what improvement to expect", "timeframe": "1-2 weeks"}
+  ],
+  "medicationConsiderations": [
+    {"consideration": "medication advice", "urgency": "high|medium|low"}
+  ],
+  "lifestyleInterventions": [
+    {"intervention": "specific lifestyle change", "targetMetric": "what to track", "goal": "specific goal"}
+  ],
+  "warningFlags": ["any urgent concerns"],
+  "positiveFindings": ["what's going well"]
+}`;
+
+  try {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: 'Perform comprehensive multi-condition health analysis and provide actionable insights.' },
+        ],
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('AI API error:', response.status);
+      throw new Error('AI analysis failed');
+    }
+
+    const aiResponse = await response.json();
+    const content = aiResponse.choices?.[0]?.message?.content;
+
+    // Parse JSON from response
+    let jsonStr = content;
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error('AI analysis error:', error);
+    // Return basic analysis without AI
+    return {
+      overallRiskLevel: trends.bp.status === 'high' || trends.sugar.status === 'diabetic_range' ? 'high' : 'moderate',
+      riskScores: {
+        cardiovascular: context.conditions.includes('heart_disease') ? 70 : 40,
+        diabeticComplications: context.conditions.includes('diabetes') ? 60 : 20,
+        kidneyDisease: 30,
+        stroke: trends.bp.status === 'high' ? 50 : 25,
+      },
+      crossConditionImpacts: [],
+      prioritizedRecommendations: [
+        { priority: 1, action: 'Continue monitoring vitals daily', expectedImpact: 'Early detection of issues', timeframe: 'Ongoing' },
+      ],
+      medicationConsiderations: [],
+      lifestyleInterventions: [],
+      warningFlags: trends.bp.status === 'high' ? ['Blood pressure needs attention'] : [],
+      positiveFindings: trends.bp.trend === 'improving' ? ['BP trend is improving'] : [],
+    };
+  }
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { userId, analysisType = 'full' } = await req.json();
+
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    console.log(`Running ${analysisType} analysis for user:`, userId);
+
+    // Get comprehensive health context
+    const context = await getHealthContext(supabase, userId);
+    
+    // Analyze trends
+    const trends = analyzeVitalTrends(context);
+
+    // Perform AI-powered multi-condition analysis
+    const analysis = await performMultiConditionAnalysis(context, trends, LOVABLE_API_KEY);
+
+    // Save analysis to database
+    await supabase.from('condition_analysis').insert({
+      user_id: userId,
+      analysis_date: new Date().toISOString().split('T')[0],
+      conditions: context.conditions,
+      risk_scores: analysis.riskScores,
+      cross_impacts: {
+        impacts: analysis.crossConditionImpacts,
+        recommendations: analysis.prioritizedRecommendations,
+      },
+      recommendations: {
+        lifestyle: analysis.lifestyleInterventions,
+        medications: analysis.medicationConsiderations,
+        warnings: analysis.warningFlags,
+        positives: analysis.positiveFindings,
+      },
+    });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        conditions: context.conditions,
+        trends,
+        analysis,
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error: any) {
+    console.error('Error in reasoning-engine:', error);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Analysis failed' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
