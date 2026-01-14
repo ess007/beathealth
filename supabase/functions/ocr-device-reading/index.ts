@@ -1,0 +1,217 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+interface OCRResult {
+  success: boolean;
+  device_type: "bp_monitor" | "glucose_meter" | "pulse_oximeter" | "thermometer" | "scale" | "unknown";
+  readings: {
+    systolic?: number;
+    diastolic?: number;
+    heart_rate?: number;
+    glucose?: number;
+    spo2?: number;
+    temperature?: number;
+    weight?: number;
+    measurement_type?: "fasting" | "random" | "post_meal";
+  };
+  confidence: number;
+  raw_text?: string;
+  suggestions?: string;
+  error?: string;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { imageBase64, deviceHint } = await req.json();
+
+    if (!imageBase64) {
+      return new Response(
+        JSON.stringify({ success: false, error: "No image provided" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(
+        JSON.stringify({ success: false, error: "API key not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const systemPrompt = `You are an expert medical device OCR system. Your task is to accurately extract readings from photos of medical measurement devices.
+
+DEVICE TYPES YOU CAN RECOGNIZE:
+1. Blood Pressure Monitor: Look for SYS/DIA readings (mmHg), pulse/heart rate (bpm)
+2. Glucose Meter: Look for mg/dL or mmol/L readings
+3. Pulse Oximeter: Look for SpO2 (%), pulse rate
+4. Thermometer: Look for °F or °C readings
+5. Weight Scale: Look for kg or lbs readings
+
+EXTRACTION RULES:
+- Blood Pressure: systolic is typically the larger number (60-250), diastolic is smaller (40-150)
+- Heart Rate: Usually displayed separately or below BP readings (30-200 bpm)
+- Glucose: Fasting is typically <100 normal, 100-125 pre-diabetic, >126 diabetic
+- SpO2: Normal is 95-100%
+- Temperature: Normal is around 36.5-37.5°C or 97.5-99.5°F
+
+CONFIDENCE SCORING:
+- 0.9-1.0: Clear display, all numbers visible
+- 0.7-0.9: Mostly clear, minor blur or glare
+- 0.5-0.7: Partially obscured but readable
+- Below 0.5: Unclear, guessing required
+
+Return your analysis as a JSON object with this structure:
+{
+  "device_type": "bp_monitor" | "glucose_meter" | "pulse_oximeter" | "thermometer" | "scale" | "unknown",
+  "readings": {
+    "systolic": number | null,
+    "diastolic": number | null,
+    "heart_rate": number | null,
+    "glucose": number | null,
+    "spo2": number | null,
+    "temperature": number | null,
+    "weight": number | null
+  },
+  "confidence": number (0-1),
+  "raw_text": "all text/numbers visible on display",
+  "suggestions": "any tips to improve reading accuracy"
+}`;
+
+    const userPrompt = deviceHint 
+      ? `Extract the readings from this ${deviceHint} device photo. Focus on the digital display.`
+      : `Identify this medical device and extract all visible readings from the display.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: userPrompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`,
+                },
+              },
+            ],
+          },
+        ],
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI Gateway error:", response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Rate limit exceeded. Please try again." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Service quota exceeded." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to analyze image" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const aiResponse = await response.json();
+    const content = aiResponse.choices?.[0]?.message?.content || "";
+
+    // Extract JSON from the response
+    let ocrData: any = {};
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        ocrData = JSON.parse(jsonMatch[0]);
+      }
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      // Try to extract numbers manually
+      const numbers = content.match(/\d+/g)?.map(Number) || [];
+      if (numbers.length >= 2) {
+        const sorted = [...numbers].sort((a, b) => b - a);
+        ocrData = {
+          device_type: "bp_monitor",
+          readings: {
+            systolic: sorted[0] <= 250 ? sorted[0] : null,
+            diastolic: sorted[1] <= 150 ? sorted[1] : null,
+            heart_rate: sorted[2] && sorted[2] <= 200 ? sorted[2] : null,
+          },
+          confidence: 0.5,
+          raw_text: content,
+        };
+      }
+    }
+
+    // Validate and sanitize readings
+    const result: OCRResult = {
+      success: true,
+      device_type: ocrData.device_type || "unknown",
+      readings: {
+        systolic: validateNumber(ocrData.readings?.systolic, 60, 250),
+        diastolic: validateNumber(ocrData.readings?.diastolic, 40, 150),
+        heart_rate: validateNumber(ocrData.readings?.heart_rate, 30, 200),
+        glucose: validateNumber(ocrData.readings?.glucose, 20, 600),
+        spo2: validateNumber(ocrData.readings?.spo2, 70, 100),
+        temperature: validateNumber(ocrData.readings?.temperature, 35, 42),
+        weight: validateNumber(ocrData.readings?.weight, 20, 300),
+      },
+      confidence: Math.min(1, Math.max(0, ocrData.confidence || 0.5)),
+      raw_text: ocrData.raw_text,
+      suggestions: ocrData.suggestions,
+    };
+
+    // Determine measurement type for glucose based on time of day
+    if (result.readings.glucose) {
+      const hour = new Date().getHours();
+      result.readings.measurement_type = hour < 10 ? "fasting" : "random";
+    }
+
+    console.log("OCR Result:", result);
+
+    return new Response(JSON.stringify(result), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("OCR error:", error);
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
+
+function validateNumber(value: any, min: number, max: number): number | undefined {
+  const num = Number(value);
+  if (isNaN(num) || num < min || num > max) return undefined;
+  return Math.round(num);
+}

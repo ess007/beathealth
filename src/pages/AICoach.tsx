@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { 
   Send, User, Trash2, MessageSquare, Sparkles, AlertTriangle, 
-  Sun, Moon, Heart, Pill, Users, TrendingUp, Flame, Settings, Mic, MicOff
+  Sun, Moon, Heart, Pill, Users, TrendingUp, Flame, Settings, Mic, MicOff, Camera
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -28,6 +28,7 @@ import { Progress } from "@/components/ui/progress";
 import { useVoiceConversation } from "@/hooks/useVoiceConversation";
 import { VoiceStateIndicator, VoiceStateBadge } from "@/components/VoiceStateIndicator";
 import { SpeakButton } from "@/components/VoiceOutput";
+import { ChatImageCapture } from "@/components/ChatImageCapture";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -651,6 +652,18 @@ const AICoach = () => {
 
         {/* Input Area */}
         <div className="flex gap-2 items-center">
+          {/* Camera OCR for device readings */}
+          <ChatImageCapture
+            onReadingDetected={(reading, summary) => {
+              // Auto-send the detected reading to chat
+              if (summary) {
+                setInput(summary);
+                setTimeout(() => handleSendWithVoice(summary), 100);
+              }
+            }}
+            disabled={isLoading}
+          />
+          
           {/* Voice state badge when active */}
           {voiceMode && voiceState !== "idle" && (
             <VoiceStateBadge 
