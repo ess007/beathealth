@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Sun, Moon, Heart, Droplet, Pill, Brain, Users, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { Sun, Moon, Heart, Droplet, Pill, Brain, Users, Check, ArrowRight, ArrowLeft, Camera, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import confetti from "canvas-confetti";
+import { SmartDeviceCapture } from "./SmartDeviceCapture";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UnifiedCheckinProps {
   isOpen: boolean;
@@ -36,6 +38,7 @@ const LONELINESS_OPTIONS = [
 
 export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedCheckinProps) => {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
   
   // Determine ritual type based on time if auto
   const getAutoType = () => {
@@ -60,11 +63,29 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
   const [lonelinessScore, setLonelinessScore] = useState<number>(1);
   const [talkedToFamily, setTalkedToFamily] = useState<boolean | null>(null);
   const [notes, setNotes] = useState("");
+  const [showOCR, setShowOCR] = useState(false);
+  const [ocrDeviceType, setOcrDeviceType] = useState<"bp_monitor" | "glucose_meter" | "any">("any");
 
   // Morning: 5 steps (Vitals, Sleep, Social, Meds, Notes)
   // Evening: 6 steps (Vitals, Mood, Social, Meds, Activity, Notes)
   const totalSteps = isMorning ? 5 : 6;
   const progress = (step / totalSteps) * 100;
+  
+  // Handle OCR reading
+  const handleOCRReading = (reading: {
+    systolic?: number;
+    diastolic?: number;
+    heart_rate?: number;
+    glucose?: number;
+  }) => {
+    if (reading.systolic) setSystolic(reading.systolic.toString());
+    if (reading.diastolic) setDiastolic(reading.diastolic.toString());
+    if (reading.heart_rate) setHeartRate(reading.heart_rate.toString());
+    if (reading.glucose) setFastingSugar(reading.glucose.toString());
+    setShowOCR(false);
+    haptic("success");
+    toast.success(language === "hi" ? "रीडिंग ऑटो-भरी गई!" : "Reading auto-filled!");
+  };
 
   const submitCheckin = useMutation({
     mutationFn: async () => {
@@ -227,15 +248,70 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
           {/* Step 1: Vitals */}
           {step === 1 && (
             <div className="space-y-6 animate-fade-in">
-              <div className="text-center mb-6">
+              <div className="text-center mb-4">
                 <Heart className="h-12 w-12 text-red-500 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold">Blood Pressure</h3>
-                <p className="text-sm text-muted-foreground">Enter your BP reading (optional)</p>
+                <h3 className="text-lg font-semibold">
+                  {language === "hi" ? "ब्लड प्रेशर" : "Blood Pressure"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {language === "hi" ? "अपनी BP रीडिंग दर्ज करें (वैकल्पिक)" : "Enter your BP reading (optional)"}
+                </p>
+              </div>
+
+              {/* Quick Camera OCR Button */}
+              <button
+                onClick={() => {
+                  haptic("light");
+                  setOcrDeviceType("bp_monitor");
+                  setShowOCR(true);
+                }}
+                className="w-full p-4 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center gap-4 active:scale-[0.98] transition-transform"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Camera className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary" />
+                    {language === "hi" ? "फोटो से ऑटो-भरें" : "Auto-fill from Photo"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === "hi" ? "BP मॉनिटर की फोटो लें" : "Take a photo of your BP monitor"}
+                  </p>
+                </div>
+              </button>
+
+              {/* OCR Modal */}
+              {showOCR && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                  <div className="bg-background rounded-2xl p-4 w-full max-w-md">
+                    <SmartDeviceCapture
+                      deviceType={ocrDeviceType}
+                      onReadingCaptured={handleOCRReading}
+                      onClose={() => setShowOCR(false)}
+                    />
+                    <Button 
+                      variant="ghost" 
+                      className="w-full mt-2" 
+                      onClick={() => setShowOCR(false)}
+                    >
+                      {language === "hi" ? "रद्द करें" : "Cancel"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="relative flex items-center gap-4 py-2">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">
+                  {language === "hi" ? "या मैन्युअली दर्ज करें" : "or enter manually"}
+                </span>
+                <div className="flex-1 h-px bg-border" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Systolic (top)</Label>
+                  <Label>{language === "hi" ? "सिस्टोलिक (ऊपर)" : "Systolic (top)"}</Label>
                   <Input
                     type="number"
                     placeholder="120"
@@ -245,7 +321,7 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Diastolic (bottom)</Label>
+                  <Label>{language === "hi" ? "डायस्टोलिक (नीचे)" : "Diastolic (bottom)"}</Label>
                   <Input
                     type="number"
                     placeholder="80"
@@ -257,7 +333,7 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
               </div>
 
               <div className="space-y-2">
-                <Label>Heart Rate (optional)</Label>
+                <Label>{language === "hi" ? "हृदय गति (वैकल्पिक)" : "Heart Rate (optional)"}</Label>
                 <Input
                   type="number"
                   placeholder="72"
@@ -268,10 +344,23 @@ export const UnifiedCheckin = ({ isOpen, onClose, type = "auto" }: UnifiedChecki
               </div>
 
               {isMorning && (
-                <div className="space-y-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Droplet className="h-5 w-5 text-blue-500" />
-                    <Label>Fasting Blood Sugar (mg/dL)</Label>
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Droplet className="h-5 w-5 text-blue-500" />
+                      <Label>{language === "hi" ? "फास्टिंग शुगर (mg/dL)" : "Fasting Blood Sugar (mg/dL)"}</Label>
+                    </div>
+                    <button
+                      onClick={() => {
+                        haptic("light");
+                        setOcrDeviceType("glucose_meter");
+                        setShowOCR(true);
+                      }}
+                      className="text-xs text-primary flex items-center gap-1"
+                    >
+                      <Camera className="w-3 h-3" />
+                      {language === "hi" ? "स्कैन" : "Scan"}
+                    </button>
                   </div>
                   <Input
                     type="number"
