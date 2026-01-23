@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown, Heart } from "lucide-react";
+import { Sun, Moon, TrendingUp, Users, MessageCircle, Flame, Pill, ShoppingBag, Trophy, Crown, Heart, Brain, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import HeartScoreCard from "@/components/HeartScoreCard";
@@ -19,6 +19,9 @@ import { AgentActivityFeed } from "@/components/AgentActivityFeed";
 import { DrugInteractionWarning } from "@/components/DrugInteractionWarning";
 import { SocialWellnessCard } from "@/components/SocialWellnessCard";
 import { UnifiedCheckin } from "@/components/UnifiedCheckin";
+import { EnvironmentalAlert } from "@/components/EnvironmentalAlert";
+import { CognitiveCheckIn } from "@/components/CognitiveCheckIn";
+import { ActivityTracker } from "@/components/ActivityTracker";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -276,6 +279,23 @@ const Dashboard = () => {
         {/* Social Wellness */}
         <section className="mb-6">
           <SocialWellnessCard />
+        </section>
+
+        {/* Environmental & Cognitive Health */}
+        <section className="mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <span className="w-1 h-5 bg-secondary rounded-full" />
+            Health Monitoring
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <EnvironmentalAlert />
+            <CognitiveCheckIn />
+          </div>
+        </section>
+
+        {/* Activity Tracker */}
+        <section className="mb-6">
+          <ActivityTracker />
         </section>
 
         {/* Quick Access */}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -15,6 +16,7 @@ import {
 } from "./ui/dialog";
 
 export const ProfileSection = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +47,7 @@ export const ProfileSection = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.success("Signed out successfully");
-    window.location.href = "/";
+    navigate("/");
   };
 
   if (loading) {
@@ -107,7 +109,7 @@ export const ProfileSection = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.location.href = "/app/profile"}
+            onClick={() => navigate("/app/profile")}
             className="hidden md:flex gap-2"
           >
             <Settings className="w-4 h-4" />

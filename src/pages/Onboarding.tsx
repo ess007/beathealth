@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 
 const Onboarding = () => {
+  const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +82,7 @@ const Onboarding = () => {
 
       toast.success(language === 'hi' ? "स्वागत है! चलिए शुरू करते हैं" : "Welcome! Let's get started");
       haptic('success');
-      window.location.href = "/app/coach";
+      navigate("/app/coach");
     } catch (error) {
       console.error("Onboarding error:", error);
       haptic('error');
