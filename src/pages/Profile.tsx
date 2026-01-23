@@ -29,6 +29,8 @@ import { DataSourcesManager } from "@/components/DataSourcesManager";
 import { FallDetectionMonitor } from "@/components/FallDetectionMonitor";
 import { LabTestTracker } from "@/components/LabTestTracker";
 import { AppointmentManager } from "@/components/AppointmentManager";
+import { ReferralProgram } from "@/components/ReferralProgram";
+import { WhatsAppSetup } from "@/components/WhatsAppSetup";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -483,6 +485,16 @@ const Profile = () => {
         {/* Push Notifications */}
         <div className="mb-6">
           <PushNotificationToggle />
+        </div>
+
+        {/* WhatsApp Setup */}
+        <div className="mb-6">
+          <WhatsAppSetup />
+        </div>
+
+        {/* Referral Program */}
+        <div className="mb-6">
+          <ReferralProgram />
         </div>
 
         {/* Notifications */}

@@ -11,6 +11,8 @@ import { Activity, Droplet, TrendingUp, Download, Loader2, Sparkles, Brain, Targ
 import { toast } from "sonner";
 import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
 import { RiskForecast } from "@/components/RiskForecast";
+import { WellnessActivities } from "@/components/WellnessActivities";
+import { DeepHealthAnalysis } from "@/components/DeepHealthAnalysis";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FeatureGate } from "@/components/FeatureGate";
@@ -386,6 +388,18 @@ const Insights = () => {
           <FeatureGate feature="advanced_insights">
             <RiskForecast />
           </FeatureGate>
+        </section>
+
+        {/* Deep Health Analysis */}
+        <section className="mb-6">
+          <FeatureGate feature="advanced_insights">
+            <DeepHealthAnalysis />
+          </FeatureGate>
+        </section>
+
+        {/* Wellness Activities */}
+        <section className="mb-6">
+          <WellnessActivities />
         </section>
 
         {/* Health Goals */}
