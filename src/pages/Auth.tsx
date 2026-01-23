@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ const passwordSchema = z.string()
 type AuthMode = "select" | "email" | "magic-link" | "reset-password";
 
 const Auth = () => {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const [authMode, setAuthMode] = useState<AuthMode>("select");
   const [isLogin, setIsLogin] = useState(true);
@@ -66,7 +68,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success(language === "hi" ? "स्वागत है!" : "Welcome back!");
-        window.location.href = "/app/home";
+        navigate("/app/home");
       } else {
         const { error } = await supabase.auth.signUp({
           email: emailValidation.data,
@@ -75,7 +77,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success(language === "hi" ? "खाता बन गया!" : "Account created! Logging you in...");
-        window.location.href = "/app/home";
+        navigate("/app/home");
       }
     } catch (error: any) {
       toast.error(error.message || (language === "hi" ? "प्रमाणीकरण विफल" : "Authentication failed"));

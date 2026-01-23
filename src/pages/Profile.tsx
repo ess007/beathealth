@@ -26,6 +26,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { AgentPreferences } from "@/components/AgentPreferences";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { DataSourcesManager } from "@/components/DataSourcesManager";
+import { FallDetectionMonitor } from "@/components/FallDetectionMonitor";
+import { LabTestTracker } from "@/components/LabTestTracker";
+import { AppointmentManager } from "@/components/AppointmentManager";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -526,6 +529,17 @@ const Profile = () => {
         {/* Agent Settings */}
         <div className="mb-6">
           <AgentPreferences />
+        </div>
+
+        {/* Safety Features */}
+        <div className="mb-6">
+          <FallDetectionMonitor />
+        </div>
+
+        {/* Lab Tests & Appointments */}
+        <div className="mb-6 space-y-4">
+          <LabTestTracker />
+          <AppointmentManager />
         </div>
 
         {/* Subscription */}

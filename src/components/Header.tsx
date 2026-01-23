@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 
 export const Header = () => {
+  const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { textSize, setTextSize } = useAccessibility();
   const { theme, setTheme } = useTheme();
@@ -169,7 +171,7 @@ export const Header = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.success(t("header.signOut"));
-    window.location.href = "/";
+    navigate("/");
   };
 
   const getThemeIcon = () => {

@@ -7,9 +7,10 @@ import { useHeartScore } from "@/hooks/useHeartScore";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { Activity, Droplet, TrendingUp, Download, Loader2, Sparkles, Brain, Target } from "lucide-react";
+import { Activity, Droplet, TrendingUp, Download, Loader2, Sparkles, Brain, Target, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { HealthGoalsTracker } from "@/components/HealthGoalsTracker";
+import { RiskForecast } from "@/components/RiskForecast";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { FeatureGate } from "@/components/FeatureGate";
@@ -379,6 +380,13 @@ const Insights = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Risk Forecast */}
+        <section className="mb-6">
+          <FeatureGate feature="advanced_insights">
+            <RiskForecast />
+          </FeatureGate>
+        </section>
 
         {/* Health Goals */}
         <section>

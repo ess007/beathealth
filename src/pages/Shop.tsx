@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ const products = [
 ];
 
 const Shop = () => {
+  const navigate = useNavigate();
   const { language } = useLanguage();
 
   return (
@@ -180,7 +182,7 @@ const Shop = () => {
               ? "बीट प्रीमियम सदस्यों को विशेष छूट मिलती है। आज ही अपग्रेड करें!" 
               : "Beat Premium members get exclusive discounts. Upgrade today!"}
           </p>
-          <Button variant="link" className="mt-2" onClick={() => window.location.href = "/app/subscription"}>
+          <Button variant="link" className="mt-2" onClick={() => navigate("/app/subscription")}>
             {language === "hi" ? "प्रीमियम देखें →" : "View Premium →"}
           </Button>
         </div>
