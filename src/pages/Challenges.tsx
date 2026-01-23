@@ -104,44 +104,31 @@ const Challenges = () => {
     }
   };
 
-  const featuredChallenges = [
-    {
-      id: "featured-1",
-      title: "#120Club",
-      titleHi: "#120क्लब",
-      description: "Keep your systolic BP under 120 for 7 consecutive days",
-      descriptionHi: "7 दिनों तक अपना सिस्टोलिक बीपी 120 से नीचे रखें",
-      participants: 1247,
-      daysLeft: 5,
-      reward: 100,
-      icon: Target,
-      color: "from-rose-500 to-pink-600",
-    },
-    {
-      id: "featured-2",
-      title: "Beat BP Week",
-      titleHi: "बीट बीपी वीक",
-      description: "Log your BP twice daily for 7 days straight",
-      descriptionHi: "7 दिन लगातार दिन में दो बार अपना बीपी लॉग करें",
-      participants: 892,
-      daysLeft: 3,
-      reward: 75,
-      icon: Heart,
-      color: "from-emerald-500 to-teal-600",
-    },
-    {
-      id: "featured-3",
-      title: "Daily Walk Circle",
-      titleHi: "डेली वॉक सर्कल",
-      description: "Walk 5000+ steps every day for a week",
-      descriptionHi: "एक सप्ताह तक हर दिन 5000+ कदम चलें",
-      participants: 2341,
-      daysLeft: 7,
-      reward: 50,
-      icon: Flame,
-      color: "from-orange-500 to-amber-600",
-    },
-  ];
+  // Get featured challenges from database (first 3 active challenges)
+  const featuredChallenges = (challenges || []).slice(0, 3).map((challenge, index) => {
+    const colors = [
+      "from-rose-500 to-pink-600",
+      "from-emerald-500 to-teal-600",
+      "from-orange-500 to-amber-600",
+    ];
+    const Icon = getChallengeIcon(challenge.title);
+    const endDate = new Date(challenge.end_date);
+    const today = new Date();
+    const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    return {
+      id: challenge.id,
+      title: challenge.title,
+      titleHi: challenge.title, // Could add Hindi titles to DB
+      description: challenge.description || "",
+      descriptionHi: challenge.description || "",
+      participants: Math.floor(Math.random() * 2000) + 500, // Mock for now
+      daysLeft,
+      reward: challenge.reward_points || 50,
+      icon: Icon,
+      color: colors[index % colors.length],
+    };
+  });
 
   return (
     <div className="min-h-screen pb-24 md:pb-6">
@@ -202,10 +189,21 @@ const Challenges = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1" size="sm">
-                      {language === "hi" ? "शामिल हों" : "Join"}
-                    </Button>
                     <Button 
+                      className="flex-1" 
+                      size="sm"
+                      variant={isJoined(challenge.id) ? "outline" : "default"}
+                      onClick={() => isJoined(challenge.id) 
+                        ? leaveChallenge.mutate(challenge.id) 
+                        : joinChallenge.mutate(challenge.id)
+                      }
+                      disabled={joinChallenge.isPending || leaveChallenge.isPending}
+                    >
+                      {isJoined(challenge.id) 
+                        ? (language === "hi" ? "शामिल ✓" : "Joined ✓") 
+                        : (language === "hi" ? "शामिल हों" : "Join")}
+                    </Button>
+                    <Button
                       variant="outline" 
                       size="icon" 
                       className="shrink-0"
