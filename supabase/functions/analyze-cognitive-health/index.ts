@@ -12,13 +12,55 @@ serve(async (req) => {
   }
 
   try {
-    const { userId } = await req.json();
-    console.log(`Analyzing cognitive health for user: ${userId}`);
+    // Validate authentication
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Create auth client to verify user
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Verify JWT and get claims
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error("Auth claims error:", claimsError);
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authenticatedUserId = claimsData.claims.sub;
+
+    // Parse request body
+    const { userId } = await req.json();
+    
+    // Authorization check: user can only analyze their own data
+    if (authenticatedUserId !== userId) {
+      console.warn(`Unauthorized access attempt: ${authenticatedUserId} tried to access ${userId}`);
+      return new Response(
+        JSON.stringify({ error: "You can only analyze your own cognitive health data" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Analyzing cognitive health for authenticated user: ${userId}`);
+
+    // Use service role key for database operations (after authentication verified)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Get cognitive assessments (last 3 months)
     const threeMonthsAgo = new Date();
