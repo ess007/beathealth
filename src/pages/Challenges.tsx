@@ -29,6 +29,24 @@ const Challenges = () => {
     },
   });
 
+  // Fetch participant counts for all challenges
+  const { data: participantCounts } = useQuery({
+    queryKey: ["challenge-participants"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("challenge_members")
+        .select("challenge_id");
+      if (error) throw error;
+      
+      // Count participants per challenge
+      const counts: Record<string, number> = {};
+      data?.forEach((m) => {
+        counts[m.challenge_id] = (counts[m.challenge_id] || 0) + 1;
+      });
+      return counts;
+    },
+  });
+
   const { data: myMemberships } = useQuery({
     queryKey: ["challenge-memberships", user?.id],
     queryFn: async () => {
@@ -119,10 +137,10 @@ const Challenges = () => {
     return {
       id: challenge.id,
       title: challenge.title,
-      titleHi: challenge.title, // Could add Hindi titles to DB
+      titleHi: challenge.title,
       description: challenge.description || "",
       descriptionHi: challenge.description || "",
-      participants: Math.floor(Math.random() * 2000) + 500, // Mock for now
+      participants: participantCounts?.[challenge.id] || 0,
       daysLeft,
       reward: challenge.reward_points || 50,
       icon: Icon,

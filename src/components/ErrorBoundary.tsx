@@ -64,10 +64,10 @@ export class ErrorBoundary extends Component<Props, State> {
               <Button
                 variant="ghost"
                 className="w-full gap-2 text-primary"
-                onClick={() => window.open("tel:+911234567890")}
+                onClick={() => window.location.href = "/contact"}
               >
                 <Phone className="w-4 h-4" />
-                Call Family Member
+                Contact Support
               </Button>
             </div>
 
