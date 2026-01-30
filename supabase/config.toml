@@ -62,3 +62,6 @@ verify_jwt = true
 
 [functions.agent-learning]
 verify_jwt = false
+
+[functions.agent-proactive]
+verify_jwt = false

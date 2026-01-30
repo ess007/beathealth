@@ -15,6 +15,7 @@ import { AchievementBadge } from "@/components/AchievementBadge";
 import { InteractiveTutorial } from "@/components/InteractiveTutorial";
 import { haptic } from "@/lib/haptics";
 import { QuickLogActions } from "@/components/QuickLogActions";
+import { DeviceQuickActions } from "@/components/DeviceQuickActions";
 import { AgentActivityFeed } from "@/components/AgentActivityFeed";
 import { DrugInteractionWarning } from "@/components/DrugInteractionWarning";
 import { SocialWellnessCard } from "@/components/SocialWellnessCard";
@@ -225,8 +226,16 @@ const Dashboard = () => {
         )}
 
         {/* Quick Log Actions */}
-        <section className="mb-6">
+        <section className="mb-4">
           <QuickLogActions />
+        </section>
+
+        {/* Device Quick Actions - Scan BP/Sugar, Camera Heart Rate */}
+        <section className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-medium text-muted-foreground">Smart Capture</h2>
+          </div>
+          <DeviceQuickActions />
         </section>
 
         {/* HeartScore Card */}
