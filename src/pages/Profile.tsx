@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { AgentPreferences } from "@/components/AgentPreferences";
+import { AgentMemoryView } from "@/components/AgentMemoryView";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 import { DataSourcesManager } from "@/components/DataSourcesManager";
 import { FallDetectionMonitor } from "@/components/FallDetectionMonitor";
@@ -541,6 +542,11 @@ const Profile = () => {
         {/* Agent Settings */}
         <div className="mb-6">
           <AgentPreferences />
+        </div>
+
+        {/* Agent Memory - What Beat Knows */}
+        <div className="mb-6">
+          <AgentMemoryView />
         </div>
 
         {/* Safety Features */}
