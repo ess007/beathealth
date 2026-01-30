@@ -127,13 +127,13 @@ const agentTools = [
   }
 ];
 
-// Fetch user's full health context
+// Fetch user's full health context including memory and model
 async function getUserContext(supabase: any, userId: string) {
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const today = now.toISOString().split('T')[0];
 
-  const [profile, bpLogs, sugarLogs, streaks, heartScores, goals, preferences, recentActions] = await Promise.all([
+  const [profile, bpLogs, sugarLogs, streaks, heartScores, goals, preferences, recentActions, userMemories, userModel] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', userId).single(),
     supabase.from('bp_logs').select('*').eq('user_id', userId).gte('measured_at', sevenDaysAgo).order('measured_at', { ascending: false }),
     supabase.from('sugar_logs').select('*').eq('user_id', userId).gte('measured_at', sevenDaysAgo).order('measured_at', { ascending: false }),
@@ -141,7 +141,11 @@ async function getUserContext(supabase: any, userId: string) {
     supabase.from('heart_scores').select('*').eq('user_id', userId).order('score_date', { ascending: false }).limit(7),
     supabase.from('health_goals').select('*').eq('user_id', userId).eq('status', 'active'),
     supabase.from('agent_preferences').select('*').eq('user_id', userId).single(),
-    supabase.from('agent_action_log').select('*').eq('user_id', userId).gte('created_at', sevenDaysAgo).order('created_at', { ascending: false }).limit(20)
+    supabase.from('agent_action_log').select('*').eq('user_id', userId).gte('created_at', sevenDaysAgo).order('created_at', { ascending: false }).limit(20),
+    // NEW: Fetch user memories (preferences, patterns, facts)
+    supabase.from('user_memory').select('*').eq('user_id', userId).order('access_count', { ascending: false }).limit(50),
+    // NEW: Fetch user model (persona, engagement patterns, success patterns)
+    supabase.from('user_model').select('*').eq('user_id', userId).single()
   ]);
 
   // Calculate trends
@@ -149,6 +153,14 @@ async function getUserContext(supabase: any, userId: string) {
   const sugarTrend = analyzeSugarTrend(sugarLogs.data || []);
   const mainStreak = streaks.data?.find((s: any) => s.type === 'main');
   const latestHeartScore = heartScores.data?.[0];
+
+  // Process memories into usable format
+  const memories = {
+    preferences: (userMemories.data || []).filter((m: any) => m.memory_type === 'preference'),
+    facts: (userMemories.data || []).filter((m: any) => m.memory_type === 'fact'),
+    patterns: (userMemories.data || []).filter((m: any) => m.memory_type === 'pattern'),
+    contexts: (userMemories.data || []).filter((m: any) => m.memory_type === 'context')
+  };
 
   return {
     profile: profile.data,
@@ -164,6 +176,9 @@ async function getUserContext(supabase: any, userId: string) {
       activeGoals: goals.data || []
     },
     recentActions: recentActions.data || [],
+    // NEW: Memory context for personalization
+    memories,
+    userModel: userModel.data || null,
     today,
     currentHour: now.getHours()
   };
@@ -373,7 +388,7 @@ async function analyzeAndAct(supabase: any, userId: string, triggerType: string,
   console.log(`[Agent Brain] Starting analysis for user ${userId}, trigger: ${triggerType}`);
   
   const context = await getUserContext(supabase, userId);
-  const { preferences, health, profile, currentHour, recentActions } = context;
+  const { preferences, health, profile, currentHour, recentActions, memories, userModel } = context;
   
   // Build system prompt based on autonomy level
   const autonomyInstructions = {
@@ -381,6 +396,24 @@ async function analyzeAndAct(supabase: any, userId: string, triggerType: string,
     balanced: "You are in BALANCED mode. You can send nudges, celebrate achievements, and escalate concerns. DO NOT adjust goals automatically. Be thoughtful and sparing with actions.",
     full: "You are in FULL AUTONOMY mode. You can take any action that would benefit the user's health journey. Be proactive but respectful. Max 1-2 actions per trigger."
   };
+
+  // Format memories for prompt
+  const memoryContext = memories.preferences.length > 0 || memories.patterns.length > 0 ? `
+USER MEMORY (What you've learned about this user):
+${memories.preferences.slice(0, 5).map((m: any) => `- Preference: ${m.key} = ${JSON.stringify(m.value)} (confidence: ${m.confidence})`).join('\n')}
+${memories.patterns.slice(0, 5).map((m: any) => `- Pattern: ${m.key} = ${JSON.stringify(m.value)}`).join('\n')}
+${memories.facts.slice(0, 3).map((m: any) => `- Fact: ${m.key} = ${JSON.stringify(m.value)}`).join('\n')}
+` : '';
+
+  // Format user model for prompt
+  const modelContext = userModel ? `
+USER MODEL (Inferred persona and patterns):
+- Engagement Patterns: ${JSON.stringify(userModel.engagement_patterns || {})}
+- Health Priorities: ${JSON.stringify(userModel.health_priorities || {})}
+- Success Patterns: ${JSON.stringify(userModel.success_patterns || {})}
+- Pain Points: ${JSON.stringify(userModel.pain_points || {})}
+- Communication Preferences: ${JSON.stringify(userModel.communication_preferences || {})}
+` : '';
 
   const systemPrompt = `You are Beat's L2 Health Agent. You proactively monitor and support the user's health journey.
 
@@ -392,7 +425,8 @@ USER PROFILE:
 - Has Diabetes: ${profile?.has_diabetes ? 'Yes' : 'No'}
 - Has Hypertension: ${profile?.has_hypertension ? 'Yes' : 'No'}
 - Current Time: ${currentHour}:00
-
+${memoryContext}
+${modelContext}
 HEALTH STATUS:
 - Current Streak: ${health.mainStreak} days
 - Latest Heart Score: ${health.heartScore || 'Not calculated'}
@@ -409,10 +443,13 @@ TRIGGER DATA: ${JSON.stringify(triggerPayload)}
 GUIDELINES:
 1. Be concise and actionable
 2. Avoid duplicate actions (check recent actions)
-3. Personalize messages using user's name
+3. Personalize messages using user's name and what you know about them
 4. For health alerts, be caring but not alarming
 5. Celebrate milestones genuinely
 6. If streak is at risk (>20hrs since log), prioritize reminder
+7. RESPECT USER PREFERENCES from memory - if they ignore certain nudge types, avoid them
+8. USE OPTIMAL TIMING from engagement patterns when possible
+9. Adapt your communication style to match user preferences
 
 Analyze the situation and decide what actions (if any) to take.`;
 

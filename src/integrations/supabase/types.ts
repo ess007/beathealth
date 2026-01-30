@@ -1181,6 +1181,53 @@ export type Database = {
         }
         Relationships: []
       }
+      interaction_outcomes: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          delivered_at: string
+          engaged_at: string | null
+          engagement_type: string | null
+          id: string
+          interaction_id: string | null
+          interaction_type: string
+          time_to_engage_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          delivered_at: string
+          engaged_at?: string | null
+          engagement_type?: string | null
+          id?: string
+          interaction_id?: string | null
+          interaction_type: string
+          time_to_engage_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          delivered_at?: string
+          engaged_at?: string | null
+          engagement_type?: string | null
+          id?: string
+          interaction_id?: string | null
+          interaction_type?: string
+          time_to_engage_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interaction_outcomes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lab_reminders: {
         Row: {
           created_at: string | null
@@ -1840,6 +1887,100 @@ export type Database = {
         }
         Relationships: []
       }
+      user_memory: {
+        Row: {
+          access_count: number | null
+          accessed_at: string | null
+          confidence: number | null
+          created_at: string | null
+          id: string
+          key: string
+          memory_type: string
+          source: string | null
+          updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          access_count?: number | null
+          accessed_at?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          key: string
+          memory_type: string
+          source?: string | null
+          updated_at?: string | null
+          user_id: string
+          value: Json
+        }
+        Update: {
+          access_count?: number | null
+          accessed_at?: string | null
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          key?: string
+          memory_type?: string
+          source?: string | null
+          updated_at?: string | null
+          user_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_memory_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_model: {
+        Row: {
+          communication_preferences: Json | null
+          engagement_patterns: Json | null
+          health_priorities: Json | null
+          last_analyzed_at: string | null
+          pain_points: Json | null
+          persona: Json | null
+          success_patterns: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          communication_preferences?: Json | null
+          engagement_patterns?: Json | null
+          health_priorities?: Json | null
+          last_analyzed_at?: string | null
+          pain_points?: Json | null
+          persona?: Json | null
+          success_patterns?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          communication_preferences?: Json | null
+          engagement_patterns?: Json | null
+          health_priorities?: Json | null
+          last_analyzed_at?: string | null
+          pain_points?: Json | null
+          persona?: Json | null
+          success_patterns?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_model_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -1955,6 +2096,26 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      get_or_create_user_model: {
+        Args: { p_user_id: string }
+        Returns: {
+          communication_preferences: Json | null
+          engagement_patterns: Json | null
+          health_priorities: Json | null
+          last_analyzed_at: string | null
+          pain_points: Json | null
+          persona: Json | null
+          success_patterns: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_model"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1962,7 +2123,43 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_interaction_outcome: {
+        Args: {
+          p_context?: Json
+          p_delivered_at?: string
+          p_interaction_id: string
+          p_interaction_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       lookup_user_by_email: { Args: { _email: string }; Returns: string }
+      mark_interaction_engaged: {
+        Args: { p_engagement_type: string; p_outcome_id: string }
+        Returns: undefined
+      }
+      recall_user_memories: {
+        Args: { p_limit?: number; p_memory_type?: string; p_user_id: string }
+        Returns: {
+          confidence: number
+          key: string
+          memory_type: string
+          source: string
+          updated_at: string
+          value: Json
+        }[]
+      }
+      remember_user_fact: {
+        Args: {
+          p_confidence?: number
+          p_key: string
+          p_memory_type: string
+          p_source?: string
+          p_user_id: string
+          p_value: Json
+        }
+        Returns: string
+      }
       update_or_create_streak: {
         Args: { p_type: string; p_user_id: string }
         Returns: undefined
