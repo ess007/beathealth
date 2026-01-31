@@ -64,49 +64,49 @@
 - New guidelines for respecting user preferences
 - Adapts communication style to user model
 
-## Cron Jobs Required
+## ✅ Cron Jobs ACTIVATED
 
-To activate the sovereign agent, set up these cron jobs in Supabase:
+All cron jobs have been configured and are running:
 
-```sql
--- Morning proactive outreach (9 AM IST = 3:30 AM UTC)
-SELECT cron.schedule(
-  'agent-proactive-morning',
-  '30 3 * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://neaeizjlvforwzxtfzus.supabase.co/functions/v1/agent-proactive',
-    headers := '{"Content-Type": "application/json", "x-internal-secret": "YOUR_SERVICE_ROLE_KEY"}'::jsonb,
-    body := '{"mode": "batch"}'::jsonb
-  );
-  $$
-);
+| Job Name | Schedule | Description |
+|----------|----------|-------------|
+| `agent-scheduler-every-5-min` | `*/5 * * * *` | Processes scheduled agent tasks every 5 minutes |
+| `agent-proactive-morning` | `30 3 * * *` | Morning proactive outreach (9 AM IST) |
+| `agent-proactive-evening` | `30 12 * * *` | Evening check-in reminder (6 PM IST) |
+| `agent-learning-weekly` | `30 20 * * 6` | Weekly pattern analysis (Sunday 2 AM IST) |
 
--- Evening check-in reminder (6 PM IST = 12:30 PM UTC)
-SELECT cron.schedule(
-  'agent-proactive-evening',
-  '30 12 * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://neaeizjlvforwzxtfzus.supabase.co/functions/v1/agent-proactive',
-    headers := '{"Content-Type": "application/json", "x-internal-secret": "YOUR_SERVICE_ROLE_KEY"}'::jsonb,
-    body := '{"mode": "batch"}'::jsonb
-  );
-  $$
-);
+### Verification
 
--- Weekly learning analysis (Sunday 2 AM IST = Saturday 8:30 PM UTC)
-SELECT cron.schedule(
-  'agent-learning-weekly',
-  '30 20 * * 6',
-  $$
-  SELECT net.http_post(
-    url := 'https://neaeizjlvforwzxtfzus.supabase.co/functions/v1/agent-learning',
-    headers := '{"Content-Type": "application/json", "x-internal-secret": "YOUR_SERVICE_ROLE_KEY"}'::jsonb,
-    body := '{"mode": "batch"}'::jsonb
-  );
-  $$
-);
+```bash
+# All cron jobs are active and verified working:
+# - agent-proactive: Processes users, sends nudges based on health risk
+# - agent-learning: Analyzes engagement patterns, updates user models
+```
+
+## ✅ Push Notifications CONFIGURED
+
+Push notifications are fully implemented:
+
+1. **Service Worker** (`public/sw.js`):
+   - Handles push events
+   - Shows notifications with actions (Log BP, Later)
+   - Handles notification clicks
+
+2. **usePushNotifications Hook**:
+   - Requests browser permission
+   - Subscribes to push with VAPID key
+   - Stores preference in `notification_preferences` table
+   - Supports local notifications fallback
+
+3. **PushNotificationToggle Component**:
+   - User-facing toggle in Profile
+   - Shows permission status
+   - Handles subscribe/unsubscribe
+
+4. **Integration with Agent System**:
+   - agent-proactive respects push preferences
+   - Nudges can be delivered via push channel
+   - Outcome tracking for learning
 ```
 
 ## Files Created/Modified

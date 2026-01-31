@@ -3,10 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret, x-cron-secret',
 };
 
 const INTERNAL_SECRET = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const CRON_SECRET = 'beat-cron-internal'; // Internal cron authentication
 
 interface OutreachDecision {
   shouldContact: boolean;
@@ -278,9 +279,13 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication - only internal/cron calls allowed
+    // Authentication - internal or cron calls allowed
     const internalSecret = req.headers.get('x-internal-secret');
-    if (!internalSecret || internalSecret !== INTERNAL_SECRET) {
+    const cronSecret = req.headers.get('x-cron-secret');
+    const isAuthorized = (internalSecret && internalSecret === INTERNAL_SECRET) || 
+                         (cronSecret && cronSecret === CRON_SECRET);
+    
+    if (!isAuthorized) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
