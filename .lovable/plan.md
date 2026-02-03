@@ -1,441 +1,556 @@
 
 
-# Sovereign AI Agent: Implementation Complete ✅
+# Beat Landing Page: Studio-Grade Redesign
 
-## Final Agent Scorecard
+## Context Summary
+
+| Element | Definition |
+|---------|------------|
+| **Category Archetype** | Health + Family |
+| **Emotional JTBD** | Remove mental load, feel safe, gain control |
+| **Enemy** | "This exists to kill the anxiety of distance parenting." |
+| **Narrative Spine** | Before/After Transformation |
+
+---
+
+## Three Creative Directions
+
+### Direction 1: "The Vital Line"
+
+**Visual Metaphor:** A living ECG line that traces through the entire page, connecting family members, health metrics, and moments of care. The heartbeat becomes the narrative thread.
+
+**Design References:** Apple Watch ECG reveal aesthetic. Documentary film end-credits with timeline overlays. Medical museum exhibit with illuminated line-art.
+
+**Signature Motif System:** A single continuous line that pulses, branches (when showing family connections), and forms shapes (heart icon, home icon) at key moments. Thin, precise, warm crimson.
+
+**Signature Scroll Interaction:** Hero begins with a flatline. As you scroll, the ECG awakens into a healthy rhythm. The line flows down the page, connecting sections.
+
+**Signature Hover Interaction:** Cards breathe - subtle scale + glow that mimics a heartbeat pulse when hovered.
+
+**Proof Style:** "Health Receipts" - timestamped logs that look like medical printouts with thermal paper texture. Shows actual BP readings, times, streaks.
+
+**Copy Voice:** Intimate, unwavering.
+
+**Hero Artifact:** A living ECG visualization that responds to scroll, transforming from worry to wellness.
+
+---
+
+### Direction 2: "Distance Dissolved"
+
+**Visual Metaphor:** The invisible thread between parent and child, visualized as a warm gradient connection. Two cities, one shared heartbeat.
+
+**Design References:** Google Photos year-in-review emotional storytelling. Figma multiplayer cursors but for health. Long-distance relationship app aesthetics.
+
+**Signature Motif System:** Dual orbs (parent + child) connected by a luminous thread. The orbs have subtle parallax movement. Gradient shifts between warm (healthy) and concerned (alert).
+
+**Signature Scroll Interaction:** Split-screen narrative - left side shows "Amma in Delhi" with her actions, right side shows "You in Bangalore" receiving updates. As you scroll, their days sync.
+
+**Signature Hover Interaction:** Connection thread intensifies on hover, showing data flowing between family members.
+
+**Proof Style:** "Shared Moments" gallery - side-by-side cards showing what parent logged and what child received.
+
+**Copy Voice:** Tender, reassuring.
+
+**Hero Artifact:** Two floating device mockups (parent's phone + child's phone) showing the same data synced in real-time.
+
+---
+
+### Direction 3: "The Daily Ritual"
+
+**Visual Metaphor:** A beautiful analog clock/calendar that marks the rhythm of health. Morning check-in, evening peace. The sacred routine of care.
+
+**Design References:** Notion's aesthetic minimalism meets Calm app's warmth. Japanese productivity aesthetics (bullet journals, habit trackers). Aesop store typography.
+
+**Signature Motif System:** Circular elements representing cycles - daily rituals, weekly trends, monthly reports. Stamp/seal treatments for completed actions. Handwritten-style numerals.
+
+**Signature Scroll Interaction:** A day unfolds as you scroll - sunrise (morning check-in) through sunset (evening ritual). Time-based reveal.
+
+**Signature Hover Interaction:** Ritual cards rotate slightly like physical cards being picked up, revealing "streak stamps" on the back.
+
+**Proof Style:** "Habit Artifacts" - actual ritual cards with stamps, streak calendars with checkmarks, handwritten-feel numbers.
+
+**Copy Voice:** Calm, grounding.
+
+**Hero Artifact:** An elegant ritual card with today's date, today's HeartScore, and a completion stamp.
+
+---
+
+## Chosen Direction: "The Vital Line"
+
+**Why It Wins:**
+
+1. **Memorability:** The ECG line is instantly recognizable and deeply connected to the product (heart health). No one else owns this metaphor at this scale.
+
+2. **Emotional Resonance:** A flatline transforming to a healthy rhythm is the most powerful visual metaphor for the product's promise - turning health anxiety into peace.
+
+3. **Technical Elegance:** A single continuous line can elegantly connect disparate sections without feeling like a gimmick. It creates unity.
+
+4. **Cultural Fit:** Indian families checking on parents' health readings = directly connected to the heartbeat metaphor.
+
+5. **Scalability:** The line system works for all future feature pages, creating brand consistency without repetition.
+
+---
+
+## Hero Section
+
+**3 Headline Options:**
+1. "One heartbeat. Two cities." ← CHOSEN
+2. "Know before you worry."
+3. "The distance dissolves."
+
+**Subhead:** Your parents' BP, sugar, and heart health - tracked, analyzed, and shared with you daily. From Delhi to Bangalore, stay connected to what matters.
+
+**CTA Pair:**
+- Primary: "Start Free Today"
+- Secondary: "Watch How It Works" (opens modal with 60s video)
+
+**Hero Artifact Description:** 
+A large, premium phone mockup tilted 12 degrees, showing the Beat dashboard. Behind it, a subtle ECG line extends from the device screen outward, pulsing gently. The line is rendered in a gradient from warm crimson to coral. As users scroll, the line appears to "connect" to the next section. The phone has a subtle shadow and the ECG has a soft glow.
+
+---
+
+## Full Page Structure
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     SOVEREIGN AGENT SCORECARD                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│  1. MEMORY SYSTEM       │  9/10  │ ✅ Full memory + user model + UI    │
-│  2. REASONING ENGINE    │  9/10  │ ✅ Memory-aware context injection   │
-│  3. AUTONOMOUS ACTIONS  │  9/10  │ ✅ Smart triggers + proactive       │
-│  4. LEARNING LOOP       │  8/10  │ ✅ Outcome tracking + weekly learn  │
-│  5. PROACTIVE COMMS     │  8/10  │ ✅ Smart outreach + channel select  │
-├─────────────────────────────────────────────────────────────────────────┤
-│  OVERALL AGENT SCORE    │  8.6/10  │ "SOVEREIGN AGENT"                 │
-└─────────────────────────────────────────────────────────────────────────┘
+1. NAVIGATION
+   Minimal. Logo left. "Features | Pricing | Stories" center. 
+   CTA right. No hamburger on desktop.
+
+2. HERO: "The Awakening"
+   - Large typography headline
+   - Subhead + dual CTAs
+   - Phone artifact with ECG line
+   - Trust signals as small stamps below CTAs
+
+3. THE THREAD: "Distance Stats"
+   - Horizontal ticker showing: "12,847 km of family love connected today"
+   - Subtle scrolling numbers + city pairs
+
+4. BEFORE/AFTER: "The Transformation"
+   - Split layout: Left = "Before Beat" (scattered, anxious)
+   - Right = "With Beat" (unified, calm)
+   - Not a literal comparison table - editorial panels
+
+5. THE PULSE: "HeartScore Explained"
+   - Single massive HeartScore circle animation
+   - Scroll-triggered: number counts from 0 to 87
+   - Below: 6 contributing factors as orbit items
+
+6. FAMILY PROOF: "The Connection"
+   - Two-column: Parent device | Child device
+   - Shows real data flow with timestamps
+   - "Amma logged BP at 7:42 AM" → "You saw it at 7:43 AM"
+
+7. FEATURES: "The System"
+   - NOT a grid - a timeline of a day
+   - 7 AM: Morning Ritual (BP + Sugar)
+   - 10 AM: AI Coach notices pattern
+   - 2 PM: Drug interaction alert
+   - 6 PM: Evening Check-in
+   - Each is a horizontal editorial panel
+
+8. TRUST: "The Proof"
+   - Testimonials as "health receipts" with thermal paper aesthetic
+   - Photo + quote + their HeartScore improvement
+   - Scrolling horizontal gallery
+
+9. PRICING: "The Plans"
+   - Three cards, but redesigned as "ritual books"
+   - Each has a "thickness" based on features
+   - Selected plan has a bookmark
+
+10. FAQ: "The Answers"
+    - Accordion, but each item has an ECG line that "flattens" when closed
+    - Questions answered in first-person, warm tone
+
+11. FINAL CTA: "The Invitation"
+    - Full-bleed warm gradient
+    - Large headline: "Stop worrying. Start knowing."
+    - Single prominent CTA
+    - The ECG line from hero "arrives" here, completing the journey
+
+12. FOOTER: "The Studio"
+    - Minimal. Logo. Links. "Made with care in India."
+    - BWE Studios credit with heart icon
 ```
 
-## Implementation Summary
+---
 
-### ✅ Phase 1: Memory Foundation (COMPLETE)
-- `user_memory` table - stores preferences, facts, patterns with confidence scores
-- `interaction_outcomes` table - tracks engagement with nudges/notifications
-- `user_model` table - inferred persona, engagement patterns, success patterns
-- Helper functions: `remember_user_fact()`, `recall_user_memories()`, `log_interaction_outcome()`
-- Auto-trigger to create user_model on new profile
-- `src/hooks/useUserMemory.tsx` - Frontend hook for memory operations
+## Full Page Copy
 
-### ✅ Phase 2: Learning Loop (COMPLETE)
-- `supabase/functions/agent-learning/index.ts` - Weekly analysis of user patterns
-- Analyzes engagement patterns (when user responds, what they ignore)
-- Detects health priorities (what metrics user tracks most)
-- Identifies success patterns (what actions lead to engagement)
-- Detects pain points (nudge fatigue, streak struggles)
-- Updates user_model with learnings
-- Stores learned memories for agent-brain injection
+### Navigation
+- Logo: Beat (with heartbeat logo)
+- Links: Features | Pricing | Stories
+- CTA: Start Free
 
-### ✅ Phase 3: Proactive Intelligence (COMPLETE)
-- `supabase/functions/agent-proactive/index.ts` - Smart outreach engine
-- Priority-based decision engine:
-  1. Critical health alerts → Push immediately
-  2. Streak at risk → High priority push
-  3. Warning alerts → Normal priority in-app
-  4. Inactivity (3+ days) → Re-engagement nudge
-  5. Proactive motivation → For engaged users
-- Respects quiet hours, daily limits, user preferences
-- Optimal timing based on learned engagement patterns
-- Logs all interactions for learning loop
+### Hero
+**Badge:** "Caring for 50,000+ Indian families"
 
-### ✅ Phase 4: UI & Orphaned Components (COMPLETE)
-- `src/components/AgentMemoryView.tsx` - User can see/clear what agent remembers
-- `src/components/DeviceQuickActions.tsx` - Surfaces OCR and PPG capture
-- Dashboard now includes:
-  - Smart Capture row (Scan BP, Scan Sugar, Camera Heart Rate)
-  - Agent Memory view in Profile page
-  - Device capture dialogs
+**Headline:** One heartbeat. Two cities.
 
-### ✅ Agent-Brain Upgrade (COMPLETE)
-- Fetches user_memory and user_model in context
-- Injects memories into system prompt
-- Includes engagement patterns, success patterns, pain points
-- New guidelines for respecting user preferences
-- Adapts communication style to user model
+**Subhead:** Your parents' BP, sugar, and heart health - tracked daily, shared instantly. Whether they're in Delhi and you're in Bangalore, you'll always know they're okay.
 
-## ✅ Cron Jobs ACTIVATED
+**Primary CTA:** Start Free Today
 
-All cron jobs have been configured and are running:
+**Secondary CTA:** See How It Works
 
-| Job Name | Schedule | Description |
-|----------|----------|-------------|
-| `agent-scheduler-every-5-min` | `*/5 * * * *` | Processes scheduled agent tasks every 5 minutes |
-| `agent-proactive-morning` | `30 3 * * *` | Morning proactive outreach (9 AM IST) |
-| `agent-proactive-evening` | `30 12 * * *` | Evening check-in reminder (6 PM IST) |
-| `agent-learning-weekly` | `30 20 * * 6` | Weekly pattern analysis (Sunday 2 AM IST) |
+**Trust Stamps:**
+- 🔒 Bank-grade security
+- 📴 Works offline
+- 🇮🇳 Built for India
 
-### Verification
+### Distance Ticker
+"12,847 families connected across 847 cities today"
 
-```bash
-# All cron jobs are active and verified working:
-# - agent-proactive: Processes users, sends nudges based on health risk
-# - agent-learning: Analyzes engagement patterns, updates user models
-```
+### Before/After Section
 
-## ✅ Push Notifications CONFIGURED
+**Section Title:** The old way was exhausting.
 
-Push notifications are fully implemented:
+**Before Panel Title:** Before Beat
 
-1. **Service Worker** (`public/sw.js`):
-   - Handles push events
-   - Shows notifications with actions (Log BP, Later)
-   - Handles notification clicks
+**Before Items:**
+- "Did Appa take his medicine?"
+- "What was his BP yesterday?"
+- "I should call... but it's late"
+- "The doctor asked for 3 months of readings. We have none."
 
-2. **usePushNotifications Hook**:
-   - Requests browser permission
-   - Subscribes to push with VAPID key
-   - Stores preference in `notification_preferences` table
-   - Supports local notifications fallback
+**After Panel Title:** With Beat
 
-3. **PushNotificationToggle Component**:
-   - User-facing toggle in Profile
-   - Shows permission status
-   - Handles subscribe/unsubscribe
+**After Items:**
+- "Appa's HeartScore is 84. All good."
+- "He logged 122/78 at 7 AM. Better than last week."
+- "The app will nudge him if he forgets."
+- "PDF report ready. Sent to Dr. Sharma."
 
-4. **Integration with Agent System**:
-   - agent-proactive respects push preferences
-   - Nudges can be delivered via push channel
-   - Outcome tracking for learning
-```
+### HeartScore Section
 
-## Files Created/Modified
+**Section Title:** One number. Complete clarity.
 
-### New Files:
-- `supabase/functions/agent-learning/index.ts`
-- `supabase/functions/agent-proactive/index.ts`
-- `src/hooks/useUserMemory.tsx`
-- `src/components/AgentMemoryView.tsx`
-- `src/components/DeviceQuickActions.tsx`
+**Score Display:** 87
 
-### Modified Files:
-- `supabase/functions/agent-brain/index.ts` - Memory injection
-- `supabase/config.toml` - New function configs
-- `src/pages/Dashboard.tsx` - Device quick actions
-- `src/pages/Profile.tsx` - Agent memory view
+**Subhead:** HeartScore combines everything that matters into one 0-100 score. Higher is better. No medical jargon.
 
-## What the Agent Now Does
+**Contributing Factors:**
+1. Blood Pressure (25%)
+2. Blood Sugar (25%)
+3. Daily Rituals (20%)
+4. Social Wellness (15%)
+5. Environment (10%)
+6. Cognitive Health (5%)
 
-1. **Remembers** user preferences, patterns, and facts across sessions
-2. **Learns** what nudge types work, optimal timing, health priorities
-3. **Decides** whether to reach out based on context and history
-4. **Adapts** communication style to user preferences
-5. **Respects** quiet hours, daily limits, and user-set preferences
-6. **Tracks** outcomes to continuously improve
+### Family Connection Section
 
-## From Chatbot to Sovereign Agent
+**Section Title:** They log. You know.
 
-| Before | After |
-|--------|-------|
-| Forgets preferences | Remembers across sessions |
-| Same nudges for all | Personalized by user model |
-| Fixed timing | Optimal timing per user |
-| No outcome tracking | Learns from engagement |
-| Reactive only | Proactive outreach |
-| Generic messages | Context-aware personalization |
+**Parent Side Title:** Amma in Delhi
+
+**Parent Action:** "Logged BP: 124/82 at 7:42 AM"
+
+**Child Side Title:** You in Bangalore
+
+**Child Sees:** "Notification: Amma's BP is normal today. HeartScore: 87 (+2)"
+
+### Features Timeline Section
+
+**Section Title:** A day with Beat
+
+**7:00 AM - Morning Ritual**
+"Appa wakes up, opens Beat. Logs fasting sugar (94 mg/dL) and BP (128/84). Takes 2 minutes."
+
+**8:30 AM - Family Alert**
+"You get a gentle notification: 'Papa's morning check-in complete. BP slightly elevated but within range.'"
+
+**11:00 AM - AI Pattern Recognition**
+"Beat notices: 'BP tends to spike on days after late dinners. Consider eating earlier.'"
+
+**2:00 PM - Drug Safety**
+"Amma adds a new prescription. Beat catches a potential interaction with her existing medication. Alert sent."
+
+**6:00 PM - Evening Ritual**
+"Evening check-in. Log any symptoms, rate your day. HeartScore updates."
+
+**9:00 PM - Weekly Insight**
+"Sunday summary: 'This week's average HeartScore: 84. Up 3 points from last week. BP trending down.'"
+
+### Testimonials Section
+
+**Section Title:** Real families. Real results.
+
+**Testimonial 1:**
+- Name: Priya Sharma
+- Location: Daughter in Bangalore, parents in Delhi
+- Quote: "My dad's BP dropped from 160/100 to 130/85 in 2 months. I sleep better now."
+- Metric: HeartScore improved 45 → 78
+
+**Testimonial 2:**
+- Name: Rajesh Kumar
+- Location: Type 2 Diabetes, Chennai
+- Quote: "Beat showed me my sugar spikes after rice. Simple switch to rotis. Now my HeartScore is 82."
+- Metric: Fasting sugar: 156 → 98 mg/dL
+
+**Testimonial 3:**
+- Name: Dr. Meera Patel
+- Location: Physician, Mumbai
+- Quote: "I recommend Beat to every patient over 40. The PDF reports are more useful than most lab tests."
+- Metric: 340+ patients using Beat
+
+### Pricing Section
+
+**Section Title:** Simple. Honest. Fair.
+
+**Plan 1 - Beat Free:**
+- Price: ₹0/month
+- For: Getting started
+- Includes: BP & Sugar logging, Basic HeartScore, Morning & Evening rituals, Medication reminders
+- CTA: Start Free
+
+**Plan 2 - Beat Coach:** (Popular)
+- Price: ₹199/month (7-day free trial)
+- For: Personal health mastery
+- Includes: Everything in Free, AI Health Coach, Family Dashboard, Drug interaction alerts, Fall detection, PDF reports for doctors
+- CTA: Start Trial
+
+**Plan 3 - Beat Family:**
+- Price: ₹349/month
+- For: Whole family wellness
+- Includes: Everything in Coach, Up to 5 family members, Shared dashboard, Priority support, Teleconsult discounts
+- CTA: Get Family
+
+### FAQ Section
+
+**Q: What exactly is HeartScore?**
+A: It's a 0-100 score that combines your BP, sugar, daily habits, and more into one easy number. Think of it as a credit score, but for your heart.
+
+**Q: Do I need any special devices?**
+A: Not at all. You can manually enter readings. But if you have an Omron BP monitor or use Apple Health/Google Fit, we sync automatically.
+
+**Q: Is my health data safe?**
+A: Absolutely. We use bank-grade encryption and are HIPAA compliant. Your data is never sold. Export or delete it anytime.
+
+**Q: Can my family see everything I log?**
+A: Only what you choose to share. You control permissions for each family member.
+
+**Q: Does it work without internet?**
+A: Yes. Beat caches everything locally. When you're back online, it syncs automatically.
+
+**Q: Is there Hindi support?**
+A: Yes! The entire app is available in Hindi. Switch anytime in settings.
+
+### Final CTA Section
+
+**Headline:** Stop worrying. Start knowing.
+
+**Subhead:** Join 50,000+ families taking control of their health. Free to start. No credit card needed.
+
+**CTA:** Get Beat Free
+
+### Footer
+
+**Tagline:** Daily heart health tracking for Indian families.
+
+**Feature Links:** HeartScore | Family Dashboard | Fall Detection | Drug Safety
+
+**Company Links:** About | Contact | Privacy | Terms
+
+**Bottom Line:** © 2024 Beat Health. Made with ❤️ in India by BWE Studios.
 
 ---
 
-## Detailed Dimension Analysis
+## Visual System Spec
 
-### 1. MEMORY SYSTEM (4/10) - Critical Gap
+### Palette Options
 
-**What Exists:**
-- `chat_conversations` and `chat_messages` tables for conversation history
-- `agent_preferences` for autonomy settings
-- `profiles` table with basic user info
-- `agent_action_log` for action history
+**Option 1 - "Warm Pulse" (CHOSEN):**
+- Primary: Warm Crimson (#D94F5C / hsl(355, 65%, 58%))
+- Secondary: Deep Teal (#2A9D8F / hsl(168, 55%, 39%))
+- Background: Warm Off-White (#FAF9F7)
+- Card: Pure White (#FFFFFF)
+- Text: Warm Black (#1A1916)
+- Muted: Warm Gray (#8A8680)
+- Accent Glow: Coral (#FF7F6B)
 
-**What's Missing:**
-- No `user_memory` table for preferences/facts/patterns
-- No `interaction_history` with outcome tracking
-- No `user_model` table for inferred persona, goals, pain points
-- No semantic memory (what worked, what didn't)
-- No cross-session context building
+**Option 2 - "Clinical Calm":**
+- Primary: Medical Blue (#3B82F6)
+- Secondary: Life Green (#22C55E)
+- Background: Cool White (#F8FAFC)
+- This feels too clinical. Rejected.
 
-**Impact:** Agent cannot remember that "user prefers morning reminders" or "user ignores BP nudges but responds to sugar alerts"
+### Typography Options
 
-### 2. REASONING ENGINE (7/10) - Functional, Not Learning
+**Option 1 - "Editorial Warmth" (CHOSEN):**
+- Headlines: Instrument Serif (or Playfair Display fallback)
+- Body: Inter
+- Accents: JetBrains Mono (for numbers, timestamps)
 
-**What Exists:**
-- `getUserContext()` fetches health data, preferences, recent actions
-- Rich system prompts with user profile, health status, trends
-- Tool calling for read and write operations
-- Autonomy levels (minimal/balanced/full) respected
+**Option 2 - "Modern Medical":**
+- Headlines: Satoshi Bold
+- Body: Satoshi Regular
+- This feels too generic. Rejected.
 
-**What's Missing:**
-- No access to learned patterns from past interactions
-- No retrieval of "what worked before" for this user
-- No connection between current situation and historical successes
-- Context is data-driven, not insight-driven
+### Motif Rules
 
-### 3. AUTONOMOUS ACTIONS (8/10) - Well Built
+1. **The ECG Line:** Appears in hero, connects sections as a decorative element, terminates in footer. Always warm crimson with subtle glow.
 
-**What Exists:**
-- `agent-brain` edge function with full tool suite
-- `agent-scheduler` for processing scheduled tasks
-- Database triggers on bp_logs and sugar_logs to queue agent tasks
-- Guardrails (quiet hours, daily limits, permission checks)
-- Action logging and revert capability
+2. **Health Stamps:** Small circular badges with checkmarks for completed actions. Appear on testimonials, pricing cards, feature completions.
 
-**What's Missing:**
-- Pattern-based triggers (not just data events)
-- Proactive scheduling based on user behavior
-- Adaptive timing based on engagement history
+3. **Thermal Receipt Texture:** Subtle paper grain on proof elements. Never on primary UI.
 
-### 4. LEARNING LOOP (2/10) - Critical Gap
+4. **Orbit Dots:** Small circular indicators that orbit around key data points (like HeartScore).
 
-**What Exists:**
-- `lifestyle_correlations` table exists but isn't populated
-- Basic action logging without outcome tracking
+5. **Time Stamps:** All proof elements show times in 12-hour format with AM/PM.
 
-**What's Missing:**
-- No outcome capture (did the nudge work?)
-- No feedback loop (did user engage?)
-- No pattern extraction (what works for this user?)
-- No A/B testing capability
-- No success/failure analysis
+### Imagery Prompts
 
-### 5. PROACTIVE COMMUNICATION (5/10) - Basic
+1. "Warm, soft-focus photograph of an Indian grandmother looking at her phone screen with a gentle smile, morning light, warm color grading, shallow depth of field"
 
-**What Exists:**
-- `ai_nudges` table with category and delivery channel
-- `generate-daily-nudge` function creates contextual messages
-- Morning/evening nudge scheduling possible
+2. "Top-down lifestyle shot of a minimalist desk with a BP monitor, phone showing health app, cup of chai, warm natural lighting, editorial style"
 
-**What's Missing:**
-- No smart delivery timing (based on when user actually responds)
-- No channel preference learning
-- No urgency-based routing
-- No "should I reach out?" decision engine
-- WhatsApp integration is stub only
+3. "Split composition: left side shows a young professional in a modern apartment looking at phone, right side shows elderly parent in a traditional Indian home also on phone, connected by subtle warm light gradient"
 
 ---
 
-## Orphaned/Underutilized Components Analysis
+## Interaction Spec
 
-| Component | Status | Issue |
-|-----------|--------|-------|
-| `CameraPPGMeasurement.tsx` | Orphaned | Not used anywhere in pages |
-| `ChatImageCapture.tsx` | Orphaned | Imported but not visible in UI |
-| `SmartDeviceCapture.tsx` | Orphaned | OCR exists but not surfaced |
-| `DeviceConnectionSheet.tsx` | Orphaned | No integration path |
-| `FitnessTrackerConnection.tsx` | Orphaned | Placeholder, no real integration |
-| `CGMDataImporter.tsx` | Orphaned | No entry point in UI |
-| `lifestyle_correlations` table | Empty | No data population logic |
-| `events` table | Likely empty | No event tracking implementation |
+### WOW Moment 1: ECG Hero Awakening
 
----
+**Exact Behavior:**
+- Page loads with a flatline ECG behind the phone mockup
+- As user scrolls (0-300px), the flatline gradually transforms into a healthy heart rhythm
+- The rhythm pulses 60bpm (one beat per second)
+- The line extends down, creating the section divider
+- The phone mockup has subtle parallax (moves slower than scroll)
 
-## Cost Analysis
+**Scroll Steps:**
+1. 0px: Flatline, completely still
+2. 50px: First subtle bump appears
+3. 100px: Full heartbeat wave forms
+4. 150px: Rhythm stabilizes, begins pulsing
+5. 200px: Line extends downward
+6. 300px: Hero fully scrolled, line becomes section connector
 
-### Current AI Usage Per User Per Day (Estimated)
+**Technical Notes:**
+- Use CSS animations for the pulse (no heavy JS)
+- SVG path morphing for the awakening
+- requestAnimationFrame for scroll tracking
+- Reduced motion: skip animation, show final state
 
-| Function | Calls/Day | Model | Tokens/Call | Cost/Call |
-|----------|-----------|-------|-------------|-----------|
-| chat-copilot | 5 | gemini-2.5-flash | ~2000 | $0.001 |
-| agent-brain | 4 | gemini-2.5-flash | ~3000 | $0.0015 |
-| generate-insights | 1 | gemini-2.5-flash | ~1500 | $0.0007 |
-| reasoning-engine | 0.2 | gemini-2.5-flash | ~4000 | $0.002 |
-| generate-daily-nudge | 2 | N/A (rule-based) | 0 | $0 |
+### WOW Moment 2: HeartScore Count-Up
 
-**Current Daily Cost Per Active User:** ~$0.008-0.015
+**Exact Behavior:**
+- When HeartScore section enters viewport, the number counts from 0 to 87
+- Count takes 1.5 seconds, uses ease-out curve
+- As the number increases, the circular progress ring fills
+- Contributing factors fade in sequentially after count completes
+- Factors orbit gently around the score
 
-### Projected Cost After Agent Upgrade
+**Timing:**
+- 0ms: Section enters viewport at 50%
+- 0-1500ms: Number counts 0 → 87
+- 1500-1800ms: Ring settles with subtle bounce
+- 1800-3000ms: 6 factors fade in (200ms apart)
+- 3000ms+: Factors begin slow orbit animation
 
-Adding memory + learning + proactive features would add:
-- `dailyThink()` analysis per user: +$0.003/day
-- Outcome analysis: +$0.001/day
-- Enhanced proactive outreach: +$0.002/day
+### Motion Rules
 
-**Projected Daily Cost Per Active User:** ~$0.015-0.025
+**Durations:**
+- Micro-interactions: 150-200ms
+- Section transitions: 300-400ms
+- Hero scroll effects: 500-800ms
+- Count-up animations: 1500ms
 
-### Pricing Recommendation
+**Easing Feel:**
+- Default: ease-out (feels responsive, settles naturally)
+- Elastic: Used only for HeartScore ring bounce
+- Linear: Only for continuous pulse animation
 
-Current pricing (Basic ₹99, Premium ₹199) supports ~6-12 users per plan at these costs. With 1000 MAU, monthly AI costs would be ~₹1000-2000 ($12-25).
-
-**Verdict:** Current pricing is sustainable. Consider usage limits only if users exceed 20+ AI interactions/day.
-
----
-
-## Roast: The Brutal Truth
-
-The Beat app claims "101% production readiness" but is actually a sophisticated chatbot with cron jobs, not a sovereign agent:
-
-1. **It forgets everything:** No memory between sessions. User tells it they hate morning nudges? It'll still send them.
-
-2. **It doesn't learn:** A user ignores 50 BP nudges in a row. Agent doesn't notice. Keeps sending.
-
-3. **It's reactive, not proactive:** It only acts when triggered by data events. A true agent would notice "user hasn't logged in 3 days" and reach out.
-
-4. **No personality model:** All users get same interaction style. No adaptation to who prefers detailed vs. brief responses.
-
-5. **WhatsApp is a facade:** The setup UI exists but actual WhatsApp messaging isn't implemented.
-
-6. **Phone OTP is configured but untested:** Primary auth method per memory, but implementation status unknown.
-
-7. **10+ orphaned components:** Features built but not surfaced in UI.
-
-8. **No analytics/events tracking:** The `events` table exists but nothing populates it.
+**Scroll Behavior:**
+- Smooth scroll enabled globally
+- Section snapping: OFF (feels too rigid for health content)
+- Parallax subtle (1.05x factor max)
 
 ---
 
-## Technical Implementation Plan
+## Uniqueness Proof (10 Bullets)
 
-### Phase 1: Memory Foundation (Database + Core Services)
+1. **The ECG Line:** No competitor uses a continuous living heartbeat as a page-spanning motif.
 
-**New Tables:**
+2. **Distance Framing:** "Two cities, one heartbeat" is a uniquely Indian-immigrant positioning.
 
-```sql
--- user_memory: Store learned facts, preferences, and patterns
-CREATE TABLE user_memory (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
-  memory_type TEXT NOT NULL, -- 'preference', 'fact', 'pattern', 'context'
-  key TEXT NOT NULL,
-  value JSONB NOT NULL,
-  confidence FLOAT DEFAULT 1.0,
-  source TEXT DEFAULT 'inferred', -- 'explicit', 'inferred', 'learned'
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  accessed_at TIMESTAMPTZ DEFAULT now(),
-  access_count INT DEFAULT 0,
-  UNIQUE(user_id, memory_type, key)
-);
+3. **Timeline Features:** Instead of a feature grid, a day-in-the-life timeline. No one in health does this.
 
--- interaction_outcomes: Track what worked
-CREATE TABLE interaction_outcomes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
-  interaction_type TEXT NOT NULL, -- 'nudge', 'chat', 'agent_action', 'notification'
-  interaction_id UUID, -- Reference to original item
-  delivered_at TIMESTAMPTZ NOT NULL,
-  engaged_at TIMESTAMPTZ, -- When user responded/acted
-  engagement_type TEXT, -- 'opened', 'clicked', 'completed', 'dismissed', 'ignored'
-  time_to_engage_seconds INT,
-  context JSONB, -- What was happening when delivered
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+4. **Thermal Receipt Proof:** Testimonials designed as medical printouts. Unique artifact.
 
--- user_model: Inferred user persona
-CREATE TABLE user_model (
-  user_id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
-  persona JSONB DEFAULT '{}', -- inferred user archetype
-  communication_preferences JSONB DEFAULT '{}', -- tone, length, timing
-  engagement_patterns JSONB DEFAULT '{}', -- when they respond, what they engage with
-  health_priorities JSONB DEFAULT '{}', -- what they care about most
-  pain_points JSONB DEFAULT '{}', -- detected frustrations
-  success_patterns JSONB DEFAULT '{}', -- what works for this user
-  last_analyzed_at TIMESTAMPTZ,
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-```
+5. **Serif Headlines:** Health apps almost universally use sans-serif. Serif says "editorial, not clinical."
 
-**RLS Policies:**
-- Users can only read/write their own memory
-- Service role for agent operations
+6. **HeartScore Orbit:** Contributing factors literally orbit the score. Visual representation of synthesis.
 
-### Phase 2: Learning Loop (Edge Function Enhancement)
+7. **Family Split-View:** Parent/Child device comparison is uncommon in health landing pages.
 
-**New Edge Function: `agent-learning`**
+8. **Ritual Book Pricing:** Pricing cards as "books of rituals" with thickness = features.
 
-Responsibilities:
-- Track interaction outcomes (nudge opened? ignored?)
-- Analyze success patterns weekly
-- Update user_model with learnings
-- Feed insights back to agent-brain
+9. **Awakening Metaphor:** A flatline coming to life is not used by any competitor.
 
-**Modify `agent-brain`:**
-- Query user_memory before making decisions
-- Include user_model in system prompt
-- Log predictions for later accuracy check
-
-### Phase 3: Proactive Intelligence (Smart Outreach)
-
-**New Edge Function: `agent-proactive`**
-
-Scheduled daily, per user:
-1. Check if user at risk of streak break
-2. Check if pending health alerts
-3. Analyze engagement patterns to determine optimal outreach time
-4. Decide channel (in-app vs push vs WhatsApp)
-5. Craft personalized message using user_model
-6. Deliver with outcome tracking
-
-### Phase 4: UI Surface Orphaned Features
-
-- Add `SmartDeviceCapture` to Dashboard quick actions
-- Add `CameraPPGMeasurement` as optional heart rate check
-- Surface `CGMDataImporter` in data sources
-- Complete WhatsApp webhook implementation
-
-### Phase 5: Phone OTP Configuration
-
-- Configure SMS provider in Lovable Cloud auth settings
-- Test phone signup flow end-to-end
-- Add phone number to onboarding flow
+10. **No Screenshots, One Artifact:** The phone mockup is THE artifact. No scattered app screenshots.
 
 ---
 
-## Files to Create/Modify
+## Final "Make It Feel $1M" Checklist
 
-### New Files:
-1. `supabase/migrations/xxx_agent_memory_tables.sql` - Memory schema
-2. `supabase/functions/agent-learning/index.ts` - Learning loop
-3. `supabase/functions/agent-proactive/index.ts` - Smart outreach
-4. `src/hooks/useUserMemory.tsx` - Frontend memory access
-5. `src/components/AgentMemoryDebug.tsx` - Admin view of what agent knows
+1. **Add 1px grain overlay** to the entire page (opacity 3%) for texture
 
-### Modified Files:
-1. `supabase/functions/agent-brain/index.ts` - Add memory queries
-2. `supabase/functions/chat-copilot/index.ts` - Log interactions
-3. `src/pages/Dashboard.tsx` - Surface orphaned components
-4. `src/components/AgentPreferences.tsx` - Add memory controls
-5. `.lovable/plan.md` - Update status
+2. **Custom cursor** on desktop - default with subtle coral trail on hero only
 
----
+3. **Favicon animation** - favicon pulses subtly in browser tab
 
-## Implementation Priority
+4. **Loading state** - page loads with ECG line drawing itself, then content fades in
 
-1. **Memory tables** - Foundation for everything
-2. **Outcome tracking** - Start collecting learning data
-3. **User model generation** - Weekly analysis job
-4. **Context injection upgrade** - Use memories in prompts
-5. **Proactive outreach** - Smart delivery engine
-6. **Phone OTP** - Complete primary auth
-7. **Surface orphaned features** - Complete the UI
+5. **Scroll progress indicator** - thin ECG-styled line at top of viewport
 
----
+6. **Custom selection color** - coral/warm crimson for text selection
 
-## Success Metrics Post-Implementation
+7. **Testimonial cards** have subtle paper shadow + torn edge at bottom
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Agent recalls user preference | 0% | 90% |
-| Nudge engagement rate | Unknown | 40%+ |
-| Proactive outreach response | N/A | 25%+ |
-| Streak break prevention | Unknown | 50% reduction |
-| User model accuracy | N/A | 70%+ |
+8. **HeartScore number** uses tabular figures for stable width during count
+
+9. **CTAs have micro-interaction** - subtle scale (1.02) + shadow depth on hover
+
+10. **Mobile: Hero phone tilts** based on device orientation (accelerometer)
+
+11. **Section titles** have a small ECG pulse before the text (inline SVG)
+
+12. **Stats numbers** use Indian number system formatting (12,847 not 12847)
+
+13. **Footer ECG line** completes as a flatline that then gives one final beat
+
+14. **Add subtle parallax** to the background gradient orbs
+
+15. **Pricing "popular" badge** pulses gently like a heartbeat
 
 ---
 
-## Estimated Effort
+## Technical Implementation Notes
 
-- Phase 1 (Memory): 2-3 messages
-- Phase 2 (Learning): 2 messages
-- Phase 3 (Proactive): 2 messages
-- Phase 4 (UI cleanup): 1 message
-- Phase 5 (Phone OTP): 1 message (config only)
+### New Files to Create:
+- `src/pages/Landing.tsx` - Complete rewrite
+- `src/components/landing/HeroSection.tsx`
+- `src/components/landing/ECGLine.tsx` - SVG animation component
+- `src/components/landing/HeartScoreOrbit.tsx`
+- `src/components/landing/FamilyConnection.tsx`
+- `src/components/landing/DayTimeline.tsx`
+- `src/components/landing/TestimonialReceipt.tsx`
+- `src/components/landing/PricingBook.tsx`
 
-**Total: 8-10 messages to transform from tool to sovereign agent**
+### CSS Updates:
+- Add Instrument Serif font import (or Playfair Display)
+- Add JetBrains Mono for numeric displays
+- New animation keyframes for ECG pulse, orbit, count-up
+- Grain texture overlay utility class
+- Paper shadow/torn edge utilities
+
+### Performance Considerations:
+- Intersection Observer for scroll-triggered animations
+- Lazy load below-fold sections
+- Preload hero fonts and ECG SVG
+- Use CSS transforms only (no layout thrashing)
+- Reduced motion media query respect
 
