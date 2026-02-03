@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @layer base {
   :root {
     /* Core Palette - Beat Brand Colors */
@@ -51,6 +54,16 @@
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.06), 0 4px 6px -4px hsl(0 0% 0% / 0.06);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.08);
     --shadow-glow: 0 0 30px -5px hsl(355 82% 56% / 0.25);
+
+    /* Landing Page - Warm Pulse Palette */
+    --landing-primary: 355 65% 58%;
+    --landing-coral: 10 90% 70%;
+    --landing-secondary: 168 55% 39%;
+    --landing-bg: 30 20% 98%;
+    --landing-card: 0 0% 100%;
+    --landing-text: 30 10% 10%;
+    --landing-muted: 30 5% 45%;
+    --landing-border: 30 10% 90%;
   }
 
   .dark {
@@ -87,6 +100,16 @@
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.25);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.35), 0 8px 10px -6px hsl(0 0% 0% / 0.3);
     --shadow-glow: 0 0 40px -5px hsl(355 80% 62% / 0.3);
+
+    /* Landing Page - Dark mode */
+    --landing-primary: 355 75% 62%;
+    --landing-coral: 10 85% 65%;
+    --landing-secondary: 168 50% 50%;
+    --landing-bg: 220 15% 8%;
+    --landing-card: 220 15% 11%;
+    --landing-text: 220 10% 98%;
+    --landing-muted: 220 10% 55%;
+    --landing-border: 220 15% 18%;
   }
 
   /* High Contrast Mode */
@@ -416,3 +439,79 @@ input:focus, textarea:focus, select:focus {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* Landing Page Specific Styles */
+
+/* ECG Pulse Animation */
+@keyframes ecg-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes ecg-draw {
+  0% { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.animate-ecg-pulse {
+  animation: ecg-pulse 1s ease-in-out infinite;
+}
+
+.animate-ecg-draw {
+  stroke-dasharray: 200;
+  animation: ecg-draw 2s ease-out forwards;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Grain Texture Overlay */
+.grain-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Custom Selection Color for Landing */
+.landing-selection::selection {
+  background: hsl(var(--landing-primary) / 0.2);
+  color: hsl(var(--landing-text));
+}
+
+/* Landing Page Typography */
+.font-serif-landing {
+  font-family: 'Instrument Serif', 'Playfair Display', Georgia, serif;
+}
+
+.font-mono-landing {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+/* Tabular figures for stable number widths */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Landing Page Semantic Colors */
+.bg-landing-bg { background-color: hsl(var(--landing-bg)); }
+.bg-landing-card { background-color: hsl(var(--landing-card)); }
+.bg-landing-primary { background-color: hsl(var(--landing-primary)); }
+.bg-landing-secondary { background-color: hsl(var(--landing-secondary)); }
+.text-landing-text { color: hsl(var(--landing-text)); }
+.text-landing-muted { color: hsl(var(--landing-muted)); }
+.text-landing-primary { color: hsl(var(--landing-primary)); }
+.text-landing-secondary { color: hsl(var(--landing-secondary)); }
+.text-landing-coral { color: hsl(var(--landing-coral)); }
+.border-landing-border { border-color: hsl(var(--landing-border)); }
+.border-landing-primary { border-color: hsl(var(--landing-primary)); }

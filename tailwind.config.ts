@@ -16,7 +16,8 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'Times New Roman', 'serif'],
+        serif: ['Instrument Serif', 'Playfair Display', 'Georgia', 'Times New Roman', 'serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -60,6 +61,16 @@ export default {
           poor: "hsl(var(--score-poor))",
           critical: "hsl(var(--score-critical))",
         },
+        landing: {
+          primary: "hsl(var(--landing-primary))",
+          coral: "hsl(var(--landing-coral))",
+          secondary: "hsl(var(--landing-secondary))",
+          bg: "hsl(var(--landing-bg))",
+          card: "hsl(var(--landing-card))",
+          text: "hsl(var(--landing-text))",
+          muted: "hsl(var(--landing-muted))",
+          border: "hsl(var(--landing-border))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -94,6 +105,12 @@ export default {
           "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "blob": {
+          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
+          "25%": { transform: "translate(20px, -30px) scale(1.05)" },
+          "50%": { transform: "translate(-20px, 20px) scale(0.95)" },
+          "75%": { transform: "translate(30px, 10px) scale(1.02)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -101,6 +118,7 @@ export default {
         "fade-in": "fade-in 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         "slide-up": "slide-up 0.4s ease-out",
+        "blob": "blob 20s ease-in-out infinite",
       },
     },
   },
