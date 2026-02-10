@@ -27,7 +27,7 @@ const testimonials: Testimonial[] = [
     name: "Dr. Meera Patel",
     location: "Physician, Mumbai",
     quote: "I recommend Beat to every patient over 40. The PDF reports are more useful than most lab tests.",
-    metric: "340+ patients using Beat",
+    metric: "Recommends Beat for patients 40+",
     avatar: "MP",
   },
 ];

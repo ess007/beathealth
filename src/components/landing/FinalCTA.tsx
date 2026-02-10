@@ -34,7 +34,7 @@ export const FinalCTA = () => {
 
         {/* Subhead */}
         <p className="text-lg sm:text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-          Join 50,000+ families taking control of their health. Free to start. No credit card needed.
+          Take control of your family's health. Free to start. No credit card needed.
         </p>
 
         {/* CTA */}
