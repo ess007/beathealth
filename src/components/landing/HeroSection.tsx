@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -7,8 +7,10 @@ import { ECGLine } from "./ECGLine";
 export const HeroSection = () => {
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -19,25 +21,42 @@ export const HeroSection = () => {
 
   return (
     <section className="relative min-h-[100vh] flex items-center justify-center overflow-hidden">
-      {/* ECG Background — multiple layers for depth */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* ECG Lines — THE WOW ELEMENT — staggered draw-on animation */}
+      <div className="absolute inset-0 pointer-events-none flex flex-col justify-center">
+        {/* Line 1 — top, subtle */}
         <div
-          className="absolute top-[20%] left-0 right-0 opacity-[0.07]"
-          style={{ transform: `translateY(${translateY * 0.5}px)` }}
+          className="absolute top-[18%] left-0 right-0"
+          style={{
+            opacity: mounted ? 0.2 : 0,
+            transform: `translateY(${translateY * 0.3}px)`,
+            transition: "opacity 0.5s ease",
+          }}
         >
-          <ECGLine className="h-24" animated />
+          <ECGLine className="h-20 sm:h-24" strokeWidth={2} glowIntensity={0.6} speed={2.5} delay={800} />
         </div>
+
+        {/* Line 2 — MAIN CENTER LINE — bold and glowing */}
         <div
-          className="absolute top-[45%] left-0 right-0 opacity-[0.12]"
-          style={{ transform: `translateY(${translateY * 0.3}px)` }}
+          className="absolute top-[46%] left-0 right-0 -translate-y-1/2"
+          style={{
+            opacity: mounted ? 0.5 : 0,
+            transform: `translateY(${translateY * 0.15}px)`,
+            transition: "opacity 0.8s ease",
+          }}
         >
-          <ECGLine className="h-32" animated />
+          <ECGLine className="h-28 sm:h-36 md:h-44" strokeWidth={3} glowIntensity={1.5} speed={2} delay={200} />
         </div>
+
+        {/* Line 3 — lower, medium */}
         <div
-          className="absolute top-[70%] left-0 right-0 opacity-[0.05]"
-          style={{ transform: `translateY(${translateY * 0.7}px)` }}
+          className="absolute top-[72%] left-0 right-0"
+          style={{
+            opacity: mounted ? 0.15 : 0,
+            transform: `translateY(${translateY * 0.5}px)`,
+            transition: "opacity 0.6s ease",
+          }}
         >
-          <ECGLine className="h-20" animated={false} />
+          <ECGLine className="h-16 sm:h-20" strokeWidth={1.5} glowIntensity={0.4} speed={3} delay={1400} />
         </div>
       </div>
 
@@ -46,7 +65,7 @@ export const HeroSection = () => {
         className="relative z-10 max-w-5xl mx-auto px-6 text-center"
         style={{ opacity, transform: `translateY(${translateY}px)` }}
       >
-        {/* Minimal badge — no false numbers */}
+        {/* Minimal badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-landing-card/80 backdrop-blur-sm border border-landing-border text-xs font-medium text-landing-muted mb-10">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute h-full w-full rounded-full bg-landing-primary opacity-75" />
@@ -55,29 +74,12 @@ export const HeroSection = () => {
           Built for Indian families
         </div>
 
-        {/* Headline — massive, serif, iconic */}
+        {/* Headline */}
         <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] mb-8 text-landing-text">
           One heartbeat.
           <br />
           <span className="text-landing-primary">Two cities.</span>
         </h1>
-
-        {/* ECG divider between headline and subhead */}
-        <div className="flex justify-center mb-8">
-          <svg
-            className="w-40 h-8 text-landing-primary/40"
-            viewBox="0 0 160 30"
-          >
-            <path
-              d="M 0 15 L 40 15 L 55 15 L 62 5 L 70 25 L 78 2 L 86 28 L 94 15 L 105 15 L 160 15"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
 
         {/* Subhead */}
         <p className="text-base sm:text-lg lg:text-xl text-landing-muted mb-12 max-w-2xl mx-auto leading-relaxed">
@@ -105,7 +107,7 @@ export const HeroSection = () => {
           </Button>
         </div>
 
-        {/* Trust stamps — no false numbers, value-based */}
+        {/* Trust stamps */}
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-landing-muted">
           <span className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-landing-secondary" />
