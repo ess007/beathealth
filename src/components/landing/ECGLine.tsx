@@ -3,88 +3,111 @@ import { useEffect, useRef, useState } from "react";
 interface ECGLineProps {
   className?: string;
   animated?: boolean;
-  pulseColor?: string;
+  color?: string;
+  strokeWidth?: number;
+  glowIntensity?: number;
+  speed?: number;
+  delay?: number;
 }
 
-export const ECGLine = ({ className = "", animated = true, pulseColor }: ECGLineProps) => {
-  const pathRef = useRef<SVGPathElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+export const ECGLine = ({
+  className = "",
+  animated = true,
+  strokeWidth = 2.5,
+  glowIntensity = 1,
+  speed = 2,
+  delay = 0,
+}: ECGLineProps) => {
+  const [dashOffset, setDashOffset] = useState(1200);
 
   useEffect(() => {
     if (!animated) return;
 
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const progress = Math.min(scrollY / 300, 1);
-      setScrollProgress(progress);
-    };
+    const timeout = setTimeout(() => {
+      setDashOffset(0);
+    }, delay);
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [animated]);
+    return () => clearTimeout(timeout);
+  }, [animated, delay]);
 
-  // Flatline to heartbeat morphing paths
-  const flatlinePath = "M 0 50 L 100 50 L 200 50 L 300 50 L 400 50 L 500 50 L 600 50";
-  
-  const heartbeatPath = "M 0 50 L 80 50 L 100 50 L 120 30 L 140 70 L 160 20 L 180 80 L 200 50 L 220 50 L 300 50 L 320 50 L 340 30 L 360 70 L 380 20 L 400 80 L 420 50 L 440 50 L 500 50 L 520 50 L 540 30 L 560 70 L 580 20 L 600 80 L 620 50";
-
-  // Interpolate between paths based on scroll
-  const interpolatePath = (progress: number) => {
-    if (progress < 0.1) return flatlinePath;
-    if (progress >= 1) return heartbeatPath;
-    
-    // Simple interpolation for demo - in production use proper path morphing
-    const eased = Math.pow(progress, 2);
-    const amplitude = eased * 30;
-    
-    return `M 0 50 L 80 50 L 100 50 L 120 ${50 - amplitude * 0.7} L 140 ${50 + amplitude * 0.7} L 160 ${50 - amplitude} L 180 ${50 + amplitude} L 200 50 L 220 50 L 300 50 L 320 50 L 340 ${50 - amplitude * 0.7} L 360 ${50 + amplitude * 0.7} L 380 ${50 - amplitude} L 400 ${50 + amplitude} L 420 50 L 440 50 L 500 50 L 520 50 L 540 ${50 - amplitude * 0.7} L 560 ${50 + amplitude * 0.7} L 580 ${50 - amplitude} L 600 ${50 + amplitude} L 620 50`;
-  };
+  // A single clean ECG heartbeat pattern repeated 3x across the width
+  const ecgPath =
+    "M 0 50 L 60 50 L 80 50 L 90 50 L 100 48 L 108 52 L 115 30 L 125 70 L 132 15 L 140 85 L 148 45 L 158 50 L 200 50 " +
+    "L 260 50 L 280 50 L 290 50 L 300 48 L 308 52 L 315 30 L 325 70 L 332 15 L 340 85 L 348 45 L 358 50 L 400 50 " +
+    "L 460 50 L 480 50 L 490 50 L 500 48 L 508 52 L 515 30 L 525 70 L 532 15 L 540 85 L 548 45 L 558 50 L 600 50";
 
   return (
-    <svg 
+    <svg
       className={`w-full ${className}`}
-      viewBox="0 0 620 100"
+      viewBox="0 0 600 100"
       preserveAspectRatio="none"
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="ecg-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-          <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
-          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
+        <linearGradient id={`ecg-grad-${delay}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="hsl(var(--landing-primary))" stopOpacity="0" />
+          <stop offset="15%" stopColor="hsl(var(--landing-primary))" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="hsl(var(--landing-primary))" stopOpacity="1" />
+          <stop offset="85%" stopColor="hsl(var(--landing-primary))" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="hsl(var(--landing-primary))" stopOpacity="0" />
         </linearGradient>
-        <filter id="ecg-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+        <filter id={`ecg-glow-${delay}`} x="-20%" y="-100%" width="140%" height="300%">
+          <feGaussianBlur stdDeviation={4 * glowIntensity} result="blur1" />
+          <feGaussianBlur stdDeviation={8 * glowIntensity} result="blur2" />
           <feMerge>
-            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
       </defs>
-      
-      {/* Glow layer */}
+
+      {/* Deep glow layer */}
       <path
-        d={interpolatePath(scrollProgress)}
+        d={ecgPath}
         fill="none"
-        stroke="hsl(var(--primary))"
-        strokeWidth="4"
+        stroke="hsl(var(--landing-primary))"
+        strokeWidth={strokeWidth * 3}
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity="0.3"
-        filter="url(#ecg-glow)"
-        className={animated && scrollProgress >= 0.5 ? "animate-ecg-pulse" : ""}
+        opacity={0.15 * glowIntensity}
+        filter={`url(#ecg-glow-${delay})`}
+        strokeDasharray="1200"
+        strokeDashoffset={dashOffset}
+        style={{
+          transition: `stroke-dashoffset ${speed}s cubic-bezier(0.22, 1, 0.36, 1)`,
+        }}
       />
-      
-      {/* Main line */}
+
+      {/* Mid glow layer */}
       <path
-        ref={pathRef}
-        d={interpolatePath(scrollProgress)}
+        d={ecgPath}
         fill="none"
-        stroke="url(#ecg-gradient)"
-        strokeWidth="2.5"
+        stroke="hsl(var(--landing-primary))"
+        strokeWidth={strokeWidth * 1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={animated && scrollProgress >= 0.5 ? "animate-ecg-pulse" : ""}
+        opacity={0.3 * glowIntensity}
+        strokeDasharray="1200"
+        strokeDashoffset={dashOffset}
+        style={{
+          transition: `stroke-dashoffset ${speed}s cubic-bezier(0.22, 1, 0.36, 1)`,
+        }}
+      />
+
+      {/* Main crisp line */}
+      <path
+        d={ecgPath}
+        fill="none"
+        stroke={`url(#ecg-grad-${delay})`}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="1200"
+        strokeDashoffset={dashOffset}
+        style={{
+          transition: `stroke-dashoffset ${speed}s cubic-bezier(0.22, 1, 0.36, 1)`,
+        }}
       />
     </svg>
   );
@@ -93,7 +116,7 @@ export const ECGLine = ({ className = "", animated = true, pulseColor }: ECGLine
 // Standalone pulsing ECG for decorative use
 export const ECGPulse = ({ className = "" }: { className?: string }) => {
   return (
-    <svg 
+    <svg
       className={`${className}`}
       viewBox="0 0 120 40"
       preserveAspectRatio="xMidYMid meet"
