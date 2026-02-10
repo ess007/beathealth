@@ -33,7 +33,7 @@ export const HeartScoreOrbit = () => {
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.15 }
     );
 
     if (sectionRef.current) {
