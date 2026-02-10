@@ -44,6 +44,7 @@ export const LandingNav = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Toggle theme"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full w-10 h-10"
             >
@@ -99,6 +100,7 @@ export const LandingNav = () => {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Toggle theme"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full"
             >
